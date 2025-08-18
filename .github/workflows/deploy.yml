@@ -1,11 +1,6 @@
 name: Portfolio Backend Deploy
 
 on:
-  workflow_dispatch:
-  push:
-    branches: [ master ]
-    paths:
-      - '.github/workflows/deploy.yml'
   workflow_run:
     workflows: ["Portfolio Backend Build"]
     branches: [master]
@@ -38,7 +33,13 @@ jobs:
         
     - name: Configure kubectl
       run: |
-        # Kubernetes Runner에서는 자동으로 kubeconfig가 설정됨
+        # Kubernetes Runner에서 kubeconfig 설정
+        mkdir -p ~/.kube
+        # 현재 Pod의 서비스 계정 토큰 사용
+        kubectl config set-cluster local --server=https://kubernetes.default.svc
+        kubectl config set-credentials user --token=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+        kubectl config set-context default --cluster=local --user=user
+        kubectl config use-context default
         kubectl config view
         kubectl get nodes
         
