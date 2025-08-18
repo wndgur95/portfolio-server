@@ -1,12 +1,12 @@
-name: Portfolio Backend CI/CD
+name: Portfolio Backend Build
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
     paths:
       - '**'
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
     paths:
       - '**'
 
@@ -15,12 +15,33 @@ env:
   IMAGE_NAME: portfolio-server
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'pnpm'
+        cache-dependency-path: pnpm-lock.yaml
+        
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8
+        
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+      
+    - name: Run tests
+      run: pnpm test
+      
+    - name: Build application
+      run: pnpm run build
       
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
@@ -53,16 +74,9 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
         
-    - name: Update ArgoCD
-      if: github.ref == 'refs/heads/main'
+    - name: Output image info
       run: |
-        # ArgoCD에 새로운 이미지 태그 알림
-        echo "New image built: ${{ steps.meta.outputs.tags }}"
-        echo "ArgoCD will automatically sync with the new image"
-        
-    - name: Notify deployment
-      if: github.ref == 'refs/heads/main'
-      run: |
-        echo "🚀 Portfolio Backend deployed successfully!"
+        echo "🚀 Build completed successfully!"
         echo "Image: ${{ steps.meta.outputs.tags }}"
-        echo "Commit: ${{ github.sha }}" 
+        echo "Commit: ${{ github.sha }}"
+        echo "Branch: ${{ github.ref_name }}" 
