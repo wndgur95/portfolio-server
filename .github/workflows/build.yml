@@ -49,8 +49,9 @@ jobs:
         
     - name: Configure Docker for Harbor
       run: |
-        echo '{"insecure-registries": ["${{ env.REGISTRY }}"]}' | sudo tee /etc/docker/daemon.json
-        sudo systemctl restart docker || true
+        # Kubernetes 환경에서는 Docker daemon 설정을 다르게 처리
+        mkdir -p ~/.docker
+        echo '{"insecure-registries": ["${{ env.REGISTRY }}"]}' > ~/.docker/config.json
         
     - name: Log in to Harbor Registry
       uses: docker/login-action@v3
