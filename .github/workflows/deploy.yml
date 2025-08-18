@@ -31,7 +31,9 @@ jobs:
     - name: Set tag from build workflow
       id: set-tag
       run: |
-        echo "TAG=${{ github.sha }}" >> $GITHUB_ENV
+        # GitHub SHA의 짧은 버전 사용 (7자리)
+        SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+        echo "TAG=master-$SHORT_SHA" >> $GITHUB_ENV
         
     - name: Update target environment image tag
       run: |
