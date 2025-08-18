@@ -11,7 +11,7 @@ on:
       - '**'
 
 env:
-  REGISTRY: harbor.ljh-project.mooo.com
+  REGISTRY: http://harbor.ljh-project.mooo.com
   IMAGE_NAME: portfolio-server
 
 jobs:
@@ -45,13 +45,17 @@ jobs:
           image=moby/buildkit:latest
         buildkitd-flags: --allow-insecure-entitlement security.insecure
         
+    - name: Configure Docker for Harbor
+      run: |
+        echo '{"insecure-registries": ["harbor.ljh-project.mooo.com"]}' | sudo tee /etc/docker/daemon.json
+        sudo systemctl restart docker || true
+        
     - name: Log in to Harbor Registry
       uses: docker/login-action@v3
       with:
         registry: ${{ env.REGISTRY }}
         username: ${{ secrets.HARBOR_USERNAME }}
         password: ${{ secrets.HARBOR_PASSWORD }}
-        insecure-registry: true
         
     - name: Extract metadata
       id: meta
