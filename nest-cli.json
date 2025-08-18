@@ -1,0 +1,95 @@
+{
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/api/src",
+  "monorepo": true,
+  "root": "apps/api",
+  "compilerOptions": {
+    "webpack": false,
+    "tsConfigPath": "apps/api/tsconfig.app.json",
+    "assets": [
+      "mail/templates/**/*"
+    ],
+    "watchAssets": true
+  },
+  "projects": {
+    "admin": {
+      "type": "application",
+      "root": "apps/admin",
+      "entryFile": "main",
+      "sourceRoot": "apps/admin/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/admin/tsconfig.app.json"
+      }
+    },
+    "api": {
+      "type": "application",
+      "root": "apps/api",
+      "entryFile": "main",
+      "sourceRoot": "apps/api/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/api/tsconfig.app.json",
+        "assets": [
+          {
+            "include": "public",
+            "outDir": "dist/apps/api/src",
+            "watchAssets": true
+          }
+        ]
+      }
+    },
+    "dao": {
+      "type": "library",
+      "root": "libs/dao",
+      "entryFile": "index",
+      "sourceRoot": "libs/dao/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/dao/tsconfig.lib.json"
+      }
+    },
+    "common": {
+      "type": "library",
+      "root": "libs/common",
+      "entryFile": "index",
+      "sourceRoot": "libs/common/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/common/tsconfig.lib.json"
+      }
+    },
+    "batch": {
+      "type": "application",
+      "root": "apps/batch",
+      "entryFile": "main",
+      "sourceRoot": "apps/batch/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/batch/tsconfig.app.json"
+      }
+    },
+    "job": {
+      "type": "application",
+      "root": "apps/job",
+      "entryFile": "main",
+      "sourceRoot": "apps/job/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/job/tsconfig.app.json"
+      }
+    },
+    "game": {
+      "type": "application",
+      "root": "apps/game",
+      "entryFile": "main",
+      "sourceRoot": "apps/game/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/game/tsconfig.app.json"
+      }
+    },
+    "deploy": {
+      "type": "application",
+      "root": "apps/deploy",
+      "entryFile": "main",
+      "sourceRoot": "apps/deploy/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/deploy/tsconfig.app.json"
+      }
+    }
+  }
+}
