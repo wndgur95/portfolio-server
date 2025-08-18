@@ -8,7 +8,8 @@ WORKDIR /app
 FROM base AS deps
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
+# 모든 의존성 설치 (devDependencies 포함)
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
 FROM base AS builder
 WORKDIR /app
@@ -21,7 +22,7 @@ FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
-# 프로덕션 의존성만 복사 (개별 파일로 복사하여 레이어 최적화)
+# 모든 의존성 복사 (필요한 모듈들이 포함되도록)
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/config ./config
