@@ -8,7 +8,8 @@ on:
       - completed
 
 env:
-  REGISTRY: docker.io
+  REGISTRY: harbor.ljh-project.mooo.com
+  PROJECT: portfolio-backend
   IMAGE_NAME: portfolio-server
 
 jobs:
@@ -17,93 +18,37 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' && github.ref == 'refs/heads/master' }}
     
     steps:
-    - name: Checkout code
+    - name: Checkout k8s-enterprise
       uses: actions/checkout@v4
-      
-    - name: Install kubectl
-      run: |
-        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-        chmod +x kubectl
-        sudo mv kubectl /usr/local/bin/
+      with:
+        repository: wndgur95/k8s-enterprise
+        token: ${{ secrets.PAT_TOKEN }}
+        path: k8s-enterprise
         
-    - name: Check kubectl
+    - name: Update Helm chart image tag
       run: |
-        kubectl version --client
-        # 현재 컨텍스트 확인 (에러 무시)
-        kubectl config current-context || echo "No current context, will set up kubeconfig"
+        cd k8s-enterprise
+        # portfolio-backend values.yaml에서 이미지 태그를 해시값으로 업데이트
+        yq eval '.image.tag = "${{ github.sha }}"' -i charts/portfolio/portfolio-backend/values.yaml
+        echo "Updated image tag to: ${{ github.sha }}"
         
-    - name: Configure kubectl
+    - name: Commit and push changes
       run: |
-        # Kubernetes Runner에서 kubeconfig 설정
-        mkdir -p ~/.kube
-        # CA 인증서 복사
-        cp /var/run/secrets/kubernetes.io/serviceaccount/ca.crt ~/.kube/
-        # kubeconfig 생성
-        cat > ~/.kube/config << EOF
-        apiVersion: v1
-        kind: Config
-        clusters:
-        - name: local
-          cluster:
-            server: https://kubernetes.default.svc
-            certificate-authority: /home/runner/.kube/ca.crt
-        users:
-        - name: user
-          user:
-            token: $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
-        contexts:
-        - name: default
-          context:
-            cluster: local
-            user: user
-        current-context: default
-        EOF
-        # 환경변수로 KUBECONFIG 설정
-        export KUBECONFIG=~/.kube/config
-        echo "KUBECONFIG=$KUBECONFIG" >> $GITHUB_ENV
-        kubectl config view
-        kubectl get nodes
-        
-    - name: Get image tag from build workflow
-      id: image-tag
-      run: |
-        # Build 워크플로우에서 생성된 이미지 태그 가져오기
-        IMAGE_TAG="${{ secrets.DOCKER_USERNAME }}/portfolio-server:latest"
-        echo "tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
-        echo "Using image: $IMAGE_TAG"
-        
-    - name: Update Helm values
-      run: |
-        # Helm values 파일에서 이미지 태그 업데이트
-        echo "Updating Helm values with new image tag..."
-        # 여기서는 ArgoCD가 자동으로 이미지를 감지하므로 별도 업데이트 불필요
+        cd k8s-enterprise
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git add charts/portfolio/portfolio-backend/values.yaml
+        git commit -m "feat: Update portfolio-backend image tag to ${{ github.sha }}"
+        git push origin main
         
     - name: Trigger ArgoCD sync
       run: |
-        echo "🚀 Triggering ArgoCD sync for portfolio-backend..."
-        echo "ArgoCD will automatically detect the new image and deploy it"
-        
-    - name: Wait for deployment
-      run: |
-        echo "⏳ Waiting for deployment to complete..."
-        sleep 30
-        
-    - name: Check deployment status
-      run: |
-        echo "📊 Checking deployment status..."
-        kubectl get pods -n portfolio -l app=portfolio-backend
-        kubectl get deployment portfolio-backend -n portfolio
-        
-    - name: Health check
-      run: |
-        echo "🏥 Performing health check..."
-        # 헬스체크 엔드포인트 확인
-        sleep 10
-        echo "Health check completed"
+        echo "🚀 ArgoCD will automatically detect the new image tag and deploy it"
+        echo "Image: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
         
     - name: Deployment notification
       run: |
-        echo "🎉 Portfolio Backend deployed successfully!"
-        echo "Image: ${{ steps.image-tag.outputs.tag }}"
+        echo "🎉 Portfolio Backend deployment triggered!"
+        echo "Image: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
         echo "Commit: ${{ github.sha }}"
-        echo "Deployment time: $(date)" 
+        echo "ArgoCD will automatically sync and deploy the new image" 
