@@ -11,7 +11,7 @@ on:
       - '**'
 
 env:
-  REGISTRY: http://harbor.ljh-project.mooo.com
+  REGISTRY: harbor.ljh-project.mooo.com
   IMAGE_NAME: portfolio-server
 
 jobs:
