@@ -1,0 +1,8 @@
+[
+  {
+    "ID": 10000000,
+    "ENUM_ID": "LOCALIZATION_MASTER_ROLE",
+    "STATE": 3,
+    "VALUE": "master"
+  }
+]

@@ -1,0 +1,131 @@
+import { Module, ValidationPipe } from '@nestjs/common';
+import { ApiServerConfig } from './config/api.server.config';
+import { AuthModule } from './auth/auth.module';
+import { ClsModule } from 'nestjs-cls';
+import { TypeOrmExModule } from '@libs/common/databases/typeorm/typeorm-ex.module';
+import { DataSourceOptions } from 'typeorm';
+import weddingDatabaseConfig from '@libs/dao/config/wedding/wedding-database.config';
+import { WeddingModule } from '@libs/dao/wedding/wedding.module';
+import { WeddingController } from './wedding/wedding.controller';
+import { WeddingService } from './wedding/wedding.service';
+import { ApiController } from './default/api.controller';
+import { ApiService } from './default/api.service';
+import { ValidateProvider } from '@libs/common/provider/validate.provider';
+import CommonDatabaseConfig from '@libs/dao/config/common/common-database.config';
+import { CommonModule } from '@libs/dao/common/common.module';
+import { UserService } from './user/user.service';
+import { UserController } from './user/user.controller';
+import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { AllExceptionFilter } from '@libs/common/filter/all-exception.filter';
+import { RequestLogInterceptor } from '@libs/common/interceptor/request-log.interceptor';
+import { PayloadInterceptor } from '@libs/common/interceptor/payload.interceptor';
+import { getGroupServerTypeOrmOptions } from '@libs/dao/config/group/group-database-config.util';
+import { GroupModule } from '@libs/dao/group/group.module';
+import GroupDatabaseConfig from '@libs/dao/config/group/group-database.config';
+import { UserLevelLockInterceptor } from '@libs/common/interceptor/user-level-lock.interceptor';
+import { TransactionInterceptor } from '@libs/common/interceptor/transaction.interceptor';
+import { GroupApiModule } from './group/group-api.module';
+import { FriendController } from './friend/friend.controller';
+import { FriendService } from './friend/friend.service';
+import { getUserServerTypeOrmOptions } from '@libs/dao/config/user/user-database-config.util';
+import UserDatabaseConfig from '@libs/dao/config/user/user-database.config';
+import { UserModule } from '@libs/dao/user/user.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+import { BugReportController } from './community/bug-report/bug-report.controller';
+import { BugReportService } from './community/bug-report/bug-report.service';
+import { QuestionController } from './community/question/question.controller';
+import { QuestionService } from './community/question/question.service';
+import { PatchNoteController } from './community/patch-note/patch-note.controller';
+import { PatchNoteService } from './community/patch-note/patch-note.service';
+import { DeveloperNoteController } from './community/developer-note/developer-note.controller';
+import { DeveloperNoteService } from './community/developer-note/developer-note.service';
+import { RedisModule } from '@libs/dao/redis/redis.module';
+import { IdeaController } from './community/idea/idea.controller';
+import { IdeaService } from './community/idea/idea.service';
+import { KnowHowController } from './community/know-how/know-how.controller';
+import { KnowHowService } from './community/know-how/know-how.service';
+import { PortfolioController } from './portfolio/portfolio.controller';
+import { PortfolioService } from './portfolio/portfolio.service';
+
+@Module({
+  imports: [
+    ApiServerConfig,
+
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, 'public'), // dist/apps/api/public
+      serveRoot: '/public', // → http://localhost:3000/public/privacy_policy.html
+    }),
+
+    ClsModule.forRoot({ global: true, middleware: { mount: true } }),
+    ...[weddingDatabaseConfig, CommonDatabaseConfig].map((it) => {
+      return TypeOrmExModule.forRootAsync({
+        name: it().name,
+        inject: [it.KEY],
+        useFactory: async (config: DataSourceOptions) => config,
+      });
+    }),
+
+    ...getGroupServerTypeOrmOptions().map((options) =>
+      TypeOrmExModule.forRootAsync({
+        name: options.name,
+        inject: [GroupDatabaseConfig.KEY],
+        useFactory: (configs: Record<string, DataSourceOptions>) =>
+          Object.values(configs).find((it) => it.name === options.name),
+      }),
+    ),
+
+    ...getUserServerTypeOrmOptions().map((options) =>
+      TypeOrmExModule.forRootAsync({
+        name: options.name,
+        inject: [UserDatabaseConfig.KEY],
+        useFactory: (configs: Record<string, DataSourceOptions>) =>
+          Object.values(configs).find((it) => it.name === options.name),
+      }),
+    ),
+
+    RedisModule,
+
+    AuthModule,
+    WeddingModule,
+    CommonModule,
+    GroupModule,
+    UserModule,
+
+    GroupApiModule,
+  ],
+  controllers: [
+    ApiController,
+    WeddingController,
+    UserController,
+    FriendController,
+    BugReportController,
+    QuestionController,
+    PatchNoteController,
+    DeveloperNoteController,
+    IdeaController,
+    KnowHowController,
+    PortfolioController,
+  ],
+  providers: [
+    { provide: APP_PIPE, useValue: new ValidationPipe({ transform: true }) },
+    { provide: APP_FILTER, useClass: AllExceptionFilter },
+    { provide: APP_INTERCEPTOR, useClass: RequestLogInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: UserLevelLockInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: TransactionInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: PayloadInterceptor },
+    ApiService,
+    UserService,
+    WeddingService,
+    ValidateProvider,
+    FriendService,
+    BugReportService,
+    QuestionService,
+    PatchNoteService,
+    DeveloperNoteService,
+    IdeaService,
+    KnowHowService,
+    PortfolioService,
+  ],
+})
+export class ApiModule {}
