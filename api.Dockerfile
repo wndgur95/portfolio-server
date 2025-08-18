@@ -5,6 +5,7 @@ ENV PATH="$PNPM_HOME:$PATH"
 ENV NODE_ENV=prod
 
 RUN corepack enable
+RUN corepack prepare pnpm@9.10.0 --activate
 COPY . /app
 WORKDIR /app
 
