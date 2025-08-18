@@ -1,6 +1,11 @@
 name: Portfolio Backend Deploy
 
 on:
+  workflow_dispatch:
+  push:
+    branches: [ master ]
+    paths:
+      - '.github/workflows/deploy.yml'
   workflow_run:
     workflows: ["Portfolio Backend Build"]
     branches: [master]
