@@ -1,60 +1,64 @@
 name: Portfolio Backend Deploy
 
 on:
+  # build 워크플로우 완료 후 자동 실행
   workflow_run:
     workflows: ["Portfolio Backend Build"]
-    branches: [master]
     types:
       - completed
+    branches: [ master ]
 
 env:
   REGISTRY: harbor.ljh-project.mooo.com
   PROJECT: portfolio-backend
   IMAGE_NAME: portfolio-server
+  CD_REPOSITORY: k8s-enterprise
 
 jobs:
   deploy:
+    name: Update helm image tag
     runs-on: self-hosted
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.ref == 'refs/heads/master' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     
     steps:
     - name: Checkout k8s-enterprise
       uses: actions/checkout@v4
       with:
-        repository: wndgur95/k8s-enterprise
+        repository: wndgur95/${{ env.CD_REPOSITORY }}
         token: ${{ secrets.PAT_TOKEN }}
-        path: k8s-enterprise
+        path: ${{ env.CD_REPOSITORY }}
         
-    - name: Install yq
+    - name: Set tag from build workflow
+      id: set-tag
       run: |
-        wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O ~/yq
-        chmod +x ~/yq
-        export PATH=$PATH:~
+        echo "TAG=${{ github.sha }}" >> $GITHUB_ENV
         
-    - name: Update Helm chart image tag
+    - name: Update target environment image tag
       run: |
-        cd k8s-enterprise
-        # portfolio-backend values.yaml에서 이미지 태그를 해시값으로 업데이트
-        yq eval '.image.tag = "${{ github.sha }}"' -i charts/portfolio/portfolio-backend/values.yaml
-        echo "Updated image tag to: ${{ github.sha }}"
+        echo "Service: backend"
+        echo "Environment: prod"
+        echo "Tag: ${{ env.TAG }}"
+        cd ${{ env.CD_REPOSITORY }}/charts/portfolio/portfolio-backend
+        sed -i 's/tag:.*/tag: "${{ env.TAG }}"/g' values.yaml
+        echo "Updated image tag to: ${{ env.TAG }}"
         
     - name: Commit and push changes
       run: |
-        cd k8s-enterprise
+        cd ${{ env.CD_REPOSITORY }}
         git config user.name "GitHub Actions"
         git config user.email "actions@github.com"
         git add charts/portfolio/portfolio-backend/values.yaml
-        git commit -m "feat: Update portfolio-backend image tag to ${{ github.sha }}"
+        git commit -m "feat: Update portfolio-backend image tag to ${{ env.TAG }}"
         git push origin main
         
     - name: Trigger ArgoCD sync
       run: |
         echo "🚀 ArgoCD will automatically detect the new image tag and deploy it"
-        echo "Image: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+        echo "Image: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}"
         
     - name: Deployment notification
       run: |
         echo "🎉 Portfolio Backend deployment triggered!"
-        echo "Image: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
-        echo "Commit: ${{ github.sha }}"
+        echo "Image: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}"
+        echo "Tag: ${{ env.TAG }}"
         echo "ArgoCD will automatically sync and deploy the new image" 
