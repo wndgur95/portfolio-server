@@ -46,7 +46,7 @@ jobs:
         - name: local
           cluster:
             server: https://kubernetes.default.svc
-            certificate-authority: ~/.kube/ca.crt
+            certificate-authority: /home/runner/.kube/ca.crt
         users:
         - name: user
           user:
