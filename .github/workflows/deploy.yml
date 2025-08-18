@@ -29,7 +29,8 @@ jobs:
     - name: Check kubectl
       run: |
         kubectl version --client
-        kubectl config current-context
+        # 현재 컨텍스트 확인 (에러 무시)
+        kubectl config current-context || echo "No current context, will set up kubeconfig"
         
     - name: Configure kubectl
       run: |
@@ -57,6 +58,9 @@ jobs:
             user: user
         current-context: default
         EOF
+        # 환경변수로 KUBECONFIG 설정
+        export KUBECONFIG=~/.kube/config
+        echo "KUBECONFIG=$KUBECONFIG" >> $GITHUB_ENV
         kubectl config view
         kubectl get nodes
         
