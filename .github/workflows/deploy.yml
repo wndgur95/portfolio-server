@@ -25,6 +25,11 @@ jobs:
         token: ${{ secrets.PAT_TOKEN }}
         path: k8s-enterprise
         
+    - name: Install yq
+      run: |
+        wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq
+        chmod +x /usr/local/bin/yq
+        
     - name: Update Helm chart image tag
       run: |
         cd k8s-enterprise
