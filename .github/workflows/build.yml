@@ -12,8 +12,8 @@ on:
 
 env:
   REGISTRY: harbor.ljh-project.mooo.com
+  PROJECT: portfolio-server
   IMAGE_NAME: portfolio-server
-  HARBOR_USERNAME: robot$portfolio-server+portfolio-backend-bot
 
 jobs:
   build:
@@ -48,7 +48,7 @@ jobs:
         
     - name: Configure Docker for Harbor
       run: |
-        echo '{"insecure-registries": ["harbor.ljh-project.mooo.com"]}' | sudo tee /etc/docker/daemon.json
+        echo '{"insecure-registries": ["${{ env.REGISTRY }}"]}' | sudo tee /etc/docker/daemon.json
         sudo systemctl restart docker || true
         
     - name: Log in to Harbor Registry
@@ -62,7 +62,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        images: ${{ secrets.HARBOR_REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_NAME }}
         tags: |
           type=ref,event=branch
           type=ref,event=pr
