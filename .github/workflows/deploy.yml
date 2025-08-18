@@ -11,7 +11,7 @@ on:
 env:
   REGISTRY: harbor.ljh-project.mooo.com
   PROJECT: portfolio-backend
-  IMAGE_NAME: portfolio-server
+  IMAGE_NAME: ${{ github.ref_name }}
   CD_REPOSITORY: k8s-enterprise
 
 jobs:
@@ -40,9 +40,14 @@ jobs:
         echo "Service: backend"
         echo "Environment: prod"
         echo "Tag: ${{ env.TAG }}"
+        echo "Repository: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_NAME }}"
         cd ${{ env.CD_REPOSITORY }}/charts/portfolio/portfolio-backend
+        # 이미지 태그 업데이트
         sed -i 's/tag:.*/tag: "${{ env.TAG }}"/g' values.yaml
+        # Harbor 브랜치 설정 업데이트
+        sed -i 's/branch:.*/branch: "${{ env.IMAGE_NAME }}"/g' values.yaml
         echo "Updated image tag to: ${{ env.TAG }}"
+        echo "Updated harbor branch to: ${{ env.IMAGE_NAME }}"
         
     - name: Commit and push changes
       run: |

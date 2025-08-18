@@ -14,7 +14,7 @@ on:
 env:
   REGISTRY: harbor.ljh-project.mooo.com
   PROJECT: portfolio-backend
-  IMAGE_NAME: portfolio-server
+  IMAGE_NAME: ${{ github.ref_name }}
 
 jobs:
   build:
