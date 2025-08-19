@@ -47,11 +47,8 @@ jobs:
         
     - name: Build application
       run: |
-        echo "Checking if @nestjs/cli is installed..."
-        if ! pnpm list @nestjs/cli > /dev/null 2>&1; then
-          echo "Installing @nestjs/cli..."
-          pnpm add -D @nestjs/cli
-        fi
+        echo "Installing @nestjs/cli..."
+        pnpm add -D @nestjs/cli
         echo "Running build..."
         pnpm run build
       
