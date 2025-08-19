@@ -46,7 +46,14 @@ jobs:
       run: pnpm install --frozen-lockfile
       
     - name: Build application
-      run: pnpm run build
+      run: |
+        if pnpm list @nestjs/cli > /dev/null 2>&1; then
+          pnpm run build
+        else
+          echo "⚠️  @nestjs/cli not found, installing only @nestjs/cli..."
+          pnpm add -D @nestjs/cli
+          pnpm run build
+        fi
       
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
