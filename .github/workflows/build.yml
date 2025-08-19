@@ -17,7 +17,7 @@ env:
   REGISTRY: harbor.ljh-project.mooo.com
   PROJECT: portfolio-backend
   IMAGE_NAME: portfolio-backend
-  NODE_ENV: production
+  NODE_ENV: development
   PNPM_VERSION: 9.10.0
   NODE_VERSION: 20
   DOCKER_BUILDKIT: 1
