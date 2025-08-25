@@ -1,5 +1,4 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { INTERNAL_ERROR_CODE_DESC } from '@libs/common/constants/internal-error-code-desc.constants';
 import { PageMetaDto } from '@libs/common/pagination/dto/page-meta.dto';
 
 export class BodyBuilder {
@@ -27,9 +26,6 @@ export class ResponseEntity<T> {
   @ApiPropertyOptional() private data?: T | T[];
   @ApiPropertyOptional() private message?: string;
   @ApiPropertyOptional() private payLoad?: object;
-
-  @ApiPropertyOptional()
-  private mission?: any;
 
   private meta?: any;
 

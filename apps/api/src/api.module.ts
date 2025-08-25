@@ -6,8 +6,6 @@ import { TypeOrmExModule } from '@libs/common/databases/typeorm/typeorm-ex.modul
 import { DataSourceOptions } from 'typeorm';
 import weddingDatabaseConfig from '@libs/dao/config/wedding/wedding-database.config';
 import { WeddingModule } from '@libs/dao/wedding/wedding.module';
-import { WeddingController } from './wedding/wedding.controller';
-import { WeddingService } from './wedding/wedding.service';
 import { ApiController } from './default/api.controller';
 import { ApiService } from './default/api.service';
 import { ValidateProvider } from '@libs/common/provider/validate.provider';
@@ -24,29 +22,12 @@ import { GroupModule } from '@libs/dao/group/group.module';
 import GroupDatabaseConfig from '@libs/dao/config/group/group-database.config';
 import { UserLevelLockInterceptor } from '@libs/common/interceptor/user-level-lock.interceptor';
 import { TransactionInterceptor } from '@libs/common/interceptor/transaction.interceptor';
-import { GroupApiModule } from './group/group-api.module';
-import { FriendController } from './friend/friend.controller';
-import { FriendService } from './friend/friend.service';
 import { getUserServerTypeOrmOptions } from '@libs/dao/config/user/user-database-config.util';
 import UserDatabaseConfig from '@libs/dao/config/user/user-database.config';
 import { UserModule } from '@libs/dao/user/user.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { BugReportController } from './community/bug-report/bug-report.controller';
-import { BugReportService } from './community/bug-report/bug-report.service';
-import { QuestionController } from './community/question/question.controller';
-import { QuestionService } from './community/question/question.service';
-import { PatchNoteController } from './community/patch-note/patch-note.controller';
-import { PatchNoteService } from './community/patch-note/patch-note.service';
-import { DeveloperNoteController } from './community/developer-note/developer-note.controller';
-import { DeveloperNoteService } from './community/developer-note/developer-note.service';
 import { RedisModule } from '@libs/dao/redis/redis.module';
-import { IdeaController } from './community/idea/idea.controller';
-import { IdeaService } from './community/idea/idea.service';
-import { KnowHowController } from './community/know-how/know-how.controller';
-import { KnowHowService } from './community/know-how/know-how.service';
-import { PortfolioController } from './portfolio/portfolio.controller';
-import { PortfolioService } from './portfolio/portfolio.service';
 
 @Module({
   imports: [
@@ -91,22 +72,8 @@ import { PortfolioService } from './portfolio/portfolio.service';
     CommonModule,
     GroupModule,
     UserModule,
-
-    GroupApiModule,
   ],
-  controllers: [
-    ApiController,
-    WeddingController,
-    UserController,
-    FriendController,
-    BugReportController,
-    QuestionController,
-    PatchNoteController,
-    DeveloperNoteController,
-    IdeaController,
-    KnowHowController,
-    PortfolioController,
-  ],
+  controllers: [ApiController, UserController],
   providers: [
     { provide: APP_PIPE, useValue: new ValidationPipe({ transform: true }) },
     { provide: APP_FILTER, useClass: AllExceptionFilter },
@@ -116,16 +83,7 @@ import { PortfolioService } from './portfolio/portfolio.service';
     { provide: APP_INTERCEPTOR, useClass: PayloadInterceptor },
     ApiService,
     UserService,
-    WeddingService,
     ValidateProvider,
-    FriendService,
-    BugReportService,
-    QuestionService,
-    PatchNoteService,
-    DeveloperNoteService,
-    IdeaService,
-    KnowHowService,
-    PortfolioService,
   ],
 })
 export class ApiModule {}

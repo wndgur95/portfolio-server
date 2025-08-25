@@ -52,25 +52,6 @@ export class UserController {
     return ResponseEntity.ok().body(userDto);
   }
 
-  @Put('/activate')
-  @ApiResponseEntity({
-    type: UserDto,
-    summary: '관리자 활성화 or 비 활성화',
-  })
-  @Roles(USER_ROLES.ADMIN)
-  async activate(
-    @Body() updateAdminUserDto: UpdateActivateUserDto,
-  ): Promise<ResponseEntity<UserDto>> {
-    let userDto: UserDto;
-
-    if (updateAdminUserDto.activate) {
-      userDto = await this.userService.activate(updateAdminUserDto.userId);
-    } else {
-      userDto = await this.userService.deactivate(updateAdminUserDto.userId);
-    }
-    return ResponseEntity.ok().body(userDto);
-  }
-
   @Put('/role')
   @ApiResponseEntity({ type: UserDto, summary: '관리자 권한 변경' })
   @Roles(USER_ROLES.ADMIN)

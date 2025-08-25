@@ -7,6 +7,9 @@ export class AuthSignUserOutDto extends UserDto {
   @ApiProperty()
   authToken: string;
 
+  @ApiProperty()
+  refreshToken: string;
+
   constructor(partial: Partial<AuthSignUserOutDto>) {
     super();
     Object.assign(this, partial);
@@ -14,6 +17,11 @@ export class AuthSignUserOutDto extends UserDto {
 
   setAuthToken(authToken: string): AuthSignUserOutDto {
     this.authToken = authToken;
+    return this;
+  }
+
+  public setRefreshToken(refreshToken: string): this {
+    this.refreshToken = refreshToken;
     return this;
   }
 

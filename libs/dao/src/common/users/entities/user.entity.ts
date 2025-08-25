@@ -16,13 +16,6 @@ export class UserEntity extends AbstractEntity implements User {
   @Column({ nullable: true })
   email?: string;
 
-  @Column()
-  name: string;
-
-  @Index({ unique: true })
-  @Column({ comment: '추천 코드' })
-  recommendCode: string;
-
   @Column({ nullable: true })
   password?: string;
 
@@ -35,18 +28,15 @@ export class UserEntity extends AbstractEntity implements User {
   })
   roles: UserRoles;
 
-  @Column({ type: 'timestamp', nullable: true })
-  activatedAt: Date;
-
-  @Column({ nullable: true })
-  image: string;
-
   @Column({ default: 0 })
   userDbId: number;
 
   @Index()
   @Column({ nullable: true })
   provider?: string;
+
+  @Column({ length: 512, nullable: true })
+  refreshToken?: string;
 
   @BeforeInsert()
   async hashPassword(): Promise<void> {

@@ -10,12 +10,6 @@ export class UserDto extends ExcludeBaseTimeDto<UserDto> {
   id: number;
 
   @ApiProperty()
-  name: string;
-
-  @ApiProperty()
-  recommendCode: string;
-
-  @ApiProperty()
   email?: string;
 
   @Exclude()
@@ -28,14 +22,11 @@ export class UserDto extends ExcludeBaseTimeDto<UserDto> {
   roles: UserRoles;
 
   @ApiProperty()
-  activatedAt: Date;
-
-  @ApiProperty()
-  image: string;
-
-  @ApiProperty()
   userDbId: number;
 
   @ApiProperty()
   provider?: string;
+
+  @ApiProperty()
+  refreshToken?: string;
 }
