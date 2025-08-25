@@ -4,10 +4,6 @@ import { UserEntity } from '@libs/dao/common/users/entities/user.entity';
 
 export class AuthSignUserInDto {
   @ApiProperty()
-  @IsString()
-  name: string;
-
-  @ApiProperty()
   @IsEmail()
   email: string;
 

@@ -8,16 +8,16 @@ export const INTERNAL_ERROR_CODE_DESC = {
     '세션 정보가 헤더에 포함 되어 있지 않음',
   [e.SESSION_DECODE_FAIL]: '세션 복호화 실패',
   [e.SESSION_SEQUENCE_NOT_FOUND]: '유효하지 않은 시퀀스',
-  [e.ADMIN_USER_MISMATCHED_CURRENT_USER]: '본인이 아닙니다.',
-  [e.ADMIN_USER_CONFLICT_EMAIL]: '이미 이메일이 존재합니다.',
-  [e.ADMIN_USER_NOT_SATISFY_PASSWORD_POLICY]:
+  [e.USER_MISMATCHED_CURRENT_USER]: '본인이 아닙니다.',
+  [e.USER_CONFLICT_EMAIL]: '이미 이메일이 존재합니다.',
+  [e.USER_NOT_SATISFY_PASSWORD_POLICY]:
     '비밀번호가 정책에 맞지 않습니다.',
-  [e.ADMIN_USER_EMPTY_NAME]: '이름이 비어있습니다.',
-  [e.ADMIN_USER_MISMATCHED_EMAIL]: '이메일이 다릅니다.',
-  [e.ADMIN_USER_MISMATCHED_PASSWORD]: '비밀번호다 틀렸습니다.',
-  [e.ADMIN_USER_NOT_ACTIVATED]: '활성화 유저가 아닙니다.',
-  [e.ADMIN_USER_UPDATE_FAILED]: '업데이트에 실패했습니다.',
-  [e.ADMIN_USER_NOT_FOUND]: '유저가 없습니다.',
+  [e.USER_EMPTY_NAME]: '이름이 비어있습니다.',
+  [e.USER_MISMATCHED_EMAIL]: '이메일이 다릅니다.',
+  [e.USER_MISMATCHED_PASSWORD]: '비밀번호가 틀렸습니다.',
+  [e.USER_NOT_ACTIVATED]: '활성화 유저가 아닙니다.',
+  [e.USER_UPDATE_FAILED]: '업데이트에 실패했습니다.',
+  [e.USER_NOT_FOUND]: '유저가 없습니다.',
 
   // Group
   [e.GROUP_MEMBER_ROLE_INVALID]: '해당 기능은 %P만 가능한 기능입니다.',

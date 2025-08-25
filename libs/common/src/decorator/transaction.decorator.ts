@@ -19,9 +19,7 @@ export function Transactional(...databaseNames: DbName[]): MethodDecorator {
     ): Promise<unknown> {
       const databases = [
         ...new Set([
-          ContextProvider.getGroupDatabase(),
           ContextProvider.getUserDatabase(),
-          ...ContextProvider.getOtherUserDatabase(),
         ]),
       ].filter(Boolean);
 

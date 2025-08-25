@@ -12,6 +12,7 @@ import { AuthController } from './auth.controller';
 import { UserDetailsModule } from '@libs/dao/user/user-details/user-details.module';
 import { KakaoTokenStrategy } from './strategy/kakao-token.strategy';
 import { GoogleTokenStrategy } from './strategy/google-token.strategy';
+import { JwtRefreshStrategy } from './strategy/jwt-refresh.strategy';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { GoogleTokenStrategy } from './strategy/google-token.strategy';
     KakaoTokenStrategy,
     GoogleTokenStrategy,
     JwtStrategy,
+    JwtRefreshStrategy,
     ApiKeyStrategy,
     BasicStrategy,
     AuthService,

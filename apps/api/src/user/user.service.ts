@@ -8,7 +8,6 @@ import { UserDto } from '@libs/dao/common/users/dto/user.dto';
 import { UpdateRoleUserDto } from './dto/update-role-user.dto';
 import { User } from '@libs/dao/common/users/interfaces/user.interface';
 import { ServerErrorException } from '@libs/common/exception/server-error.exception';
-import { randomBytes } from 'crypto';
 import { UserDetail } from '@libs/dao/user/user-details/interfaces/user-detail.interface';
 import { UserDetailsDbRepositories } from '@libs/dao/user/user-details/repositories/user-details-db.repository';
 import { UserDetailsRepository } from '@libs/dao/user/user-details/interfaces/user-details-repository.interface';
@@ -20,6 +19,8 @@ import { UserDetailEntity } from '@libs/dao/user/user-details/entities/user-deta
 import { Transactional } from '@libs/common/decorator/transaction.decorator';
 import { DB_NAME } from '@libs/common/constants/database.constants';
 import { UserEntity } from '@libs/dao/common/users/entities/user.entity';
+import { PASSWORD_POLICY } from '@libs/common/constants/jwt.constants';
+import joiPasswordComplexity from 'joi-password-complexity';
 import { ContextProvider } from '@libs/common/provider/context.provider';
 
 @Injectable()
@@ -30,49 +31,43 @@ export class UserService {
     @Inject(UserDetailsRepository)
     private readonly userDetailsRepositories: UserDetailsDbRepositories,
   ) {}
+  async login(email: string, password: string): Promise<User> {
+    const user = await this.usersRepository.findByEmail(email);
 
-  async isDuplicated(userInDto: AuthSignUserInDto): Promise<void> {
-    const userCount = await this.usersRepository.countByEmail(userInDto.email);
-    if (userCount) {
+    if (!user) return null;
+
+    if (!(await user.checkPassword(password))) {
       throw new ServerErrorException(
-        INTERNAL_ERROR_CODE.ADMIN_USER_CONFLICT_EMAIL,
+        INTERNAL_ERROR_CODE.USER_MISMATCHED_PASSWORD,
       );
     }
+
+    return user;
   }
 
-  async isPasswordComplexity(userInDto: AuthSignUserInDto): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const joiPasswordComplexity = require('joi-password-complexity');
-    const complexityOptions = {
-      min: 10,
-      max: 30,
-      lowerCase: 1,
-      upperCase: 1,
-      numeric: 1,
-      symbol: 1,
-      requirementCount: 4,
-    };
-    const complexityResult = joiPasswordComplexity(complexityOptions).validate(
-      userInDto.password,
-    );
-    if (undefined !== complexityResult.error) {
-      throw new ServerErrorException(
-        INTERNAL_ERROR_CODE.ADMIN_USER_NOT_SATISFY_PASSWORD_POLICY,
-      );
-    }
+  /**
+   * 회원가입
+   */
+  async signup(email: string, password: string): Promise<User> {
+    await this._isDuplicated(email);
+    this._isPasswordComplexity(password);
+
+    const userEntity = AuthSignUserInDto.toEntity({ email, password });
+
+    return await this.usersRepository.save(userEntity);
   }
 
-  async signup(signUserInDto: AuthSignUserInDto): Promise<UserDto> {
-    if (signUserInDto.name.trim() == '') {
-      throw new ServerErrorException(INTERNAL_ERROR_CODE.ADMIN_USER_EMPTY_NAME);
-    }
-    await this.isDuplicated(signUserInDto);
-    await this.isPasswordComplexity(signUserInDto);
-    const entity = AuthSignUserInDto.toEntity(signUserInDto);
+  async getUserIfRefreshTokenMatches(
+    id: number,
+    refreshToken: string,
+  ): Promise<User> {
+    const user = await this.usersRepository.findById(id);
 
-    entity.recommendCode = await this._getRecommendCode();
-    const createdUser = await this.usersRepository.save(entity);
-    return UserDto.fromEntity(createdUser);
+    if (!user) {
+      throw new ServerErrorException(INTERNAL_ERROR_CODE.USER_NOT_FOUND);
+    }
+
+    return refreshToken === user.refreshToken ? user : null;
   }
 
   async changePassword(
@@ -82,16 +77,16 @@ export class UserService {
     // const user = await this.usersRepository.findByEmail(
     //   signUserInDto.email,
     // );
-    await this.isPasswordComplexity(signUserInDto);
+    this._isPasswordComplexity(signUserInDto.password);
     if (executor != signUserInDto.email) {
       throw new ServerErrorException(
-        INTERNAL_ERROR_CODE.ADMIN_USER_MISMATCHED_CURRENT_USER,
+        INTERNAL_ERROR_CODE.USER_MISMATCHED_CURRENT_USER,
       );
     }
 
     if (signUserInDto.email != signUserInDto.email) {
       throw new ServerErrorException(
-        INTERNAL_ERROR_CODE.ADMIN_USER_MISMATCHED_EMAIL,
+        INTERNAL_ERROR_CODE.USER_MISMATCHED_EMAIL,
       );
     }
 
@@ -103,55 +98,12 @@ export class UserService {
     );
   }
 
-  async signIn(email: string, password: string): Promise<User> {
-    const findUser = await this.findByEmail(email);
-    if (!(await findUser.checkPassword(password))) {
-      throw new ServerErrorException(
-        INTERNAL_ERROR_CODE.ADMIN_USER_MISMATCHED_PASSWORD,
-      );
-    } else if (!findUser.activatedAt) {
-      throw new ServerErrorException(
-        INTERNAL_ERROR_CODE.ADMIN_USER_NOT_ACTIVATED,
-      );
-    }
-
-    return findUser;
-  }
-
-  @Transactional(DB_NAME.COMMON)
-  async kakaoSignIn(
-    kakaoId: string,
-    name: string,
-    provider: string,
-    profileImage?: string,
-  ): Promise<User> {
-    let findUser = await this.usersRepository.findOneBy({
-      platformId: kakaoId,
-    });
-
-    if (!findUser) {
-      findUser = await this.usersRepository.save(
-        UserEntity.create({
-          name,
-          platformId: kakaoId,
-          recommendCode: await this._getRecommendCode(),
-          activatedAt: ContextProvider.getNow(),
-          image: profileImage ?? null,
-          provider: provider,
-        }),
-      );
-    }
-
-    return findUser;
-  }
-
   @Transactional(DB_NAME.COMMON)
   async googleSignIn(
     googleId: string,
     email: string,
     name: string,
     provider: string,
-    profileImage?: string,
   ): Promise<User> {
     let findUser = await this.usersRepository.findOneBy({
       platformId: googleId,
@@ -160,48 +112,14 @@ export class UserService {
     if (!findUser) {
       findUser = await this.usersRepository.save(
         UserEntity.create({
-          name,
           platformId: googleId,
           email: email,
-          recommendCode: await this._getRecommendCode(),
-          activatedAt: ContextProvider.getNow(),
-          image: profileImage ?? null,
           provider: provider,
         }),
       );
     }
 
     return findUser;
-  }
-
-  async activate(id: number): Promise<UserDto> {
-    const updateResult = await this.usersRepository.update(
-      { id: id },
-      { activatedAt: new Date() },
-    );
-
-    if (!updateResult.affected) {
-      throw new ServerErrorException(
-        INTERNAL_ERROR_CODE.ADMIN_USER_UPDATE_FAILED,
-      );
-    }
-
-    return await this.findById(id);
-  }
-
-  async deactivate(id: number): Promise<UserDto> {
-    const updateResult = await this.usersRepository.update(
-      { id: id },
-      { activatedAt: null },
-    );
-
-    if (!updateResult.affected) {
-      throw new ServerErrorException(
-        INTERNAL_ERROR_CODE.ADMIN_USER_UPDATE_FAILED,
-      );
-    }
-
-    return await this.findById(id);
   }
 
   async updateRole(updateRoleUserDto: UpdateRoleUserDto): Promise<UserDto> {
@@ -213,7 +131,7 @@ export class UserService {
 
     if (!updateResult.affected) {
       throw new ServerErrorException(
-        INTERNAL_ERROR_CODE.ADMIN_USER_UPDATE_FAILED,
+        INTERNAL_ERROR_CODE.USER_UPDATE_FAILED,
       );
     }
 
@@ -239,7 +157,7 @@ export class UserService {
   async findById(id: number): Promise<UserDto> {
     const findUser = await this.usersRepository.findById(id);
     if (!findUser) {
-      throw new ServerErrorException(INTERNAL_ERROR_CODE.ADMIN_USER_NOT_FOUND);
+      throw new ServerErrorException(INTERNAL_ERROR_CODE.USER_NOT_FOUND);
     }
 
     return UserDto.fromEntity(findUser);
@@ -248,7 +166,7 @@ export class UserService {
   async findByEmail(email: string): Promise<User> {
     const findUser = await this.usersRepository.findByEmail(email);
     if (!findUser) {
-      throw new ServerErrorException(INTERNAL_ERROR_CODE.ADMIN_USER_NOT_FOUND);
+      throw new ServerErrorException(INTERNAL_ERROR_CODE.USER_NOT_FOUND);
     }
 
     return findUser;
@@ -257,7 +175,7 @@ export class UserService {
   async removeUser(id: number): Promise<void> {
     const findUser = await this.usersRepository.findById(id);
     if (!findUser) {
-      throw new ServerErrorException(INTERNAL_ERROR_CODE.ADMIN_USER_NOT_FOUND);
+      throw new ServerErrorException(INTERNAL_ERROR_CODE.USER_NOT_FOUND);
     }
 
     await this.usersRepository.softDelete(id);
@@ -265,40 +183,41 @@ export class UserService {
 
   @Transactional(DB_NAME.COMMON)
   async createUserDetail(user: User): Promise<UserDetail> {
-    const userDbId = 200 + (user.id % getUserShardDatabases.length);
-
-    user.userDbId = userDbId;
-
-    await this.usersRepository.updateById(user.id, {
-      userDbId,
-    });
-
-    const database = getDatabaseByUserDbId(userDbId);
+    const database = ContextProvider.getUserDatabase();
 
     return await this.userDetailsRepositories[database].save(
       UserDetailEntity.create({ userId: user.id }),
     );
   }
 
-  private async _getRecommendCode(): Promise<string> {
-    let isUnique = false;
-    let recommendCode: string;
+  private async _isDuplicated(email: string): Promise<void> {
+    const isExistEmail = await this.usersRepository.existByEmail(email);
 
-    while (!isUnique) {
-      recommendCode = randomBytes(4)
-        .toString('hex') // 16진수 변환 (0-9, a-f)
-        .replace(/[g-z]/gi, '') // a-f까지만 사용
-        .substring(0, 6); // 6자리만 사용
-
-      const existingUser = await this.usersRepository.findOne({
-        where: { recommendCode },
-      });
-
-      if (!existingUser) {
-        isUnique = true; // 중복되지 않으면 탈출
-      }
+    if (isExistEmail) {
+      throw new ServerErrorException(
+        INTERNAL_ERROR_CODE.USER_CONFLICT_EMAIL,
+      );
     }
+  }
 
-    return recommendCode;
+  private _isPasswordComplexity(password: string): void {
+    const complexityOptions = {
+      min: PASSWORD_POLICY.MIN_LENGTH,
+      max: PASSWORD_POLICY.MAX_LENGTH,
+      lowerCase: PASSWORD_POLICY.LOWER_CASE,
+      upperCase: PASSWORD_POLICY.UPPER_CASE,
+      numeric: PASSWORD_POLICY.NUMERIC,
+      symbol: PASSWORD_POLICY.SYMBOL,
+      requirementCount: PASSWORD_POLICY.REQUIREMENT_COUNT,
+    };
+
+    const complexityResult =
+      joiPasswordComplexity(complexityOptions).validate(password);
+
+    if (undefined !== complexityResult.error) {
+      throw new ServerErrorException(
+        INTERNAL_ERROR_CODE.USER_NOT_SATISFY_PASSWORD_POLICY,
+      );
+    }
   }
 }

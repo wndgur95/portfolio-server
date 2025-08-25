@@ -11,21 +11,6 @@ export class UsersDbRepository
   extends AbstractRepository<UserEntity>
   implements UsersRepository
 {
-  async findAndSetOtherUserDatabaseByRecommendCode(
-    recommendCode: string,
-  ): Promise<User> {
-    const user = await this.queryBuilder
-      .where(`${this.alias}.recommendCode = :recommendCode`, { recommendCode })
-      .getOne();
-
-    if (user.userDbId) {
-      const database = getDatabaseByUserDbId(user.userDbId);
-      ContextProvider.setOtherUserDatabase(database);
-    }
-
-    return user;
-  }
-
   async findByEmail(email: string): Promise<UserEntity> {
     return await this.queryBuilder
       .where(`${this.alias}.email = :email`, { email })
@@ -36,6 +21,12 @@ export class UsersDbRepository
     return await this.queryBuilder
       .where(`${this.alias}.email=:email`, { email })
       .getCount();
+  }
+
+  async existByEmail(email: string): Promise<boolean> {
+    return await this.queryBuilder
+      .where(`${this.alias}.email=:email`, { email })
+      .getExists(); // 첫 번째 레코드만 찾으면 즉시 중단
   }
 
   async findAllAndCount(

@@ -13,6 +13,6 @@ export class BasicStrategy extends PassportStrategy(Strategy) {
   }
 
   public async validate(email: string, password: string): Promise<any> {
-    return await this.authService.login(email, password);
+    // return await this.authService.register(email, password);
   }
 }

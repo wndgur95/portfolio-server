@@ -56,7 +56,24 @@ export class ApiServer {
         },
         'basic',
       )
-      .addBearerAuth({ type: 'http' }, 'jwt')
+      .addBearerAuth(
+        {
+          type: 'http',
+          name: 'Authorization',
+          in: 'header',
+          description: 'refresh token',
+        },
+        'jwt-refresh',
+      )
+      .addBearerAuth(
+        {
+          type: 'http',
+          name: 'Authorization',
+          in: 'header',
+          description: 'jwt auth',
+        },
+        'jwt',
+      )
       .addBearerAuth({ type: 'http' }, 'kakao-token')
       .build();
 

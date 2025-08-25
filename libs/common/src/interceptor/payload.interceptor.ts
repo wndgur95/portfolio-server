@@ -21,17 +21,8 @@ export class PayloadInterceptor implements NestInterceptor {
           return res;
         }
 
-        const user = ContextProvider.getJwt();
-        let requestCount = 0;
-        if (user) {
-          requestCount = await this.requestCountsRedisRepository.countRequest(
-            user.id,
-          );
-        }
-
         res.payLoad = {
           ...(res.payLoad ?? {}),
-          isShowAd: requestCount % 10 == 0,
         };
 
         return res;
