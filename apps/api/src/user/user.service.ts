@@ -11,10 +11,6 @@ import { ServerErrorException } from '@libs/common/exception/server-error.except
 import { UserDetail } from '@libs/dao/user/user-details/interfaces/user-detail.interface';
 import { UserDetailsDbRepositories } from '@libs/dao/user/user-details/repositories/user-details-db.repository';
 import { UserDetailsRepository } from '@libs/dao/user/user-details/interfaces/user-details-repository.interface';
-import {
-  getDatabaseByUserDbId,
-  getUserShardDatabases,
-} from '@libs/dao/config/user/user-database-config.util';
 import { UserDetailEntity } from '@libs/dao/user/user-details/entities/user-detail.entity';
 import { Transactional } from '@libs/common/decorator/transaction.decorator';
 import { DB_NAME } from '@libs/common/constants/database.constants';
