@@ -1,4 +1,4 @@
-import { BeforeInsert, Column, Entity, Index } from 'typeorm';
+import { BeforeInsert, BeforeUpdate, Column, Entity, Index } from 'typeorm';
 import {
   AbstractEntity,
   BaseTimeEntity,
@@ -16,7 +16,7 @@ export class UserEntity extends AbstractEntity implements User {
   @Column({ nullable: true })
   email?: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, select: false })
   password?: string;
 
   @Index()
@@ -39,6 +39,7 @@ export class UserEntity extends AbstractEntity implements User {
   refreshToken?: string;
 
   @BeforeInsert()
+  @BeforeUpdate()
   async hashPassword(): Promise<void> {
     try {
       if (this.platformId == null) {
