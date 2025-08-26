@@ -16,7 +16,7 @@ export class UserEntity extends AbstractEntity implements User {
   @Column({ nullable: true })
   email?: string;
 
-  @Column({ nullable: true, select: false })
+  @Column({ nullable: true })
   password?: string;
 
   @Index()

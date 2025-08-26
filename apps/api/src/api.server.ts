@@ -43,7 +43,7 @@ export class ApiServer {
           type: 'apiKey',
           name: 'X-API-KEY',
           in: 'header',
-          description: 'eh internal api',
+          description: 'api',
         },
         'apiKey',
       )
