@@ -1,11 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { PageOptionsDto } from '@libs/common/pagination/dto/page-options.dto';
-import { PageMetaDto } from '@libs/common/pagination/dto/page-meta.dto';
 import { UsersRepository } from '@libs/dao/common/users/interfaces/users-repository.interface';
 import { AuthSignUserInDto } from '../auth/dto/auth-sign-user-in.dto';
 import { INTERNAL_ERROR_CODE } from '@libs/common/constants/internal-error-code.constants';
 import { UserDto } from '@libs/dao/common/users/dto/user.dto';
-import { UpdateRoleUserDto } from './dto/update-role-user.dto';
 import { User } from '@libs/dao/common/users/interfaces/user.interface';
 import { ServerErrorException } from '@libs/common/exception/server-error.exception';
 import { UserDetail } from '@libs/dao/user/user-details/interfaces/user-detail.interface';
@@ -66,39 +63,10 @@ export class UserService {
     return refreshToken === user.refreshToken ? user : null;
   }
 
-  async changePassword(
-    signUserInDto: AuthSignUserInDto,
-    executor: string,
-  ): Promise<void> {
-    // const user = await this.usersRepository.findByEmail(
-    //   signUserInDto.email,
-    // );
-    this._isPasswordComplexity(signUserInDto.password);
-    if (executor != signUserInDto.email) {
-      throw new ServerErrorException(
-        INTERNAL_ERROR_CODE.USER_MISMATCHED_CURRENT_USER,
-      );
-    }
-
-    if (signUserInDto.email != signUserInDto.email) {
-      throw new ServerErrorException(
-        INTERNAL_ERROR_CODE.USER_MISMATCHED_EMAIL,
-      );
-    }
-
-    const entity = AuthSignUserInDto.toEntity(signUserInDto);
-    await entity.hashPassword();
-    await this.usersRepository.update(
-      { email: signUserInDto.email },
-      { password: entity.password },
-    );
-  }
-
   @Transactional(DB_NAME.COMMON)
   async googleSignIn(
     googleId: string,
     email: string,
-    name: string,
     provider: string,
   ): Promise<User> {
     let user = await this.usersRepository.findOneBy({
@@ -118,38 +86,6 @@ export class UserService {
     return user;
   }
 
-  async updateRole(updateRoleUserDto: UpdateRoleUserDto): Promise<UserDto> {
-    const { userId, roles } = updateRoleUserDto;
-    const updateResult = await this.usersRepository.update(
-      { id: userId },
-      { roles: roles },
-    );
-
-    if (!updateResult.affected) {
-      throw new ServerErrorException(
-        INTERNAL_ERROR_CODE.USER_UPDATE_FAILED,
-      );
-    }
-
-    return await this.findById(userId);
-  }
-
-  async findAll(
-    pageOptionsDto: PageOptionsDto,
-  ): Promise<[UserDto[], PageMetaDto]> {
-    const { order, page, take } = pageOptionsDto;
-    const skip = (page - 1) * take;
-    const [users, itemCount] = await this.usersRepository.findAllAndCount(
-      take,
-      skip,
-      order,
-    );
-    const usersDto = users.map((it) => UserDto.fromEntity(it));
-    const pageMetaDto = new PageMetaDto({ pageOptionsDto, itemCount });
-
-    return [usersDto, pageMetaDto];
-  }
-
   async findById(id: number): Promise<UserDto> {
     const findUser = await this.usersRepository.findById(id);
     if (!findUser) {
@@ -157,24 +93,6 @@ export class UserService {
     }
 
     return UserDto.fromEntity(findUser);
-  }
-
-  async findByEmail(email: string): Promise<User> {
-    const findUser = await this.usersRepository.findByEmail(email);
-    if (!findUser) {
-      throw new ServerErrorException(INTERNAL_ERROR_CODE.USER_NOT_FOUND);
-    }
-
-    return findUser;
-  }
-
-  async removeUser(id: number): Promise<void> {
-    const findUser = await this.usersRepository.findById(id);
-    if (!findUser) {
-      throw new ServerErrorException(INTERNAL_ERROR_CODE.USER_NOT_FOUND);
-    }
-
-    await this.usersRepository.softDelete(id);
   }
 
   @Transactional(DB_NAME.COMMON)
@@ -190,9 +108,7 @@ export class UserService {
     const isExistEmail = await this.usersRepository.existByEmail(email);
 
     if (isExistEmail) {
-      throw new ServerErrorException(
-        INTERNAL_ERROR_CODE.USER_CONFLICT_EMAIL,
-      );
+      throw new ServerErrorException(INTERNAL_ERROR_CODE.USER_CONFLICT_EMAIL);
     }
   }
 
