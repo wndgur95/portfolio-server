@@ -1,5 +1,4 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import * as admin from 'firebase-admin';
 import {
   JWT_OPTIONS,
   JWT_REFRESH_OPTIONS,
@@ -29,6 +28,7 @@ import {
 } from '@libs/common/constants/token.constants';
 import { ServerErrorException } from '@libs/common/exception/server-error.exception';
 import { INTERNAL_ERROR_CODE } from '@libs/common/constants/internal-error-code.constants';
+import { GoogleOAuthProvider, FirebaseAdminProvider } from '@libs/common/http';
 
 @Injectable()
 export class AuthService {
@@ -36,9 +36,10 @@ export class AuthService {
     private readonly config: ConfigService,
     @Inject(UsersRepository)
     private readonly usersRepository: UsersRepository,
-
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    private readonly googleOAuthProvider: GoogleOAuthProvider,
+    private readonly firebaseAdminProvider: FirebaseAdminProvider,
   ) {}
 
   private apiKeys: string[] = [process.env.AUTH_KEY];
@@ -160,77 +161,11 @@ export class AuthService {
   }
 
   private async _exchangeCodeForUserInfo(code: string): Promise<any> {
-    const accessToken = await this._exchangeCodeForAccessToken(code);
-    return await this._getGoogleUserInfo(accessToken);
-  }
-
-  private async _exchangeCodeForAccessToken(code: string): Promise<string> {
-    const requestBody = new URLSearchParams({
-      client_id: this.config.get('GOOGLE_WEB_CLIENT_ID'),
-      client_secret: this.config.get('GOOGLE_CLIENT_SECRET'),
-      code,
-      grant_type: 'authorization_code',
-      redirect_uri: this.config.get('GOOGLE_REDIRECT_URI'),
-    });
-
-    const response = await fetch('https://oauth2.googleapis.com/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: requestBody,
-    });
-
-    if (!response.ok) {
-      throw new ServerErrorException(INTERNAL_ERROR_CODE.USER_NOT_ACTIVATED);
-    }
-
-    const { access_token } = await response.json();
-    return access_token;
-  }
-
-  private async _getGoogleUserInfo(accessToken: string): Promise<any> {
-    const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-
-    if (!response.ok) {
-      throw new ServerErrorException(INTERNAL_ERROR_CODE.USER_NOT_ACTIVATED);
-    }
-
-    return await response.json();
+    return await this.googleOAuthProvider.exchangeCodeForUserInfo(code);
   }
 
   private async _verifyFirebaseIdToken(idToken: string): Promise<any> {
-    try {
-      this._initializeFirebaseAdmin();
-      const decodedToken = await admin.auth().verifyIdToken(idToken);
-      
-      return {
-        sub: decodedToken.uid,
-        email: decodedToken.email,
-        name: decodedToken.name || decodedToken.email?.split('@')[0],
-        picture: decodedToken.picture,
-      };
-    } catch (error) {
-      console.error('Firebase ID Token verification error:', error);
-      throw new UnauthorizedException('Firebase ID Token verification failed');
-    }
-  }
-
-  private _initializeFirebaseAdmin(): void {
-    if (!admin.apps.length) {
-      const serviceAccount = {
-        projectId: this.config.get('FIREBASE_PROJECT_ID'),
-        privateKeyId: this.config.get('FIREBASE_PRIVATE_KEY_ID'),
-        privateKey: this.config.get('FIREBASE_PRIVATE_KEY')?.replace(/\\n/g, '\n'),
-        clientEmail: this.config.get('FIREBASE_CLIENT_EMAIL'),
-        clientId: this.config.get('FIREBASE_CLIENT_ID'),
-      };
-
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-        projectId: this.config.get('FIREBASE_PROJECT_ID'),
-      });
-    }
+    return await this.firebaseAdminProvider.verifyIdToken(idToken);
   }
 
   /**
