@@ -1,11 +1,10 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { AuthSignUserInDto } from './dto/auth-sign-user-in.dto';
 import { ResponseEntity } from '@libs/common/network/response-entity';
 import { AuthSignUserOutDto } from './dto/auth-sign-user-out.dto';
 import { ApiResponseEntity } from '@libs/common/decorator/api-response-entity';
-import { AuthGuard } from '@nestjs/passport';
 import { JwtRefreshAuthGuard } from './guard/jwt-refresh-auth.guard';
 import { CurrentUser } from '@libs/common/decorator/current-user.decorator';
 import { User } from '@libs/dao/common/users/interfaces/user.interface';
@@ -14,6 +13,8 @@ import { UserDto } from '@libs/dao/common/users/dto/user.dto';
 import { JwtPayload } from '@libs/common/constants/jwt.constants';
 import { GetApiKeyOutDto } from './dto/get-api-key-out.dto';
 import { ApiKeyAuthGuard } from './guard/api-key-auth.guard';
+import { GoogleFirebaseLoginInDto } from './dto/google-firebase-login-in.dto';
+import { GoogleOauthLoginInDto } from './dto/google-oauth-login-in.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -79,22 +80,36 @@ export class AuthController {
   }
 
   /**
-   * OAUTH 인증
+   * OAUTH 인증 - Firebase 방식
    * */
-  @Post('google/login')
-  @ApiResponseEntity({ type: AuthSignUserOutDto, summary: '구글 로그인' })
-  @ApiBearerAuth('google-token')
-  @UseGuards(AuthGuard('google-token'))
-  async googleLogin(
-    @Req() request: any,
+  @Post('google/firebase/login')
+  @ApiResponseEntity({
+    type: AuthSignUserOutDto,
+    summary: 'Firebase Google 로그인',
+  })
+  async googleFirebaseLogin(
+    @Body() googleFirebaseLoginInDto: GoogleFirebaseLoginInDto,
   ): Promise<ResponseEntity<AuthSignUserOutDto>> {
-    const { email, name, googleId, provider } = request.user;
+    const authSignUserOutDto = await this.authService.googleLoginWithIdToken(
+      googleFirebaseLoginInDto.idToken,
+    );
 
-    const authSignUserOutDto = await this.authService.googleLogin(
-      googleId.toString(),
-      email,
-      name,
-      provider,
+    return ResponseEntity.ok().body(authSignUserOutDto);
+  }
+
+  /**
+   * OAUTH 인증 - Google OAuth 2.0 직접 구현
+   * */
+  @Post('google/oauth/login')
+  @ApiResponseEntity({
+    type: AuthSignUserOutDto,
+    summary: 'Google OAuth 2.0 직접 로그인',
+  })
+  async googleOAuthLogin(
+    @Body() googleOauthLoginInDto: GoogleOauthLoginInDto,
+  ): Promise<ResponseEntity<AuthSignUserOutDto>> {
+    const authSignUserOutDto = await this.authService.googleLoginWithCode(
+      googleOauthLoginInDto.code,
     );
 
     return ResponseEntity.ok().body(authSignUserOutDto);
