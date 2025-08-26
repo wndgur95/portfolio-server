@@ -101,12 +101,12 @@ export class UserService {
     name: string,
     provider: string,
   ): Promise<User> {
-    let findUser = await this.usersRepository.findOneBy({
+    let user = await this.usersRepository.findOneBy({
       platformId: googleId,
     });
 
-    if (!findUser) {
-      findUser = await this.usersRepository.save(
+    if (!user) {
+      user = await this.usersRepository.save(
         UserEntity.create({
           platformId: googleId,
           email: email,
@@ -115,7 +115,7 @@ export class UserService {
       );
     }
 
-    return findUser;
+    return user;
   }
 
   async updateRole(updateRoleUserDto: UpdateRoleUserDto): Promise<UserDto> {

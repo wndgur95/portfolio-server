@@ -10,8 +10,6 @@ import { JWT_OPTIONS } from '@libs/common/constants/jwt.constants';
 import { UsersModule } from '@libs/dao/common/users/users.module';
 import { AuthController } from './auth.controller';
 import { UserDetailsModule } from '@libs/dao/user/user-details/user-details.module';
-import { KakaoTokenStrategy } from './strategy/kakao-token.strategy';
-import { GoogleTokenStrategy } from './strategy/google-token.strategy';
 import { JwtRefreshStrategy } from './strategy/jwt-refresh.strategy';
 
 @Module({
@@ -26,8 +24,6 @@ import { JwtRefreshStrategy } from './strategy/jwt-refresh.strategy';
   ],
   controllers: [AuthController],
   providers: [
-    KakaoTokenStrategy,
-    GoogleTokenStrategy,
     JwtStrategy,
     JwtRefreshStrategy,
     ApiKeyStrategy,
