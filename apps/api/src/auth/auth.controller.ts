@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Put, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { AuthSignUserInDto } from './dto/auth-sign-user-in.dto';
@@ -15,6 +15,7 @@ import { GetApiKeyOutDto } from './dto/get-api-key-out.dto';
 import { ApiKeyAuthGuard } from './guard/api-key-auth.guard';
 import { GoogleFirebaseLoginInDto } from './dto/google-firebase-login-in.dto';
 import { GoogleOauthLoginInDto } from './dto/google-oauth-login-in.dto';
+import { UpdateRoleUserDto } from './dto/update-role-user.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -111,6 +112,22 @@ export class AuthController {
     const authSignUserOutDto = await this.authService.googleLoginWithCode(
       googleOauthLoginInDto.code,
     );
+
+    return ResponseEntity.ok().body(authSignUserOutDto);
+  }
+
+  /**
+   * RBAC 권한 관리
+   * */
+  @Put('role')
+  @ApiResponseEntity({ type: UserDto, summary: '관리자 권한 변경' })
+  @ApiBearerAuth('jwt')
+  @UseGuards(JwtAuthGuard)
+  async updateRole(
+    @Body() updateRoleUserDto: UpdateRoleUserDto,
+  ): Promise<ResponseEntity<AuthSignUserOutDto>> {
+    const authSignUserOutDto =
+      await this.authService.updateRole(updateRoleUserDto);
 
     return ResponseEntity.ok().body(authSignUserOutDto);
   }

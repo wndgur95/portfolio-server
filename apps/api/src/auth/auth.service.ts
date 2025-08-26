@@ -29,6 +29,7 @@ import {
 import { ServerErrorException } from '@libs/common/exception/server-error.exception';
 import { INTERNAL_ERROR_CODE } from '@libs/common/constants/internal-error-code.constants';
 import { GoogleOAuthProvider, FirebaseAdminProvider } from '@libs/common/http';
+import { UpdateRoleUserDto } from './dto/update-role-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -72,8 +73,8 @@ export class AuthService {
   }
 
   validateUser(payload: JwtPayload): boolean {
-    // ContextProvider.setJwt(payload);
-    // if (payload.userDbId) ContextProvider.setUserDatabase(payload.database);
+    ContextProvider.setJwt(payload);
+    if (payload.userDbId) ContextProvider.setUserDatabase(payload.database);
     return !!payload;
   }
 
@@ -139,7 +140,6 @@ export class AuthService {
     const user = await this.userService.googleSignIn(
       userInfo.id,
       userInfo.email,
-      userInfo.name,
       'google',
     );
 
@@ -153,7 +153,6 @@ export class AuthService {
     const user = await this.userService.googleSignIn(
       userInfo.sub,
       userInfo.email,
-      userInfo.name,
       'google',
     );
 
@@ -205,6 +204,23 @@ export class AuthService {
     return AuthSignUserOutDto.of(user)
       .setAuthToken(accessToken)
       .setRefreshToken(refreshToken);
+  }
+
+  @TransactionalEx(DB_NAME.COMMON)
+  async updateRole(
+    updateRoleUserDto: UpdateRoleUserDto,
+  ): Promise<AuthSignUserOutDto> {
+    const { roles } = updateRoleUserDto;
+
+    const { id } = ContextProvider.getJwt();
+
+    await this.usersRepository.updateById(id, {
+      roles: roles,
+    });
+
+    const user = await this.usersRepository.findById(id);
+
+    return await this._handleLogin(user);
   }
 
   private _getAuthToken(payload: JwtPayload): string {
