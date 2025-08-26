@@ -11,6 +11,7 @@ import { UsersModule } from '@libs/dao/common/users/users.module';
 import { AuthController } from './auth.controller';
 import { UserDetailsModule } from '@libs/dao/user/user-details/user-details.module';
 import { JwtRefreshStrategy } from './strategy/jwt-refresh.strategy';
+import { GoogleOAuthProvider, FirebaseAdminProvider } from '@libs/common/http';
 
 @Module({
   imports: [
@@ -30,6 +31,8 @@ import { JwtRefreshStrategy } from './strategy/jwt-refresh.strategy';
     BasicStrategy,
     AuthService,
     UserService,
+    GoogleOAuthProvider,
+    FirebaseAdminProvider,
   ],
 })
 export class AuthModule {}
