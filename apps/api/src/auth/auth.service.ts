@@ -9,13 +9,25 @@ import { NODE_ENV } from '@libs/common/constants/environment.constants';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@libs/dao/common/users/interfaces/user.interface';
 import { AuthSignUserOutDto } from './dto/auth-sign-user-out.dto';
-import { getDatabaseByUserDbId, getUserShardDatabases } from '@libs/dao/config/user/user-database-config.util';
+import {
+  getDatabaseByUserDbId,
+  getUserShardDatabases,
+} from '@libs/dao/config/user/user-database-config.util';
 import { AuthSignUserInDto } from './dto/auth-sign-user-in.dto';
 import { UsersRepository } from '@libs/dao/common/users/interfaces/users-repository.interface';
 import { ConfigService } from '@nestjs/config';
 import { TransactionalEx } from '@libs/common/decorator/transaction.decorator';
 import { DB_NAME } from '@libs/common/constants/database.constants';
 import { ContextProvider } from '@libs/common/provider/context.provider';
+import { GetApiKeyOutDto } from './dto/get-api-key-out.dto';
+import { EncryptUtil } from '@libs/common/utils/encrypt.util';
+import {
+  AUTH_TOKEN_SECRET_KEY,
+  AUTH_TOKEN_TTL,
+  AuthToken,
+} from '@libs/common/constants/token.constants';
+import { ServerErrorException } from '@libs/common/exception/server-error.exception';
+import { INTERNAL_ERROR_CODE } from '@libs/common/constants/internal-error-code.constants';
 
 @Injectable()
 export class AuthService {
@@ -28,23 +40,28 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  private apiKeys: string[] =
-    NODE_ENV !== 'prod'
-      ? [
-          process.env.AUTH_KEY,
-          'rvxuJW1J5XEJYo8+6d5ffR72QilBJC4FzvUYgVFxA8Fvi3z963RJQB4x3iZQUumqtAwh6keD/euzreWS+ewSmg==',
-        ]
-      : [
-          'rvxuJW1J5XEJYo8+6d5ffR72QilBJC4FzvUYgVFxA8Fvi3z963RJQB4x3iZQUumqtAwh6keD/euzreWS+ewSmg==',
-        ];
+  private apiKeys: string[] = [process.env.AUTH_KEY];
 
   private readonly externalApiKeys = [
     'vNA3sRMjTwgmE72v9cGDySKGK/wOIdfQVF0HMPM3lE72Upug3VLhOkYq+89D45gQZ7oHpatzRDdxuog8iFQgHw==',
   ];
 
   // api-key
-  validateApiKey(apiKey: string): string {
-    return this.apiKeys.find((key) => key === apiKey);
+  validateApiKey(apiKey: string): boolean {
+    const isAuthKey = this.apiKeys.some((key) => key === apiKey);
+
+    if (!isAuthKey) {
+      const { ttl } = EncryptUtil.decode(
+        apiKey,
+        AUTH_TOKEN_SECRET_KEY,
+      ) satisfies AuthToken;
+
+      if (ttl < new Date().getTime()) {
+        throw new ServerErrorException(INTERNAL_ERROR_CODE.API_KEY_NOT_VALID);
+      }
+    }
+
+    return true;
   }
 
   // external-api-key
@@ -100,6 +117,17 @@ export class AuthService {
     return AuthSignUserOutDto.of(user)
       .setAuthToken(newAccessToken)
       .setRefreshToken(newRefreshToken);
+  }
+
+  getApiKey(): GetApiKeyOutDto {
+    const apiKey = EncryptUtil.encode(
+      {
+        ttl: new Date().getTime() + AUTH_TOKEN_TTL,
+      },
+      AUTH_TOKEN_SECRET_KEY,
+    );
+
+    return GetApiKeyOutDto.of({ apiKey });
   }
 
   async googleLogin(

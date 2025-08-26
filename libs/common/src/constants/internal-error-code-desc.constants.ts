@@ -8,6 +8,9 @@ export const INTERNAL_ERROR_CODE_DESC = {
     '세션 정보가 헤더에 포함 되어 있지 않음',
   [e.SESSION_DECODE_FAIL]: '세션 복호화 실패',
   [e.SESSION_SEQUENCE_NOT_FOUND]: '유효하지 않은 시퀀스',
+
+  [e.API_KEY_NOT_VALID]: '유효하지 않은 api key',
+
   [e.USER_MISMATCHED_CURRENT_USER]: '본인이 아닙니다.',
   [e.USER_CONFLICT_EMAIL]: '이미 이메일이 존재합니다.',
   [e.USER_NOT_SATISFY_PASSWORD_POLICY]:
