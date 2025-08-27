@@ -16,6 +16,8 @@ import { ApiKeyAuthGuard } from './guard/api-key-auth.guard';
 import { GoogleFirebaseLoginInDto } from './dto/google-firebase-login-in.dto';
 import { GoogleOauthLoginInDto } from './dto/google-oauth-login-in.dto';
 import { UpdateRoleUserDto } from './dto/update-role-user.dto';
+import { SkipThrottle, Throttle, ThrottlerGuard } from '@nestjs/throttler';
+import { ValidationInDto } from './dto/validation-in.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -130,5 +132,59 @@ export class AuthController {
       await this.authService.updateRole(updateRoleUserDto);
 
     return ResponseEntity.ok().body(authSignUserOutDto);
+  }
+
+  /**
+   * 접근제한 - 기본 제한
+   * */
+  @Post('throttler')
+  @UseGuards(ThrottlerGuard)
+  @ApiResponseEntity({ summary: '접근 제한 테스트' })
+  async throttler(): Promise<ResponseEntity<string>> {
+    return ResponseEntity.ok().body('접근 성공');
+  }
+
+  /**
+   * 접근제한 - 엄격한 제한
+   * */
+  @Post('throttler/strict')
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 3, ttl: 60000 } }) // 1분에 3번만 허용
+  @ApiResponseEntity({ summary: '엄격한 접근 제한 테스트' })
+  async throttlerStrict(): Promise<ResponseEntity<string>> {
+    return ResponseEntity.ok().body('엄격한 제한 통과');
+  }
+
+  /**
+   * 접근제한 - 제한 없음
+   * */
+  @Post('throttler/unlimited')
+  @UseGuards(ThrottlerGuard)
+  @SkipThrottle()
+  @ApiResponseEntity({ summary: '제한 없는 접근 테스트' })
+  async throttlerUnlimited(): Promise<ResponseEntity<string>> {
+    return ResponseEntity.ok().body('제한 없음');
+  }
+
+  /**
+   * 접근제한 - 짧은 간격
+   * */
+  @Post('throttler/short')
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 5, ttl: 10000 } }) // 10초에 5번 허용
+  @ApiResponseEntity({ summary: '짧은 간격 접근 제한 테스트' })
+  async throttlerShort(): Promise<ResponseEntity<string>> {
+    return ResponseEntity.ok().body('짧은 간격 제한 통과');
+  }
+
+  /**
+   * Validation
+   * */
+  @Post('validation')
+  @ApiResponseEntity({ type: ValidationInDto, summary: 'validation' })
+  async validation(
+    @Body() validationInDto: ValidationInDto,
+  ): Promise<ResponseEntity<ValidationInDto>> {
+    return ResponseEntity.ok().body(validationInDto);
   }
 }

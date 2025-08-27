@@ -1,11 +1,10 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   JWT_OPTIONS,
   JWT_REFRESH_OPTIONS,
   JwtPayload,
 } from '@libs/common/constants/jwt.constants';
 import { UserService } from '../user/user.service';
-import { NODE_ENV } from '@libs/common/constants/environment.constants';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@libs/dao/common/users/interfaces/user.interface';
 import { AuthSignUserOutDto } from './dto/auth-sign-user-out.dto';

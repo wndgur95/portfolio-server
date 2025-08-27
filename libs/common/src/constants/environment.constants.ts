@@ -1,13 +1,11 @@
 export const ENVIRONMENT = {
-  PRODUCTION: 'prod1',
-  DEV1: 'dev1',
-  DEV2: 'dev2',
-  QA1: 'qa1',
-  QA2: 'qa2',
+  PRODUCTION: 'prod',
+  DEV: 'dev',
+  QA: 'qa',
   STAGING: 'staging',
-  GARENA_DEV: 'garena_dev',
   TEST: 'test',
 };
+export type Environment = (typeof ENVIRONMENT)[keyof typeof ENVIRONMENT];
 
 export const NODE_ENV = process.env.NODE_ENV || ENVIRONMENT.TEST;
 
