@@ -13,7 +13,7 @@ import CommonDatabaseConfig from '@libs/dao/config/common/common-database.config
 import { CommonModule } from '@libs/dao/common/common.module';
 import { UserService } from './user/user.service';
 import { UserController } from './user/user.controller';
-import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { AllExceptionFilter } from '@libs/common/filter/all-exception.filter';
 import { RequestLogInterceptor } from '@libs/common/interceptor/request-log.interceptor';
 import { PayloadInterceptor } from '@libs/common/interceptor/payload.interceptor';
@@ -28,10 +28,22 @@ import { UserModule } from '@libs/dao/user/user.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { RedisModule } from '@libs/dao/redis/redis.module';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { RedisThrottlerStorage } from './auth/guard/redis-throttler-storage';
 
 @Module({
   imports: [
     ApiServerConfig,
+
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 60000, // 1분
+          limit: 10, // 10번 요청
+        },
+      ],
+      storage: new RedisThrottlerStorage(),
+    }),
 
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, 'public'), // dist/apps/api/public
@@ -75,7 +87,17 @@ import { RedisModule } from '@libs/dao/redis/redis.module';
   ],
   controllers: [ApiController, UserController],
   providers: [
-    { provide: APP_PIPE, useValue: new ValidationPipe({ transform: true }) },
+    {
+      provide: APP_PIPE,
+      useValue: new ValidationPipe({
+        transform: true,
+        whitelist: true,
+        transformOptions: {
+          enableImplicitConversion: true, // 암시적 타입 변환 활성화 (문자열 → 숫자, 불린 등)
+        },
+      }),
+    },
+    // { provide: APP_GUARD, useClass: ThrottlerGuard }, // 개별 적용으로 변경
     { provide: APP_FILTER, useClass: AllExceptionFilter },
     { provide: APP_INTERCEPTOR, useClass: RequestLogInterceptor },
     { provide: APP_INTERCEPTOR, useClass: UserLevelLockInterceptor },
