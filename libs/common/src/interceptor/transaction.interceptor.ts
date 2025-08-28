@@ -15,7 +15,6 @@ export class TransactionInterceptor implements NestInterceptor {
       // exception
       catchError(async (e) => {
         await TypeOrmHelper.rollbackTransactions();
-
         await RedisHelper.rollbackMulti();
 
         throw e;
@@ -24,7 +23,6 @@ export class TransactionInterceptor implements NestInterceptor {
       // execute
       mergeMap(async (res) => {
         await TypeOrmHelper.commitTransactions();
-
         await RedisHelper.commitMulti();
 
         return res;

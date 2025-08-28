@@ -13,4 +13,5 @@ export default registerAs('common-database', () => ({
     process.env.COMMON_DB_SYNCHRONIZE &&
     JSON.parse(process.env.COMMON_DB_SYNCHRONIZE),
   entities: ['dist/libs/dao/src/common/**/*.entity.!(js.map){,+(ts,js)}'],
+  // logging: ['query']
 }));

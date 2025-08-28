@@ -18,6 +18,7 @@ export const INTERNAL_ERROR_CODE = {
   USER_NOT_FOUND: 1057,
   USER_MISMATCHED_CURRENT_USER: 1058,
   USER_EMPTY_NAME: 1059,
+  USER_BLOCK: 1060,
 
   // GROUP : 2000 ~ 2100
   GROUP_MEMBER_ROLE_INVALID: 2000,
@@ -65,7 +66,8 @@ export const INTERNAL_ERROR_CODE = {
   DATA_INVALID: 8000,
 
   // Database
-  DB_USER_LEVEL_LOCK_NOT_RELEASE: 9998, // db user level lock
+  DB_TRANSACTION_TEST_ERROR: 9997, // db game level lock
+  DB_USER_LEVEL_LOCK_NOT_RELEASE: 9998, // db game level lock
   DB_UPDATE_FAILED: 9999, // db 업데이트 실패
   // FATAL ERROR
   UNKNOWN_FATAL_ERROR: 10000, // 알 수 없는 에러(서버에서 의도하지 않음, 확인필요)

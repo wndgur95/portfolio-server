@@ -9,15 +9,17 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from '@libs/dao/common/users/interfaces/user.interface';
 import { AuthSignUserOutDto } from './dto/auth-sign-user-out.dto';
 import {
-  getDatabaseByUserDbId,
-  getUserShardDatabases,
-} from '@libs/dao/config/user/user-database-config.util';
+  getDatabaseByGameDbId,
+  getGameShardDatabases,
+} from '@libs/dao/config/game/game-database-config.util';
 import { AuthSignUserInDto } from './dto/auth-sign-user-in.dto';
 import { UsersRepository } from '@libs/dao/common/users/interfaces/users-repository.interface';
 import { ConfigService } from '@nestjs/config';
 import { TransactionalEx } from '@libs/common/decorator/transaction.decorator';
 import { DB_NAME } from '@libs/common/constants/database.constants';
 import { ContextProvider } from '@libs/common/provider/context.provider';
+import { SqlInjectionInDto } from './dto/sql-injection-in.dto';
+import { SqlInjectionResultDto } from './dto/sql-injection-result.dto';
 import { GetApiKeyOutDto } from './dto/get-api-key-out.dto';
 import { EncryptUtil } from '@libs/common/utils/encrypt.util';
 import {
@@ -29,17 +31,33 @@ import { ServerErrorException } from '@libs/common/exception/server-error.except
 import { INTERNAL_ERROR_CODE } from '@libs/common/constants/internal-error-code.constants';
 import { GoogleOAuthProvider, FirebaseAdminProvider } from '@libs/common/http';
 import { UpdateRoleUserDto } from './dto/update-role-user.dto';
+import { UsersDbRepository } from '@libs/dao/common/users/repositories/users-db.repository';
+import { SqlInjectionsDbRepository } from '@libs/dao/common/sql-injections/repositories/sql-injections-db.repository';
+import { SqlInjectionsRepository } from '@libs/dao/common/sql-injections/interfaces/sql-injections-repository.interface';
+import { Session } from '@libs/dao/redis/session/session.entity';
+import {
+  ENVIRONMENT,
+  NODE_ENV,
+} from '@libs/common/constants/environment.constants';
+import { SESSION_EXPIRED_TIME } from '@libs/common/constants/redis.constants';
+import { SessionRepository } from '@libs/dao/redis/session/session.repository';
+import { TimeUtil } from '@libs/common/utils/time.util';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly config: ConfigService,
     @Inject(UsersRepository)
-    private readonly usersRepository: UsersRepository,
+    private readonly usersRepository: UsersDbRepository,
+
+    @Inject(SqlInjectionsRepository)
+    private readonly sqlInjectionsRepository: SqlInjectionsDbRepository,
+
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly googleOAuthProvider: GoogleOAuthProvider,
     private readonly firebaseAdminProvider: FirebaseAdminProvider,
+    private readonly sessionRepository: SessionRepository,
   ) {}
 
   private apiKeys: string[] = [process.env.AUTH_KEY];
@@ -47,6 +65,45 @@ export class AuthService {
   private readonly externalApiKeys = [
     'vNA3sRMjTwgmE72v9cGDySKGK/wOIdfQVF0HMPM3lE72Upug3VLhOkYq+89D45gQZ7oHpatzRDdxuog8iFQgHw==',
   ];
+
+  async validateSession(userId: number, sessionId: string): Promise<boolean> {
+    if (!userId || !sessionId) {
+      throw new ServerErrorException(
+        INTERNAL_ERROR_CODE.SESSION_NOT_EXIST_ACCOUNT_KEY_IN_HEADER,
+      );
+    }
+
+    const session = await this.sessionRepository.getSession(userId);
+
+    if (!session) {
+      throw new ServerErrorException(INTERNAL_ERROR_CODE.SESSION_NOT_FOUND, [
+        `userId: ${userId} `,
+      ]);
+    } else if (session.id !== sessionId) {
+      throw new ServerErrorException(INTERNAL_ERROR_CODE.SESSION_RE_LOGIN);
+    } else if (session.block) {
+      throw new ServerErrorException(INTERNAL_ERROR_CODE.USER_BLOCK);
+    }
+
+    ContextProvider.setSession(session);
+
+    const timeOffset = session.timeOffset;
+
+    if (!timeOffset) {
+      return true;
+    }
+
+    const absOffset = Math.abs(timeOffset);
+    const now = ContextProvider.getNow();
+    const adjustedNow =
+      timeOffset < 0
+        ? TimeUtil.subSeconds(now, absOffset)
+        : TimeUtil.addSeconds(now, absOffset);
+
+    ContextProvider.setNow(adjustedNow);
+
+    return true;
+  }
 
   // api-key
   validateApiKey(apiKey: string): boolean {
@@ -73,7 +130,7 @@ export class AuthService {
 
   validateUser(payload: JwtPayload): boolean {
     ContextProvider.setJwt(payload);
-    if (payload.userDbId) ContextProvider.setUserDatabase(payload.database);
+    if (payload.gameDbId) ContextProvider.setGameDatabase(payload.database);
     return !!payload;
   }
 
@@ -92,7 +149,7 @@ export class AuthService {
       user = await this.userService.signup(email, password);
     }
 
-    return this._handleLogin(user);
+    return await this._handleLogin(user);
   }
 
   /**
@@ -104,8 +161,8 @@ export class AuthService {
       id: user.id,
       email: user.email ?? '',
       roles: user.roles,
-      userDbId: user.userDbId || 0,
-      database: user.userDbId ? getDatabaseByUserDbId(user.userDbId) : '',
+      gameDbId: user.gameDbId || 0,
+      database: user.gameDbId ? getDatabaseByGameDbId(user.gameDbId) : '',
     };
 
     const newAccessToken = this._getAuthToken(newPayload);
@@ -158,6 +215,36 @@ export class AuthService {
     return await this._handleLogin(user);
   }
 
+  async sqlInjection(
+    sqlInjectionInDto: SqlInjectionInDto,
+  ): Promise<SqlInjectionResultDto> {
+    try {
+      // Repository를 통한 안전한 쿼리 실행
+      await this.sqlInjectionsRepository.findByContentsSafe(
+        sqlInjectionInDto.contents,
+      );
+
+      return {
+        inputContents: sqlInjectionInDto.contents,
+        executedQuery: `SELECT \`sql_injection\`.\`id\`, \`sql_injection\`.\`contents\`, \`sql_injection\`.\`created_at\`, \`sql_injection\`.\`updated_at\`, \`sql_injection\`.\`deleted_at\` FROM \`sql_injection\` WHERE \`sql_injection\`.\`contents\` = ?`,
+        parameter: sqlInjectionInDto.contents,
+        defenseMessage:
+          'SQL 인젝션 공격이 TypeORM에 의해 성공적으로 방어되었습니다.',
+        securityEffect:
+          'TypeORM Query Builder가 파라미터화된 쿼리를 사용하여 악성 SQL 코드를 단순한 문자열 데이터로 처리했습니다.',
+      };
+    } catch (error) {
+      return {
+        inputContents: sqlInjectionInDto.contents,
+        executedQuery: 'Query execution failed',
+        parameter: sqlInjectionInDto.contents,
+        defenseMessage:
+          '쿼리 실행 중 오류가 발생했지만, SQL 인젝션은 방어되었습니다.',
+        securityEffect: `TypeORM이 안전하게 처리했습니다: ${error.message}`,
+      };
+    }
+  }
+
   private async _exchangeCodeForUserInfo(code: string): Promise<any> {
     return await this.googleOAuthProvider.exchangeCodeForUserInfo(code);
   }
@@ -169,18 +256,19 @@ export class AuthService {
   /**
    * 로그인 후 공통 처리 메서드
    */
+  @TransactionalEx(DB_NAME.COMMON)
   private async _handleLogin(user: User): Promise<AuthSignUserOutDto> {
-    if (!user.userDbId) {
-      const userDbId = 200 + (user.id % getUserShardDatabases.length);
+    if (!user.gameDbId) {
+      const gameDbId = 100 + (user.id % getGameShardDatabases.length);
 
-      user.userDbId = userDbId;
+      user.gameDbId = gameDbId;
 
       await this.usersRepository.updateById(user.id, {
-        userDbId,
+        gameDbId,
       });
 
-      const database = getDatabaseByUserDbId(userDbId);
-      ContextProvider.setUserDatabase(database);
+      const database = getDatabaseByGameDbId(gameDbId);
+      ContextProvider.setGameDatabase(database);
 
       await this.userService.createUserDetail(user);
     }
@@ -189,12 +277,14 @@ export class AuthService {
       id: user.id,
       email: user.email ?? '',
       roles: user.roles,
-      userDbId: user.userDbId || 0,
-      database: user.userDbId ? getDatabaseByUserDbId(user.userDbId) : '',
+      gameDbId: user.gameDbId || 0,
+      database: user.gameDbId ? getDatabaseByGameDbId(user.gameDbId) : '',
     };
 
     const accessToken = this._getAuthToken(payload);
     const refreshToken = this._getRefreshToken(payload);
+
+    const session = await this._createSession(user);
 
     await this.usersRepository.updateById(user.id, {
       refreshToken: refreshToken,
@@ -202,7 +292,8 @@ export class AuthService {
 
     return AuthSignUserOutDto.of(user)
       .setAuthToken(accessToken)
-      .setRefreshToken(refreshToken);
+      .setRefreshToken(refreshToken)
+      .setSessionId(session.id);
   }
 
   @TransactionalEx(DB_NAME.COMMON)
@@ -234,5 +325,24 @@ export class AuthService {
       secret: this.config.get<string>('REFRESH_TOKEN_SECRET'),
       expiresIn: JWT_REFRESH_OPTIONS.expiresIn,
     });
+  }
+
+  /**
+   * 세션 생성
+   */
+  private async _createSession(user: User): Promise<Session> {
+    const session = Session.create({
+      userId: user.id,
+      nid: user.nid,
+      gameDbId: user.gameDbId,
+    });
+
+    await this.sessionRepository.setSession(
+      user.id,
+      session,
+      ['', ENVIRONMENT.TEST].includes(NODE_ENV) ? 0 : SESSION_EXPIRED_TIME,
+    );
+
+    return session;
   }
 }

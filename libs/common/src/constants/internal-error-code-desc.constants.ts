@@ -2,7 +2,7 @@ import { INTERNAL_ERROR_CODE as e } from './internal-error-code.constants';
 
 export const INTERNAL_ERROR_CODE_DESC = {
   // SESSION
-  [e.SESSION_NOT_FOUND]: '유효하지 않은 세션 정보',
+  [e.SESSION_NOT_FOUND]: '유효하지 않은 세션 정보 : %P',
   [e.SESSION_RE_LOGIN]: '다른 기기에서 재 로그인',
   [e.SESSION_NOT_EXIST_ACCOUNT_KEY_IN_HEADER]:
     '세션 정보가 헤더에 포함 되어 있지 않음',
@@ -13,14 +13,14 @@ export const INTERNAL_ERROR_CODE_DESC = {
 
   [e.USER_MISMATCHED_CURRENT_USER]: '본인이 아닙니다.',
   [e.USER_CONFLICT_EMAIL]: '이미 이메일이 존재합니다.',
-  [e.USER_NOT_SATISFY_PASSWORD_POLICY]:
-    '비밀번호가 정책에 맞지 않습니다.',
+  [e.USER_NOT_SATISFY_PASSWORD_POLICY]: '비밀번호가 정책에 맞지 않습니다.',
   [e.USER_EMPTY_NAME]: '이름이 비어있습니다.',
   [e.USER_MISMATCHED_EMAIL]: '이메일이 다릅니다.',
   [e.USER_MISMATCHED_PASSWORD]: '비밀번호가 틀렸습니다.',
   [e.USER_NOT_ACTIVATED]: '활성화 유저가 아닙니다.',
   [e.USER_UPDATE_FAILED]: '업데이트에 실패했습니다.',
   [e.USER_NOT_FOUND]: '유저가 없습니다.',
+  [e.USER_BLOCK]: '블록 유저',
 
   // Group
   [e.GROUP_MEMBER_ROLE_INVALID]: '해당 기능은 %P만 가능한 기능입니다.',
@@ -63,7 +63,8 @@ export const INTERNAL_ERROR_CODE_DESC = {
   [e.DATA_INVALID]: '유효하지 않은 STATIC 데이터',
 
   // Database
-  [e.DB_USER_LEVEL_LOCK_NOT_RELEASE]: 'db user level lock 미 해제',
+  [e.DB_TRANSACTION_TEST_ERROR]: 'transaction 확인을 위한 에러 에러포인트 : %P',
+  [e.DB_USER_LEVEL_LOCK_NOT_RELEASE]: 'db game level lock 미 해제',
   [e.DB_UPDATE_FAILED]: 'db 업데이트 실패',
   [e.UNKNOWN_FATAL_ERROR]: '알 수 없는 에러(서버에서 의도하지 않음, 확인필요)',
 } as const;

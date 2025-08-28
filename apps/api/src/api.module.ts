@@ -4,8 +4,6 @@ import { AuthModule } from './auth/auth.module';
 import { ClsModule } from 'nestjs-cls';
 import { TypeOrmExModule } from '@libs/common/databases/typeorm/typeorm-ex.module';
 import { DataSourceOptions } from 'typeorm';
-import weddingDatabaseConfig from '@libs/dao/config/wedding/wedding-database.config';
-import { WeddingModule } from '@libs/dao/wedding/wedding.module';
 import { ApiController } from './default/api.controller';
 import { ApiService } from './default/api.service';
 import { ValidateProvider } from '@libs/common/provider/validate.provider';
@@ -13,23 +11,22 @@ import CommonDatabaseConfig from '@libs/dao/config/common/common-database.config
 import { CommonModule } from '@libs/dao/common/common.module';
 import { UserService } from './user/user.service';
 import { UserController } from './user/user.controller';
-import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { AllExceptionFilter } from '@libs/common/filter/all-exception.filter';
 import { RequestLogInterceptor } from '@libs/common/interceptor/request-log.interceptor';
 import { PayloadInterceptor } from '@libs/common/interceptor/payload.interceptor';
-import { getGroupServerTypeOrmOptions } from '@libs/dao/config/group/group-database-config.util';
-import { GroupModule } from '@libs/dao/group/group.module';
-import GroupDatabaseConfig from '@libs/dao/config/group/group-database.config';
 import { UserLevelLockInterceptor } from '@libs/common/interceptor/user-level-lock.interceptor';
 import { TransactionInterceptor } from '@libs/common/interceptor/transaction.interceptor';
-import { getUserServerTypeOrmOptions } from '@libs/dao/config/user/user-database-config.util';
-import UserDatabaseConfig from '@libs/dao/config/user/user-database.config';
-import { UserModule } from '@libs/dao/user/user.module';
+import GameDatabaseConfig from '@libs/dao/config/game/game-database.config';
+import { UserModule } from '@libs/dao/game/user.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { RedisModule } from '@libs/dao/redis/redis.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { RedisThrottlerStorage } from './auth/guard/redis-throttler-storage';
+import { DatabaseController } from './database/database.controller';
+import { DatabaseService } from './database/database.service';
+import { getGameServerTypeOrmOptions } from '@libs/dao/config/game/game-database-config.util';
 
 @Module({
   imports: [
@@ -51,7 +48,7 @@ import { RedisThrottlerStorage } from './auth/guard/redis-throttler-storage';
     }),
 
     ClsModule.forRoot({ global: true, middleware: { mount: true } }),
-    ...[weddingDatabaseConfig, CommonDatabaseConfig].map((it) => {
+    ...[CommonDatabaseConfig].map((it) => {
       return TypeOrmExModule.forRootAsync({
         name: it().name,
         inject: [it.KEY],
@@ -59,19 +56,10 @@ import { RedisThrottlerStorage } from './auth/guard/redis-throttler-storage';
       });
     }),
 
-    ...getGroupServerTypeOrmOptions().map((options) =>
+    ...getGameServerTypeOrmOptions().map((options) =>
       TypeOrmExModule.forRootAsync({
         name: options.name,
-        inject: [GroupDatabaseConfig.KEY],
-        useFactory: (configs: Record<string, DataSourceOptions>) =>
-          Object.values(configs).find((it) => it.name === options.name),
-      }),
-    ),
-
-    ...getUserServerTypeOrmOptions().map((options) =>
-      TypeOrmExModule.forRootAsync({
-        name: options.name,
-        inject: [UserDatabaseConfig.KEY],
+        inject: [GameDatabaseConfig.KEY],
         useFactory: (configs: Record<string, DataSourceOptions>) =>
           Object.values(configs).find((it) => it.name === options.name),
       }),
@@ -80,12 +68,10 @@ import { RedisThrottlerStorage } from './auth/guard/redis-throttler-storage';
     RedisModule,
 
     AuthModule,
-    WeddingModule,
     CommonModule,
-    GroupModule,
     UserModule,
   ],
-  controllers: [ApiController, UserController],
+  controllers: [ApiController, UserController, DatabaseController],
   providers: [
     {
       provide: APP_PIPE,
@@ -105,6 +91,8 @@ import { RedisThrottlerStorage } from './auth/guard/redis-throttler-storage';
     { provide: APP_INTERCEPTOR, useClass: PayloadInterceptor },
     ApiService,
     UserService,
+    DatabaseService,
+
     ValidateProvider,
   ],
 })

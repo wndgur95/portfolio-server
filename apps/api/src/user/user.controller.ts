@@ -1,4 +1,4 @@
-import { Controller, Post, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ResponseEntity } from '@libs/common/network/response-entity';
 import { ApiResponseEntity } from '@libs/common/decorator/api-response-entity';
@@ -7,6 +7,7 @@ import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { RoleGuard } from '../auth/guard/role.guard';
 import { Roles } from '../auth/role/role.decorator';
 import { USER_ROLES } from '@libs/common/constants/role.constants';
+import { GetUserOutDto } from './dto/get-user-out.dto';
 
 @ApiTags('user')
 @Controller('user')
@@ -14,6 +15,18 @@ import { USER_ROLES } from '@libs/common/constants/role.constants';
 @UseGuards(JwtAuthGuard, RoleGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Get('')
+  @ApiResponseEntity({
+    type: GetUserOutDto,
+    summary: '유저 정보 가져오기',
+  })
+  @UseGuards(JwtAuthGuard)
+  async getUser(): Promise<ResponseEntity<GetUserOutDto>> {
+    const getUserOutDto = await this.userService.getUser();
+
+    return ResponseEntity.ok().body(getUserOutDto);
+  }
 
   @Post('rbac/admin')
   @ApiResponseEntity({

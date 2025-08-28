@@ -5,6 +5,10 @@ import {
 } from '@libs/common/constants/environment.constants';
 import { JwtPayload } from '@libs/common/constants/jwt.constants';
 import { ChainableCommander } from 'ioredis/built/utils/RedisCommander';
+import { getDatabaseByGameDbId } from '@libs/dao/config/game/game-database-config.util';
+import { ServerErrorException } from '@libs/common/exception/server-error.exception';
+import { INTERNAL_ERROR_CODE } from '@libs/common/constants/internal-error-code.constants';
+import { Session } from '@libs/dao/redis/session/session.entity';
 
 // test debugging 용
 export const context = {};
@@ -20,6 +24,27 @@ export class ContextProvider {
     NODE_ENV === ENVIRONMENT.TEST
       ? ClsServiceManager.getClsService().set(key, value)
       : ClsServiceManager.getClsService().set(key, value);
+  }
+
+  static getSession(check = true): Session {
+    const session: Session = ContextProvider.get('session');
+
+    if (check && !session) {
+      throw new ServerErrorException(INTERNAL_ERROR_CODE.SESSION_NOT_FOUND);
+    }
+    if (!session) {
+      return null;
+    }
+
+    session.database = session.gameDbId
+      ? getDatabaseByGameDbId(session.gameDbId)
+      : null;
+
+    return session;
+  }
+
+  static setSession(session: Session): void {
+    ContextProvider.set('session', session);
   }
 
   static getNow(): Date {
@@ -39,45 +64,23 @@ export class ContextProvider {
     ContextProvider.set('jwt', jwt);
   }
 
-  static getGroupDatabase(): string {
-    return ContextProvider.get('group-database');
+  static getGameDatabase(): string {
+    return ContextProvider.get('game-database');
   }
 
-  static setGroupDatabase(groupDatabase: string): void {
-    ContextProvider.set('group-database', groupDatabase);
-  }
-
-  static getUserDatabase(): string {
-    return ContextProvider.get('user-database');
-  }
-
-  static setUserDatabase(userDatabase: string): void {
-    ContextProvider.set('user-database', userDatabase);
-  }
-
-  static getOtherUserDatabase(): string[] {
-    return ContextProvider.get('other-user-database') ?? [];
-  }
-
-  static setOtherUserDatabase(otherUserDatabase: string): void {
-    const databases = [
-      ...new Set([
-        ContextProvider.get('other-user-database'),
-        otherUserDatabase,
-      ]),
-    ];
-    ContextProvider.set('other-user-database', databases);
+  static setGameDatabase(gameDatabase: string): void {
+    ContextProvider.set('game-database', gameDatabase);
   }
 
   /**
-   * user level lock
+   * game level lock
    * */
   static isUserLevelLockActive(): boolean {
     return ContextProvider.get('user-level-lock') ?? false;
   }
 
   static setIsUserLevelLockActive(lock: boolean): void {
-    ContextProvider.set('user-level-lock', lock);
+    ContextProvider.set('game-level-lock', lock);
   }
 
   static getRedisMultiPool(): Record<string, ChainableCommander> {
