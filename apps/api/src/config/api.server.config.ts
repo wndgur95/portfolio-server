@@ -3,11 +3,9 @@ import '@extension/json.extension';
 import '@extension/date.extension';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import WeddingDatabaseConfig from '@libs/dao/config/wedding/wedding-database.config';
 import CommonDatabaseConfig from '@libs/dao/config/common/common-database.config';
 import { NODE_ENV } from '@libs/common/constants/environment.constants';
-import GroupDatabaseConfig from '@libs/dao/config/group/group-database.config';
-import UserDatabaseConfig from '@libs/dao/config/user/user-database.config';
+import GameDatabaseConfig from '@libs/dao/config/game/game-database.config';
 
 const environment = NODE_ENV || 'test';
 
@@ -17,12 +15,7 @@ const environment = NODE_ENV || 'test';
       envFilePath: `./config/.api.${environment}.env`,
       isGlobal: true,
       cache: true,
-      load: [
-        WeddingDatabaseConfig,
-        CommonDatabaseConfig,
-        GroupDatabaseConfig,
-        UserDatabaseConfig,
-      ],
+      load: [CommonDatabaseConfig, GameDatabaseConfig],
     }),
   ],
 })

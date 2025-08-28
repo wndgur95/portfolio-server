@@ -9,9 +9,11 @@ import { JwtModule } from '@nestjs/jwt';
 import { JWT_OPTIONS } from '@libs/common/constants/jwt.constants';
 import { UsersModule } from '@libs/dao/common/users/users.module';
 import { AuthController } from './auth.controller';
-import { UserDetailsModule } from '@libs/dao/user/user-details/user-details.module';
+import { UserDetailsModule } from '@libs/dao/game/user-details/user-details.module';
 import { JwtRefreshStrategy } from './strategy/jwt-refresh.strategy';
 import { GoogleOAuthProvider, FirebaseAdminProvider } from '@libs/common/http';
+import { SqlInjectionsModule } from '@libs/dao/common/sql-injections/sql-injections.module';
+import { RedisModule } from '@libs/dao/redis/redis.module';
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { GoogleOAuthProvider, FirebaseAdminProvider } from '@libs/common/http';
     }),
     UsersModule,
     UserDetailsModule,
+    SqlInjectionsModule,
+    RedisModule,
   ],
   controllers: [AuthController],
   providers: [

@@ -31,6 +31,6 @@ export interface JwtPayload {
   email?: string;
   platformId?: string;
   roles: UserRoles;
-  userDbId?: number;
+  gameDbId?: number;
   database?: string;
 }

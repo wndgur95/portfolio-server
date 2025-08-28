@@ -4,7 +4,7 @@ import { IsEmail, IsString, IsOptional } from 'class-validator';
 export class AuthLoginDto {
   @ApiProperty({
     description: '사용자 이메일',
-    example: 'user@example.com'
+    example: 'game@example.com'
   })
   @IsEmail()
   email: string;

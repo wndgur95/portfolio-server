@@ -10,18 +10,26 @@ export class AuthSignUserOutDto extends UserDto {
   @ApiProperty()
   refreshToken: string;
 
+  @ApiProperty()
+  sessionId: string;
+
   constructor(partial: Partial<AuthSignUserOutDto>) {
     super();
     Object.assign(this, partial);
   }
 
-  setAuthToken(authToken: string): AuthSignUserOutDto {
+  setAuthToken(authToken: string): this {
     this.authToken = authToken;
     return this;
   }
 
-  public setRefreshToken(refreshToken: string): this {
+  setRefreshToken(refreshToken: string): this {
     this.refreshToken = refreshToken;
+    return this;
+  }
+
+  setSessionId(sessionId: string): this {
+    this.sessionId = sessionId;
     return this;
   }
 

@@ -2,9 +2,6 @@ import { EntityRepository } from '@libs/common/databases/typeorm/typeorm-ex.deco
 import { AbstractRepository } from '@libs/common/databases/typeorm/abstract.repository';
 import { UserEntity } from '@libs/dao/common/users/entities/user.entity';
 import { UsersRepository } from '@libs/dao/common/users/interfaces/users-repository.interface';
-import { User } from '@libs/dao/common/users/interfaces/user.interface';
-import { getDatabaseByUserDbId } from '@libs/dao/config/user/user-database-config.util';
-import { ContextProvider } from '@libs/common/provider/context.provider';
 
 @EntityRepository(UserEntity)
 export class UsersDbRepository

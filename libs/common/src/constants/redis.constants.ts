@@ -11,3 +11,5 @@ export const RedisDbNumber = {
   SESSION: 1,
 };
 export type RedisDbNumber = (typeof RedisDbNumber)[keyof typeof RedisDbNumber];
+
+export const SESSION_EXPIRED_TIME = Number(process.env.SESSION_TTL);

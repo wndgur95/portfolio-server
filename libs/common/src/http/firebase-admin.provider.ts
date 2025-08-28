@@ -62,7 +62,7 @@ export class FirebaseAdminProvider {
       return await admin.auth().getUser(uid);
     } catch (error) {
       console.error('Firebase getUser error:', error);
-      throw new UnauthorizedException('Failed to get Firebase user info');
+      throw new UnauthorizedException('Failed to get Firebase game info');
     }
   }
 } 

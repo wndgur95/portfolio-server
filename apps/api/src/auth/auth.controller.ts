@@ -18,6 +18,11 @@ import { GoogleOauthLoginInDto } from './dto/google-oauth-login-in.dto';
 import { UpdateRoleUserDto } from './dto/update-role-user.dto';
 import { SkipThrottle, Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { ValidationInDto } from './dto/validation-in.dto';
+import { SqlInjectionInDto } from './dto/sql-injection-in.dto';
+import { SqlInjectionResultDto } from './dto/sql-injection-result.dto';
+import { Auth } from './decorator/auth.decorator';
+import { ContextProvider } from '@libs/common/provider/context.provider';
+import { Session } from '@libs/dao/redis/session/session.entity';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -61,6 +66,16 @@ export class AuthController {
     const authSignUserOutDto = await this.authService.refreshToken(user);
 
     return ResponseEntity.ok().body(authSignUserOutDto);
+  }
+
+  /**
+   * Session 인증
+   * */
+  @Auth()
+  @Post('session')
+  @ApiResponseEntity({ type: Session, summary: '1분 api key 발급' })
+  async session(): Promise<ResponseEntity<Session>> {
+    return ResponseEntity.ok().body(ContextProvider.getSession());
   }
 
   /**
@@ -186,5 +201,18 @@ export class AuthController {
     @Body() validationInDto: ValidationInDto,
   ): Promise<ResponseEntity<ValidationInDto>> {
     return ResponseEntity.ok().body(validationInDto);
+  }
+
+  /**
+   * sql injection
+   * */
+  @Post('sql-injection')
+  @ApiResponseEntity({ type: SqlInjectionResultDto, summary: 'sql-injection' })
+  async sqlInjection(
+    @Body() sqlInjectionInDto: SqlInjectionInDto,
+  ): Promise<ResponseEntity<SqlInjectionResultDto>> {
+    const result = await this.authService.sqlInjection(sqlInjectionInDto);
+
+    return ResponseEntity.ok().body(result);
   }
 }

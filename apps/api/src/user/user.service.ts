@@ -1,29 +1,44 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { UsersRepository } from '@libs/dao/common/users/interfaces/users-repository.interface';
-import { AuthSignUserInDto } from '../auth/dto/auth-sign-user-in.dto';
 import { INTERNAL_ERROR_CODE } from '@libs/common/constants/internal-error-code.constants';
 import { UserDto } from '@libs/dao/common/users/dto/user.dto';
 import { User } from '@libs/dao/common/users/interfaces/user.interface';
 import { ServerErrorException } from '@libs/common/exception/server-error.exception';
-import { UserDetail } from '@libs/dao/user/user-details/interfaces/user-detail.interface';
-import { UserDetailsDbRepositories } from '@libs/dao/user/user-details/repositories/user-details-db.repository';
-import { UserDetailsRepository } from '@libs/dao/user/user-details/interfaces/user-details-repository.interface';
-import { UserDetailEntity } from '@libs/dao/user/user-details/entities/user-detail.entity';
+import { UserDetail } from '@libs/dao/game/user-details/interfaces/user-detail.interface';
+import { UserDetailsDbRepositories } from '@libs/dao/game/user-details/repositories/user-details-db.repository';
+import { UserDetailsRepository } from '@libs/dao/game/user-details/interfaces/user-details-repository.interface';
+import { UserDetailEntity } from '@libs/dao/game/user-details/entities/user-detail.entity';
 import { Transactional } from '@libs/common/decorator/transaction.decorator';
 import { DB_NAME } from '@libs/common/constants/database.constants';
 import { UserEntity } from '@libs/dao/common/users/entities/user.entity';
 import { PASSWORD_POLICY } from '@libs/common/constants/jwt.constants';
 import joiPasswordComplexity from 'joi-password-complexity';
 import { ContextProvider } from '@libs/common/provider/context.provider';
+import { UsersDbRepository } from '@libs/dao/common/users/repositories/users-db.repository';
+import { GetUserOutDto } from './dto/get-user-out.dto';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class UserService {
   constructor(
     @Inject(UsersRepository)
-    private readonly usersRepository: UsersRepository,
+    private readonly usersRepository: UsersDbRepository,
     @Inject(UserDetailsRepository)
     private readonly userDetailsRepositories: UserDetailsDbRepositories,
   ) {}
+  async getUser(): Promise<GetUserOutDto> {
+    const { database, id } = ContextProvider.getJwt();
+
+    const user = await this.usersRepository.findById(id);
+    const userDetail =
+      await this.userDetailsRepositories[database].findByUserId(id);
+
+    return GetUserOutDto.of({
+      user,
+      userDetail,
+    });
+  }
+
   async login(email: string, password: string): Promise<User> {
     const user = await this.usersRepository.findByEmail(email);
 
@@ -45,7 +60,11 @@ export class UserService {
     await this._isDuplicated(email);
     this._isPasswordComplexity(password);
 
-    const userEntity = AuthSignUserInDto.toEntity({ email, password });
+    const userEntity = UserEntity.create({
+      email,
+      password,
+      nid: randomUUID(),
+    });
 
     return await this.usersRepository.save(userEntity);
   }
@@ -76,6 +95,7 @@ export class UserService {
     if (!user) {
       user = await this.usersRepository.save(
         UserEntity.create({
+          nid: randomUUID(),
           platformId: googleId,
           email: email,
           provider: provider,
@@ -97,7 +117,7 @@ export class UserService {
 
   @Transactional(DB_NAME.COMMON)
   async createUserDetail(user: User): Promise<UserDetail> {
-    const database = ContextProvider.getUserDatabase();
+    const database = ContextProvider.getGameDatabase();
 
     return await this.userDetailsRepositories[database].save(
       UserDetailEntity.create({ userId: user.id }),

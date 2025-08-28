@@ -10,6 +10,9 @@ export class UserDto extends ExcludeBaseTimeDto<UserDto> {
   id: number;
 
   @ApiProperty()
+  nid?: string;
+
+  @ApiProperty()
   email?: string;
 
   @Exclude()
@@ -22,7 +25,7 @@ export class UserDto extends ExcludeBaseTimeDto<UserDto> {
   roles: UserRoles;
 
   @ApiProperty()
-  userDbId: number;
+  gameDbId: number;
 
   @ApiProperty()
   provider?: string;

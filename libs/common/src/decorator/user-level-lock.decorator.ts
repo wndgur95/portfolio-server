@@ -18,7 +18,7 @@ export function UserLevelLock(): MethodDecorator {
     ): Promise<unknown> {
       const { id } = ContextProvider.getJwt();
 
-      const database = ContextProvider.getUserDatabase();
+      const database = ContextProvider.getGameDatabase();
 
       const queryRunners = TypeOrmHelper.getQueryRunners();
 

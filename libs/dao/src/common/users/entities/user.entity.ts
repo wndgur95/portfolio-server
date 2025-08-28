@@ -12,6 +12,10 @@ import { User } from '@libs/dao/common/users/interfaces/user.interface';
 @BaseTimeEntity()
 @Index(['email', 'platformId'], { unique: true })
 export class UserEntity extends AbstractEntity implements User {
+  @Index({ unique: true })
+  @Column()
+  nid: string;
+
   @Index()
   @Column({ nullable: true })
   email?: string;
@@ -29,7 +33,7 @@ export class UserEntity extends AbstractEntity implements User {
   roles: UserRoles;
 
   @Column({ default: 0 })
-  userDbId: number;
+  gameDbId: number;
 
   @Index()
   @Column({ nullable: true })
