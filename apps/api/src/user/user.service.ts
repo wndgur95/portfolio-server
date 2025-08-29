@@ -27,15 +27,18 @@ export class UserService {
     private readonly userDetailsRepositories: UserDetailsDbRepositories,
   ) {}
   async getUser(): Promise<GetUserOutDto> {
-    const { database, id } = ContextProvider.getJwt();
+    const session = ContextProvider.getSession();
 
-    const user = await this.usersRepository.findById(id);
+    const { userId, database } = session;
+
+    const user = await this.usersRepository.findById(userId);
     const userDetail =
-      await this.userDetailsRepositories[database].findByUserId(id);
+      await this.userDetailsRepositories[database].findByUserId(userId);
 
     return GetUserOutDto.of({
       user,
       userDetail,
+      session,
     });
   }
 

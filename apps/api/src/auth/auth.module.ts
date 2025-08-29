@@ -12,8 +12,8 @@ import { AuthController } from './auth.controller';
 import { UserDetailsModule } from '@libs/dao/game/user-details/user-details.module';
 import { JwtRefreshStrategy } from './strategy/jwt-refresh.strategy';
 import { GoogleOAuthProvider, FirebaseAdminProvider } from '@libs/common/http';
-import { SqlInjectionsModule } from '@libs/dao/common/sql-injections/sql-injections.module';
 import { RedisModule } from '@libs/dao/redis/redis.module';
+import { TestTablesModule } from '@libs/dao/common/test-tables/test-tables.module';
 
 @Module({
   imports: [
@@ -24,7 +24,7 @@ import { RedisModule } from '@libs/dao/redis/redis.module';
     }),
     UsersModule,
     UserDetailsModule,
-    SqlInjectionsModule,
+    TestTablesModule,
     RedisModule,
   ],
   controllers: [AuthController],

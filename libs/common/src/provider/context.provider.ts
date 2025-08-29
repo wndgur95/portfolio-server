@@ -44,6 +44,10 @@ export class ContextProvider {
   }
 
   static setSession(session: Session): void {
+    ContextProvider.setGameDatabase(
+      session.database ?? getDatabaseByGameDbId(session.gameDbId),
+    );
+    ContextProvider.setUserId(session.userId);
     ContextProvider.set('session', session);
   }
 
@@ -61,7 +65,17 @@ export class ContextProvider {
   }
 
   static setJwt(jwt: JwtPayload): void {
+    ContextProvider.setGameDatabase(jwt.database);
+    ContextProvider.setUserId(jwt.id);
     ContextProvider.set('jwt', jwt);
+  }
+
+  static getUserId(): number {
+    return ContextProvider.get('user-id');
+  }
+
+  static setUserId(userId: number): void {
+    ContextProvider.set('user-id', userId);
   }
 
   static getGameDatabase(): string {
@@ -80,7 +94,7 @@ export class ContextProvider {
   }
 
   static setIsUserLevelLockActive(lock: boolean): void {
-    ContextProvider.set('game-level-lock', lock);
+    ContextProvider.set('user-level-lock', lock);
   }
 
   static getRedisMultiPool(): Record<string, ChainableCommander> {

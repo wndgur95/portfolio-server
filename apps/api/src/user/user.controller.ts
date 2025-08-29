@@ -8,11 +8,10 @@ import { RoleGuard } from '../auth/guard/role.guard';
 import { Roles } from '../auth/role/role.decorator';
 import { USER_ROLES } from '@libs/common/constants/role.constants';
 import { GetUserOutDto } from './dto/get-user-out.dto';
+import { Auth } from '../auth/decorator/auth.decorator';
 
 @ApiTags('user')
 @Controller('user')
-@ApiBearerAuth('jwt')
-@UseGuards(JwtAuthGuard, RoleGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -21,7 +20,7 @@ export class UserController {
     type: GetUserOutDto,
     summary: '유저 정보 가져오기',
   })
-  @UseGuards(JwtAuthGuard)
+  @Auth()
   async getUser(): Promise<ResponseEntity<GetUserOutDto>> {
     const getUserOutDto = await this.userService.getUser();
 
@@ -32,6 +31,7 @@ export class UserController {
   @ApiResponseEntity({
     summary: 'admin 권한 확인',
   })
+  @ApiBearerAuth('jwt')
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(USER_ROLES.ADMIN)
   async rbacAdmin(): Promise<ResponseEntity<string>> {
@@ -42,6 +42,7 @@ export class UserController {
   @ApiResponseEntity({
     summary: 'manager 권한 확인',
   })
+  @ApiBearerAuth('jwt')
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(USER_ROLES.MANAGER)
   async rbacManager(): Promise<ResponseEntity<string>> {
@@ -52,6 +53,7 @@ export class UserController {
   @ApiResponseEntity({
     summary: 'admin 권한 확인',
   })
+  @ApiBearerAuth('jwt')
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(USER_ROLES.DEVELOPER)
   async rbacDeveloper(): Promise<ResponseEntity<string>> {
@@ -62,6 +64,7 @@ export class UserController {
   @ApiResponseEntity({
     summary: 'guest 권한 확인',
   })
+  @ApiBearerAuth('jwt')
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(USER_ROLES.GUEST)
   async rbacGuest(): Promise<ResponseEntity<string>> {

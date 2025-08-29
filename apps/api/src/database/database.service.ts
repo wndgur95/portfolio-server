@@ -4,12 +4,21 @@ import { UserDetailsDbRepositories } from '@libs/dao/game/user-details/repositor
 import { UserDetailsRepository } from '@libs/dao/game/user-details/interfaces/user-details-repository.interface';
 import { UsersDbRepository } from '@libs/dao/common/users/repositories/users-db.repository';
 import { TransactionInDto } from './dto/transaction-in.dto';
-import { GetUserOutDto } from '../user/dto/get-user-out.dto';
 import { ContextProvider } from '@libs/common/provider/context.provider';
-import { Transactional } from '@libs/common/decorator/transaction.decorator';
+import {
+  Transactional,
+  TransactionalEx,
+} from '@libs/common/decorator/transaction.decorator';
 import { DB_NAME } from '@libs/common/constants/database.constants';
 import { ServerErrorException } from '@libs/common/exception/server-error.exception';
 import { INTERNAL_ERROR_CODE } from '@libs/common/constants/internal-error-code.constants';
+import { SessionRepository } from '@libs/dao/redis/session/session.repository';
+import { UserDetail } from '@libs/dao/game/user-details/interfaces/user-detail.interface';
+import { RowLevelLockInDto } from './dto/row-level-lock-in.dto';
+import { TestTablesDbRepository } from '@libs/dao/common/test-tables/repositories/test-tables-db.repository';
+import { TestTablesRepository } from '@libs/dao/common/test-tables/interfaces/test-tables-repository.interface';
+import { TestTableEntity } from '@libs/dao/common/test-tables/entities/test-table.entity';
+import { TestTable } from '@libs/dao/common/test-tables/interfaces/test-table.interface';
 
 @Injectable()
 export class DatabaseService {
@@ -18,14 +27,19 @@ export class DatabaseService {
     private readonly usersRepository: UsersDbRepository,
     @Inject(UserDetailsRepository)
     private readonly userDetailsRepositories: UserDetailsDbRepositories,
+    private readonly sessionRepository: SessionRepository,
+
+    @Inject(TestTablesRepository)
+    private readonly testTablesRepository: TestTablesDbRepository,
   ) {}
 
   @Transactional(DB_NAME.COMMON)
   async testTransaction(transactionInDto: TransactionInDto): Promise<void> {
     const { role, gold, errorPoint } = transactionInDto;
-    const { id, database } = ContextProvider.getJwt();
+    const session = ContextProvider.getSession();
+    const { database, userId } = session;
 
-    await this.usersRepository.updateById(id, { roles: role });
+    await this.usersRepository.updateById(userId, { roles: role });
 
     if (errorPoint == 1) {
       throw new ServerErrorException(
@@ -34,7 +48,7 @@ export class DatabaseService {
       );
     }
 
-    await this.userDetailsRepositories[database].updateGold(id, gold);
+    await this.userDetailsRepositories[database].updateGold(userId, gold);
 
     if (errorPoint == 2) {
       throw new ServerErrorException(
@@ -42,5 +56,55 @@ export class DatabaseService {
         [errorPoint],
       );
     }
+
+    session.sequence += 1;
+    await this.sessionRepository.setSession(userId, session);
+
+    if (errorPoint == 3) {
+      throw new ServerErrorException(
+        INTERNAL_ERROR_CODE.DB_TRANSACTION_TEST_ERROR,
+        [errorPoint],
+      );
+    }
+  }
+
+  @Transactional()
+  async testUserLevelLock(addGold: number): Promise<UserDetail> {
+    const session = ContextProvider.getSession();
+    const { database, userId } = session;
+
+    const userDetail =
+      await this.userDetailsRepositories[database].findByUserId(userId);
+
+    userDetail.gold += addGold;
+
+    return await this.userDetailsRepositories[database].save(userDetail);
+  }
+
+  @TransactionalEx(DB_NAME.COMMON)
+  async testRowLevelLock(
+    rowLevelLockInDto: RowLevelLockInDto,
+  ): Promise<TestTable> {
+    const { id, addCount } = rowLevelLockInDto;
+    const testTable =
+      (await this.testTablesRepository.findByIdRowLevelLock(id)) ??
+      TestTableEntity.create({ id, count: 0 });
+    testTable.count += addCount;
+
+    return await this.testTablesRepository.save(testTable);
+  }
+
+  @TransactionalEx(DB_NAME.COMMON)
+  async testRowLevelUnlock(
+    rowLevelLockInDto: RowLevelLockInDto,
+  ): Promise<TestTable> {
+    const { id, addCount } = rowLevelLockInDto;
+    const testTable =
+      (await this.testTablesRepository.findById(id)) ??
+      TestTableEntity.create({ id, count: 0 });
+
+    testTable.count += addCount;
+
+    return await this.testTablesRepository.save(testTable);
   }
 }
