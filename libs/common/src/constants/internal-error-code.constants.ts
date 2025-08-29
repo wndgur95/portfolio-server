@@ -65,6 +65,9 @@ export const INTERNAL_ERROR_CODE = {
   // DATA : 8000 ~ 8050
   DATA_INVALID: 8000,
 
+  // Redis
+  REDIS_MESSAGE_HANDLE_FAIL: 9502, // redis 데이터 메세지 핸들링 실패
+
   // Database
   DB_TRANSACTION_TEST_ERROR: 9997, // db game level lock
   DB_USER_LEVEL_LOCK_NOT_RELEASE: 9998, // db game level lock

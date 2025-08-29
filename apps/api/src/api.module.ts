@@ -27,6 +27,7 @@ import { RedisThrottlerStorage } from './auth/guard/redis-throttler-storage';
 import { DatabaseController } from './database/database.controller';
 import { DatabaseService } from './database/database.service';
 import { getGameServerTypeOrmOptions } from '@libs/dao/config/game/game-database-config.util';
+import { StaticModule } from '@libs/dao/static/static.module';
 
 @Module({
   imports: [
@@ -70,6 +71,7 @@ import { getGameServerTypeOrmOptions } from '@libs/dao/config/game/game-database
     AuthModule,
     CommonModule,
     UserModule,
+    StaticModule,
   ],
   controllers: [ApiController, UserController, DatabaseController],
   providers: [
