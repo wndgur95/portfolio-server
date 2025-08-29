@@ -32,8 +32,6 @@ import { INTERNAL_ERROR_CODE } from '@libs/common/constants/internal-error-code.
 import { GoogleOAuthProvider, FirebaseAdminProvider } from '@libs/common/http';
 import { UpdateRoleUserDto } from './dto/update-role-user.dto';
 import { UsersDbRepository } from '@libs/dao/common/users/repositories/users-db.repository';
-import { SqlInjectionsDbRepository } from '@libs/dao/common/sql-injections/repositories/sql-injections-db.repository';
-import { SqlInjectionsRepository } from '@libs/dao/common/sql-injections/interfaces/sql-injections-repository.interface';
 import { Session } from '@libs/dao/redis/session/session.entity';
 import {
   ENVIRONMENT,
@@ -42,6 +40,8 @@ import {
 import { SESSION_EXPIRED_TIME } from '@libs/common/constants/redis.constants';
 import { SessionRepository } from '@libs/dao/redis/session/session.repository';
 import { TimeUtil } from '@libs/common/utils/time.util';
+import { TestTablesDbRepository } from '@libs/dao/common/test-tables/repositories/test-tables-db.repository';
+import { TestTablesRepository } from '@libs/dao/common/test-tables/interfaces/test-tables-repository.interface';
 
 @Injectable()
 export class AuthService {
@@ -50,8 +50,8 @@ export class AuthService {
     @Inject(UsersRepository)
     private readonly usersRepository: UsersDbRepository,
 
-    @Inject(SqlInjectionsRepository)
-    private readonly sqlInjectionsRepository: SqlInjectionsDbRepository,
+    @Inject(TestTablesRepository)
+    private readonly testTablesRepository: TestTablesDbRepository,
 
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
@@ -220,7 +220,7 @@ export class AuthService {
   ): Promise<SqlInjectionResultDto> {
     try {
       // Repository를 통한 안전한 쿼리 실행
-      await this.sqlInjectionsRepository.findByContentsSafe(
+      await this.testTablesRepository.findByContentsSafe(
         sqlInjectionInDto.contents,
       );
 

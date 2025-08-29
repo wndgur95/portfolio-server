@@ -3,10 +3,13 @@ import { ExcludeBaseTimeDto } from '@libs/dao/base/time/dto/exclude-base-time.dt
 import { ApiProperty } from '@nestjs/swagger';
 
 @EntitySerializeImpl()
-export class SqlInjectionDto extends ExcludeBaseTimeDto<SqlInjectionDto> {
+export class TestTableDto extends ExcludeBaseTimeDto<TestTableDto> {
   @ApiProperty()
   id: number;
 
   @ApiProperty()
   contents: string;
+
+  @ApiProperty()
+  count: number;
 }

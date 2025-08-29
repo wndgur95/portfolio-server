@@ -8,7 +8,7 @@ export class TransactionInDto {
   @IsNotEmpty()
   role: UserRoles;
 
-  @ApiProperty({ description: 'game 디비의 userDetail 정보의 role 변경' })
+  @ApiProperty({ description: 'game 디비의 userDetail 정보의 골드 변경' })
   @IsNumber()
   @IsNotEmpty()
   gold: number;

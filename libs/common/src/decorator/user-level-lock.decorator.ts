@@ -16,7 +16,7 @@ export function UserLevelLock(): MethodDecorator {
     const overrideMethod = async function (
       ...originMethodArgs: unknown[]
     ): Promise<unknown> {
-      const { id } = ContextProvider.getJwt();
+      const userId = ContextProvider.getUserId();
 
       const database = ContextProvider.getGameDatabase();
 
@@ -36,7 +36,7 @@ export function UserLevelLock(): MethodDecorator {
         return await originMethod.apply(this, originMethodArgs);
       }
 
-      const lockName = EnvProvider.isProd() ? `${id}` : `${NODE_ENV}_${id}`;
+      const lockName = EnvProvider.isProd() ? `${userId}` : `${NODE_ENV}_${userId}`;
 
       // lock
       const [result] = await queryRunner.query(
