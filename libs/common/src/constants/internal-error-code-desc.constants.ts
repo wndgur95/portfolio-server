@@ -62,6 +62,9 @@ export const INTERNAL_ERROR_CODE_DESC = {
   // DATA
   [e.DATA_INVALID]: '유효하지 않은 STATIC 데이터',
 
+  // Redis
+  [e.REDIS_MESSAGE_HANDLE_FAIL]: 'redis 데이터 메세지 핸들링 실패',
+
   // Database
   [e.DB_TRANSACTION_TEST_ERROR]: 'transaction 확인을 위한 에러 에러포인트 : %P',
   [e.DB_USER_LEVEL_LOCK_NOT_RELEASE]: 'db game level lock 미 해제',
