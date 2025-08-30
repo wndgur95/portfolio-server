@@ -2,7 +2,7 @@ name: Portfolio Backend Deploy
 
 on:
   workflow_run:
-    workflows: ["Portfolio Backend Build"]
+    workflows: ["Build and Push Docker Image"]
     types:
       - completed
     branches: [ master ]
