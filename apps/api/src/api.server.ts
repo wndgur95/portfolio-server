@@ -1,10 +1,6 @@
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { INestApplication, Logger } from '@nestjs/common';
 import { SWAGGER_CUSTOM_OPTIONS } from '@libs/common/constants/swagger.constants';
-import {
-  ENVIRONMENT,
-  NODE_ENV,
-} from '@libs/common/constants/environment.constants';
 
 export class ApiServer {
   constructor(private readonly app: INestApplication) {}
