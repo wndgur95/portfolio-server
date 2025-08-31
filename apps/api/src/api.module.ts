@@ -18,7 +18,7 @@ import { PayloadInterceptor } from '@libs/common/interceptor/payload.interceptor
 import { UserLevelLockInterceptor } from '@libs/common/interceptor/user-level-lock.interceptor';
 import { TransactionInterceptor } from '@libs/common/interceptor/transaction.interceptor';
 import GameDatabaseConfig from '@libs/dao/config/game/game-database.config';
-import { UserModule } from '@libs/dao/game/user.module';
+import { GameModule } from '@libs/dao/game/game.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { RedisModule } from '@libs/dao/redis/redis.module';
@@ -70,10 +70,14 @@ import { StaticModule } from '@libs/dao/static/static.module';
 
     AuthModule,
     CommonModule,
-    UserModule,
+    GameModule,
     StaticModule,
   ],
-  controllers: [ApiController, UserController, DatabaseController],
+  controllers: [
+    ApiController,
+    UserController,
+    DatabaseController,
+  ],
   providers: [
     {
       provide: APP_PIPE,

@@ -7,12 +7,10 @@ import { TransactionInDto } from './dto/transaction-in.dto';
 import { UserLevelLock } from '@libs/common/decorator/user-level-lock.decorator';
 import { Auth } from '../auth/decorator/auth.decorator';
 import { UserLevelLockInDto } from './dto/user-level-lock-in.dto';
-import { UserDetail } from '@libs/dao/game/user-details/interfaces/user-detail.interface';
-import { UserDetailDto } from '@libs/dao/game/user-details/dto/user-detail.dto';
 import { RowLevelLockInDto } from './dto/row-level-lock-in.dto';
 
 @ApiTags('database')
-@Controller('database')
+@Controller('api/database')
 export class DatabaseController {
   constructor(private readonly databaseService: DatabaseService) {}
 

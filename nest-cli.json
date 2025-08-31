@@ -12,6 +12,15 @@
     "watchAssets": true
   },
   "projects": {
+    "app": {
+      "type": "application",
+      "root": "apps",
+      "entryFile": "main",
+      "sourceRoot": "apps/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/tsconfig.app.json"
+      }
+    },
     "admin": {
       "type": "application",
       "root": "apps/admin",

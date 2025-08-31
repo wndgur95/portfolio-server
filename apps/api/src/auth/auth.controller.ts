@@ -25,12 +25,12 @@ import { ContextProvider } from '@libs/common/provider/context.provider';
 import { Session } from '@libs/dao/redis/session/session.entity';
 
 @ApiTags('auth')
-@Controller('auth')
+@Controller('api/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   /**
-   * JTW 인증
+   * 로그인
    * */
   @Post('register')
   @ApiResponseEntity({
