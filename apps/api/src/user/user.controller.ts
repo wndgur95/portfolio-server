@@ -11,11 +11,11 @@ import { GetUserOutDto } from './dto/get-user-out.dto';
 import { Auth } from '../auth/decorator/auth.decorator';
 
 @ApiTags('user')
-@Controller('user')
+@Controller('api/user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get('')
+  @Post('get')
   @ApiResponseEntity({
     type: GetUserOutDto,
     summary: '유저 정보 가져오기',

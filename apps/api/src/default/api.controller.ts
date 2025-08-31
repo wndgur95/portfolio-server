@@ -9,7 +9,7 @@ import { readFileSync } from 'fs';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 
-@Controller()
+@Controller('api')
 export class ApiController {
   constructor(private readonly apiService: ApiService) {}
 
