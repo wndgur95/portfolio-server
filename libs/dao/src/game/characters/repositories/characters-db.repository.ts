@@ -16,4 +16,16 @@ export class CharactersDbRepository
       .where(`${this.alias}.userId = :userId`, { userId: userId })
       .getMany();
   }
+
+  async findByUserIdAndDataCharacterId(
+    userId: number,
+    dataCharacterId: number,
+  ): Promise<Character> {
+    return await this.queryBuilder
+      .where(`${this.alias}.userId = :userId`, { userId: userId })
+      .andWhere(`${this.alias}.dataCharacterId = :dataCharacterId`, {
+        dataCharacterId: dataCharacterId,
+      })
+      .getOne();
+  }
 }
