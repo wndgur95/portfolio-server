@@ -1,21 +1,24 @@
 import { Module } from '@nestjs/common';
 import { StaticRepository } from '@libs/dao/static/static.repository';
-import { DataCharacterRepository } from '@libs/dao/static/data-character/data-character.repository';
 import { DataVersionRepository } from '@libs/dao/static/data-version/data-version.repository';
 import { DataBalanceRepository } from '@libs/dao/static/data-balance/data-balance.repository';
+import { DataCharacterRepository } from '@libs/dao/static/data-character/data-character.repository';
+import { DataLocalization_korRepository } from '@libs/dao/static/data-localization_kor/data-localization_kor.repository';
 
 @Module({
   providers: [
     StaticRepository,
     DataVersionRepository,
-    DataCharacterRepository,
     DataBalanceRepository,
+    DataCharacterRepository,
+    DataLocalization_korRepository,
   ],
   exports: [
     StaticRepository,
     DataVersionRepository,
-    DataCharacterRepository,
     DataBalanceRepository,
+    DataCharacterRepository,
+    DataLocalization_korRepository,
   ],
 })
 export class StaticModule {}
