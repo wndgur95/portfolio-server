@@ -136,3 +136,4 @@ charts/*/charts/
 charts/*/requirements.lock
 
 data
+version
