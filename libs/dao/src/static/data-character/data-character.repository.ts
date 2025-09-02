@@ -37,14 +37,9 @@ export class DataCharacterRepository extends StaticBaseRepository<DataCharacter>
     );
 
     Object.freeze(this.items);
-    this.invalidateCache();
   }
 
   query(query: DataCharacterQuery): DataCharacter[] {
     return super.query(query);
-  }
-
-  invalidateCache(): void {
-    this.cache.clear();
   }
 }

@@ -8,6 +8,9 @@ export const INTERNAL_ERROR_CODE = {
 
   API_KEY_NOT_VALID: 10, // 유효하지않은 api key
 
+  CHARACTER_NOT_FOUND: 201, // 캐릭터 정보를 찾을 수 없음
+  CHARACTER_NOT_ENOUGH: 202, // 캐릭터가 충분하지 않다
+
   //USER : 1051 ~ 1060
   USER_CONFLICT_EMAIL: 1051,
   USER_NOT_SATISFY_PASSWORD_POLICY: 1052,

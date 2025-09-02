@@ -5,6 +5,11 @@ import { Character } from '@libs/dao/game/characters/interfaces/character.interf
 export interface CharactersRepository
   extends AbstractRepositoryInterface<CharacterEntity> {
   findByUserId(userId: number): Promise<Character[]>;
+
+  findByUserIdAndDataCharacterId(
+    userId: number,
+    dataCharacterId: number,
+  ): Promise<Character>;
 }
 
 export const CharactersRepository = Symbol('CharactersRepository');

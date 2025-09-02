@@ -11,6 +11,9 @@ export const INTERNAL_ERROR_CODE_DESC = {
 
   [e.API_KEY_NOT_VALID]: '유효하지 않은 api key',
 
+  [e.CHARACTER_NOT_FOUND]: '캐릭터 정보를 찾을 수 없습니다.',
+  [e.CHARACTER_NOT_ENOUGH]: '캐릭터가 부족합니다.',
+
   [e.USER_MISMATCHED_CURRENT_USER]: '본인이 아닙니다.',
   [e.USER_CONFLICT_EMAIL]: '이미 이메일이 존재합니다.',
   [e.USER_NOT_SATISFY_PASSWORD_POLICY]: '비밀번호가 정책에 맞지 않습니다.',
