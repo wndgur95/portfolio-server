@@ -1,10 +1,10 @@
 import { StaticBase } from '@libs/dao/static/static-base.entity';
 
 export class DataCharacterEnum extends StaticBase {
-  static CHARACTER_YELLOWMON = 100000;
-  static CHARACTER_JOA = 100007;
-  static CHARACTER_RU_I = 100008;
-  static CHARACTER_JOHNCOOPER = 100017;
-  static CHARACTER_NOAH = 100023;
-  static CHARACTER_BEAT = 100026;
+  static CHARACTER_GAGA = 100000;
+  static CHARACTER_AA = 100007;
+  static CHARACTER_JAJA = 100008;
+  static CHARACTER_MEOMEO = 101004;
+  static CHARACTER_KEOKEO = 101010;
+  static CHARACTER_HEOHEO = 101013;
 }

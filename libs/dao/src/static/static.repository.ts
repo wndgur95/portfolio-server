@@ -2,8 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { StaticBase } from '@libs/dao/static/static-base.entity';
 import { StaticBaseRepository } from '@libs/dao/static/static-base.repository';
 import { DataVersionRepository } from '@libs/dao/static/data-version/data-version.repository';
-import { DataCharacterRepository } from '@libs/dao/static/data-character/data-character.repository';
 import { DataBalanceRepository } from '@libs/dao/static/data-balance/data-balance.repository';
+import { DataCharacterRepository } from '@libs/dao/static/data-character/data-character.repository';
+import { DataLocalization_korRepository } from '@libs/dao/static/data-localization_kor/data-localization_kor.repository';
 
 @Injectable()
 export class StaticRepository {
@@ -11,11 +12,14 @@ export class StaticRepository {
 
   constructor(
     private readonly dataVersionRepository: DataVersionRepository,
-    private readonly dataCharacterRepository: DataCharacterRepository,
     private readonly dataBalanceRepository: DataBalanceRepository,
+    private readonly dataCharacterRepository: DataCharacterRepository,
+    private readonly dataLocalization_korRepository: DataLocalization_korRepository,
   ) {
-    this.items['DataCharacterRepository'] = this.dataCharacterRepository;
     this.items['DataBalanceRepository'] = this.dataBalanceRepository;
+    this.items['DataCharacterRepository'] = this.dataCharacterRepository;
+    this.items['DataLocalization_korRepository'] =
+      this.dataLocalization_korRepository;
   }
 
   reload(names: string[]): void {
