@@ -25,15 +25,13 @@ export const CHARACTER_TIER_TYPE = {
 export type CharacterTierType =
   (typeof CHARACTER_TIER_TYPE)[keyof typeof CHARACTER_TIER_TYPE];
 
-export const CHARACTER_CLASS_TYPE = {
+export const CHARACTER_WEAPON = {
   NONE: 0,
-  SLAUGHTER: 1,
-  JACKER: 2,
-  VANGUARD: 3,
-  REWINDER: 4,
+  SWORD: 1,
+  BREATH: 2,
 } as const;
-export type CharacterClassType =
-  (typeof CHARACTER_CLASS_TYPE)[keyof typeof CHARACTER_CLASS_TYPE];
+export type CharacterWeapon =
+  (typeof CHARACTER_WEAPON)[keyof typeof CHARACTER_WEAPON];
 
 export const PURCHASE_ORDER_STATE = {
   NONE: 0,
