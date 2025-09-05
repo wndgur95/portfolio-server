@@ -70,6 +70,13 @@ export class ContextProvider {
     ContextProvider.set('jwt', jwt);
   }
 
+  static getDbInfo(): { database: string; userId: number } {
+    return {
+      database: ContextProvider.getGameDatabase(),
+      userId: ContextProvider.getUserId(),
+    };
+  }
+
   static getUserId(): number {
     return ContextProvider.get('user-id');
   }

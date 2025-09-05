@@ -10,6 +10,11 @@ export interface CharactersRepository
     userId: number,
     dataCharacterId: number,
   ): Promise<Character>;
+
+  findByUserIdAndDataCharacterIdIn(
+    userId: number,
+    dataCharacterIds: number[],
+  ): Promise<Character[]>;
 }
 
 export const CharactersRepository = Symbol('CharactersRepository');

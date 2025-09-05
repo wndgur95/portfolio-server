@@ -28,6 +28,12 @@ import { DatabaseController } from './database/database.controller';
 import { DatabaseService } from './database/database.service';
 import { getGameServerTypeOrmOptions } from '@libs/dao/config/game/game-database-config.util';
 import { StaticModule } from '@libs/dao/static/static.module';
+import { ConsumptionProvider } from '@libs/common/provider/goods/consumption.provider';
+import { GoodsProvider } from '@libs/common/provider/goods/goods.provider';
+import { RewardProvider } from '@libs/common/provider/goods/reward.provider';
+import { UserDetailProvider } from '@libs/common/provider/contents/user-detail.provider';
+import { DataCharacterProvider } from '@libs/common/provider/static-data/data-character.provider';
+import { DataGoodsProvider } from '@libs/common/provider/static-data/data-goods.provider';
 
 @Module({
   imports: [
@@ -73,11 +79,7 @@ import { StaticModule } from '@libs/dao/static/static.module';
     GameModule,
     StaticModule,
   ],
-  controllers: [
-    ApiController,
-    UserController,
-    DatabaseController,
-  ],
+  controllers: [ApiController, UserController, DatabaseController],
   providers: [
     {
       provide: APP_PIPE,
@@ -100,6 +102,15 @@ import { StaticModule } from '@libs/dao/static/static.module';
     DatabaseService,
 
     ValidateProvider,
+
+    ConsumptionProvider,
+    GoodsProvider,
+    RewardProvider,
+
+    UserDetailProvider,
+
+    DataCharacterProvider,
+    DataGoodsProvider,
   ],
 })
 export class ApiModule {}

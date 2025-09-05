@@ -11,8 +11,17 @@ export const INTERNAL_ERROR_CODE_DESC = {
 
   [e.API_KEY_NOT_VALID]: '유효하지 않은 api key',
 
+  // USER DETAIL
+  [e.USER_DETAIL_NOT_FOUND]: '유저 상세 정보를 찾을 수 없음',
+  [e.USER_DETAIL_UNKNOWN_CURRENCY_TYPE]: '확인 되지 않은 통화',
+  [e.USER_DETAIL_CURRENCY_GOLD_NOT_ENOUGH]: '골드 부족',
+  [e.USER_DETAIL_CURRENCY_CASH_NOT_ENOUGH]: '캐시 부족',
+
   [e.CHARACTER_NOT_FOUND]: '캐릭터 정보를 찾을 수 없습니다.',
   [e.CHARACTER_NOT_ENOUGH]: '캐릭터가 부족합니다.',
+  [e.CHARACTER_LEVEL_NOT_MATCH]: '캐릭터 레벨이 다릅니다.',
+
+  [e.BATTLE_NOT_VALID]: '전투가 유효하지 않습니다.',
 
   [e.USER_MISMATCHED_CURRENT_USER]: '본인이 아닙니다.',
   [e.USER_CONFLICT_EMAIL]: '이미 이메일이 존재합니다.',
@@ -63,7 +72,8 @@ export const INTERNAL_ERROR_CODE_DESC = {
   [e.KNOW_HOW_COMMENT_NOT_MINE]: '해당 댓글은 내 댓글이 아닙니다.',
 
   // DATA
-  [e.DATA_INVALID]: '유효하지 않은 STATIC 데이터',
+  [e.DATA_INVALID]: '유효하지 않은 STATIC 데이터 : %P',
+  [e.DATA_NOT_OBJECT]: 'object 형식이 아닙니다.',
 
   // Redis
   [e.REDIS_MESSAGE_HANDLE_FAIL]: 'redis 데이터 메세지 핸들링 실패',
