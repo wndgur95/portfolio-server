@@ -28,4 +28,16 @@ export class CharactersDbRepository
       })
       .getOne();
   }
+
+  async findByUserIdAndDataCharacterIdIn(
+    userId: number,
+    dataCharacterIds: number[],
+  ): Promise<Character[]> {
+    return await this.queryBuilder
+      .where(`${this.alias}.userId=:userId`, { userId: userId })
+      .andWhere(`${this.alias}.dataCharacterId In(:dataCharacterIds)`, {
+        dataCharacterIds: dataCharacterIds,
+      })
+      .getMany();
+  }
 }

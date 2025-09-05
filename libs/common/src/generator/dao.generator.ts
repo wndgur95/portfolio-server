@@ -15,6 +15,8 @@ let pluralCamelName: string;
 let pluralDirName: string;
 let pluralClassName: string;
 
+const ShardDbName = ['game']
+
 let tablePath: string;
 export async function daoGenerator(): Promise<void> {
   const words = lodash.snakeCase(entityName).split('_');
@@ -118,7 +120,7 @@ function makeRepository(): void {
   data += `import { AbstractRepository } from '@libs/common/databases/typeorm/abstract.repository';\n`;
   data += `import { ${singleClassName}Entity } from '@libs/dao/${database}/${pluralDirName}/entities/${singleDirName}.entity';\n`;
   data += `import { ${pluralClassName}Repository } from '@libs/dao/${database}/${pluralDirName}/interfaces/${pluralDirName}-repository.interface';\n\n`;
-  if (['group', 'user'].includes(database))
+  if (ShardDbName.includes(database))
     data += `export type ${pluralClassName}DbRepositories = Record<string, ${pluralClassName}Repository>;\n\n`;
   data += `@EntityRepository(${singleClassName}Entity)\n`;
   data += `export class ${pluralClassName}DbRepository\n`;
@@ -136,7 +138,7 @@ function makeModule(): void {
   data += `import { TypeOrmExModule } from '@libs/common/databases/typeorm/typeorm-ex.module';\n`;
   data += `import { ${pluralClassName}Repository } from '@libs/dao/${database}/${pluralDirName}/interfaces/${pluralDirName}-repository.interface';\n`;
   data += `import { ${pluralClassName}DbRepository } from '@libs/dao/${database}/${pluralDirName}/repositories/${pluralDirName}-db.repository';\n`;
-  if (['group', 'user'].includes(database)) {
+  if (ShardDbName.includes(database)) {
     data += `import { get${firstLetterDatabase}ShardDatabases } from '@libs/dao/config/${database}/${database}-database-config.util';\n`;
   } else {
     data += `import ${firstLetterDatabase}DatabaseConfig from '@libs/dao/config/${database}/${database}-database.config';\n`;
@@ -148,7 +150,7 @@ function makeModule(): void {
   data += `  imports: [\n`;
   data += `    TypeOrmExModule.forFeatures(\n`;
   data += `      [${pluralClassName}DbRepository],\n`;
-  if (['group', 'user'].includes(database)) {
+  if (ShardDbName.includes(database)) {
     data += `      get${firstLetterDatabase}ShardDatabases,\n`;
   } else {
     data += `      [${firstLetterDatabase}DatabaseConfig().name],\n`;
@@ -165,7 +167,7 @@ function makeModule(): void {
   data += `  exports: [${pluralClassName}Repository],\n`;
   data += `})\n`;
   data += `export class ${pluralClassName}Module {\n`;
-  if (['group', 'user'].includes(database)) {
+  if (ShardDbName.includes(database)) {
     data += `  constructor(\n`;
     data += `    @InjectDataSource(...get${firstLetterDatabase}ShardDatabases)\n`;
     data += `    private readonly dataSources: DataSource[],\n`;

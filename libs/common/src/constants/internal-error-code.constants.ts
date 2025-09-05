@@ -8,8 +8,17 @@ export const INTERNAL_ERROR_CODE = {
 
   API_KEY_NOT_VALID: 10, // 유효하지않은 api key
 
+  // USER DETAIL : 51 ~ 100
+  USER_DETAIL_NOT_FOUND: 51, // 유저 상세 정보를 찾을 수 없음
+  USER_DETAIL_UNKNOWN_CURRENCY_TYPE: 52, // 확인 되지 않은 통화
+  USER_DETAIL_CURRENCY_GOLD_NOT_ENOUGH: 53, // 골드 부족
+  USER_DETAIL_CURRENCY_CASH_NOT_ENOUGH: 54, // 캐시 부족
+
   CHARACTER_NOT_FOUND: 201, // 캐릭터 정보를 찾을 수 없음
   CHARACTER_NOT_ENOUGH: 202, // 캐릭터가 충분하지 않다
+  CHARACTER_LEVEL_NOT_MATCH: 203, // 캐릭터가 레벨이 다릅니다.
+
+  BATTLE_NOT_VALID: 211, // 전투가 유효하지 않습니다.
 
   //USER : 1051 ~ 1060
   USER_CONFLICT_EMAIL: 1051,
@@ -67,6 +76,7 @@ export const INTERNAL_ERROR_CODE = {
 
   // DATA : 8000 ~ 8050
   DATA_INVALID: 8000,
+  DATA_NOT_OBJECT: 8001,
 
   // Redis
   REDIS_MESSAGE_HANDLE_FAIL: 9502, // redis 데이터 메세지 핸들링 실패

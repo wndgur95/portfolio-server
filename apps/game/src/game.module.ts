@@ -23,7 +23,15 @@ import { CharacterController } from './character/character.controller';
 import { CharacterService } from './character/character.service';
 import { UserController } from './user/user.controller';
 import { UserService } from './user/user.service';
-
+import { UserDetailProvider } from '@libs/common/provider/contents/user-detail.provider';
+import { ConsumptionProvider } from '@libs/common/provider/goods/consumption.provider';
+import { GoodsProvider } from '@libs/common/provider/goods/goods.provider';
+import { RewardProvider } from '@libs/common/provider/goods/reward.provider';
+import { DataCharacterProvider } from '@libs/common/provider/static-data/data-character.provider';
+import { DataGoodsProvider } from '@libs/common/provider/static-data/data-goods.provider';
+import { BattleController } from './battle/battle.controller';
+import { BattleService } from './battle/battle.service';
+import { BattleProvider } from '@libs/common/provider/contents/battle.provider';
 
 @Module({
   imports: [
@@ -59,7 +67,7 @@ import { UserService } from './user/user.service';
     GameDbModule,
     StaticModule,
   ],
-  controllers: [UserController, CharacterController],
+  controllers: [UserController, CharacterController, BattleController],
   providers: [
     {
       provide: APP_PIPE,
@@ -77,8 +85,24 @@ import { UserService } from './user/user.service';
     { provide: APP_INTERCEPTOR, useClass: TransactionInterceptor },
     { provide: APP_INTERCEPTOR, useClass: PayloadInterceptor },
 
+    //----Service
     UserService,
     CharacterService,
+    BattleService,
+    //Service----
+
+    //----Provider
+    ConsumptionProvider,
+    GoodsProvider,
+    RewardProvider,
+    UserDetailProvider,
+    BattleProvider,
+    //Provider----
+
+    //----DataProvider
+    DataCharacterProvider,
+    DataGoodsProvider,
+    //DataProvider----
   ],
 })
 export class GameModule {}
