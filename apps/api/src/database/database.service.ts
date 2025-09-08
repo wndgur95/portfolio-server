@@ -19,6 +19,12 @@ import { TestTablesDbRepository } from '@libs/dao/common/test-tables/repositorie
 import { TestTablesRepository } from '@libs/dao/common/test-tables/interfaces/test-tables-repository.interface';
 import { TestTableEntity } from '@libs/dao/common/test-tables/entities/test-table.entity';
 import { TestTable } from '@libs/dao/common/test-tables/interfaces/test-table.interface';
+import { JwtService } from '@nestjs/jwt';
+import { GoodsProvider } from '@libs/common/provider/goods/goods.provider';
+import { Reward } from '@libs/common/interface/goods.interface';
+import { GOODS_TYPE } from '@libs/dao/static/common.constants';
+import { DataCurrency } from '@libs/dao/static/data-currency/data-currency.entity';
+import { GoodsOutDto } from '@libs/common/dto/goods-out.dto';
 
 @Injectable()
 export class DatabaseService {
@@ -31,6 +37,7 @@ export class DatabaseService {
 
     @Inject(TestTablesRepository)
     private readonly testTablesRepository: TestTablesDbRepository,
+    private readonly goodsProvider: GoodsProvider,
   ) {}
 
   @Transactional(DB_NAME.COMMON)
@@ -48,7 +55,15 @@ export class DatabaseService {
       );
     }
 
-    await this.userDetailsRepositories[database].updateGold(userId, gold);
+    await this.goodsProvider.payImmediately([
+      {
+        goodsType: GOODS_TYPE.CURRENCY,
+        dataId: DataCurrency.CURRENCY_GOLD,
+        quantity: gold,
+      } as Reward
+    ]);
+
+    // await this.userDetailsRepositories[database].updateGold(userId, gold);
 
     if (errorPoint == 2) {
       throw new ServerErrorException(
@@ -69,16 +84,14 @@ export class DatabaseService {
   }
 
   @Transactional()
-  async testUserLevelLock(addGold: number): Promise<UserDetail> {
-    const session = ContextProvider.getSession();
-    const { database, userId } = session;
-
-    const userDetail =
-      await this.userDetailsRepositories[database].findByUserId(userId);
-
-    userDetail.gold += addGold;
-
-    return await this.userDetailsRepositories[database].save(userDetail);
+  async testUserLevelLock(addGold: number): Promise<GoodsOutDto> {
+    return await this.goodsProvider.payImmediately([
+      {
+        goodsType: GOODS_TYPE.CURRENCY,
+        dataId: DataCurrency.CURRENCY_GOLD,
+        quantity: addGold,
+      } as Reward
+    ]);
   }
 
   @TransactionalEx(DB_NAME.COMMON)

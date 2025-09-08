@@ -34,6 +34,10 @@ import { RewardProvider } from '@libs/common/provider/goods/reward.provider';
 import { UserDetailProvider } from '@libs/common/provider/contents/user-detail.provider';
 import { DataCharacterProvider } from '@libs/common/provider/static-data/data-character.provider';
 import { DataGoodsProvider } from '@libs/common/provider/static-data/data-goods.provider';
+import { AchievementProvider } from '@libs/common/provider/achievement/achievement.provider';
+import { MissionAchievementProvider } from '@libs/common/provider/achievement/mission-achievement.provider';
+import { MissionProvider } from '@libs/common/provider/contents/mission.provider';
+import { DataMissionProvider } from '@libs/common/provider/static-data/data-mission.provider';
 
 @Module({
   imports: [
@@ -111,6 +115,11 @@ import { DataGoodsProvider } from '@libs/common/provider/static-data/data-goods.
 
     DataCharacterProvider,
     DataGoodsProvider,
+
+    AchievementProvider,
+    MissionAchievementProvider,
+    MissionProvider,
+    DataMissionProvider,
   ],
 })
 export class ApiModule {}

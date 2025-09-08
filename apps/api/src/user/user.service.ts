@@ -17,6 +17,21 @@ import { ContextProvider } from '@libs/common/provider/context.provider';
 import { UsersDbRepository } from '@libs/dao/common/users/repositories/users-db.repository';
 import { GetUserOutDto } from './dto/get-user-out.dto';
 import { randomUUID } from 'crypto';
+import { GoodsProvider } from '@libs/common/provider/goods/goods.provider';
+import { Reward } from '@libs/common/interface/goods.interface';
+import {
+  GOODS_TYPE,
+  MISSION_TYPE,
+  MissionType,
+} from '@libs/dao/static/common.constants';
+import { DataBalanceRepository } from '@libs/dao/static/data-balance/data-balance.repository';
+import { DataBalance } from '@libs/dao/static/data-balance/data-balance.entity';
+import { TimeUtil } from '@libs/common/utils/time.util';
+import { MissionsDbRepositories } from '@libs/dao/game/missions/repositories/missions-db.repository';
+import { MissionsRepository } from '@libs/dao/game/missions/interfaces/missions-repository.interface';
+import { DataMissionRepository } from '@libs/dao/static/data-mission/data-mission.repository';
+import { UserDetailProvider } from '@libs/common/provider/contents/user-detail.provider';
+import { InitAt } from '@libs/dao/game/user-details/type/init-at';
 
 @Injectable()
 export class UserService {
@@ -25,20 +40,28 @@ export class UserService {
     private readonly usersRepository: UsersDbRepository,
     @Inject(UserDetailsRepository)
     private readonly userDetailsRepositories: UserDetailsDbRepositories,
-  ) {}
-  async getUser(): Promise<GetUserOutDto> {
-    const session = ContextProvider.getSession();
+    @Inject(MissionsRepository)
+    private readonly missionsRepositories: MissionsDbRepositories,
 
-    const { userId, database } = session;
+    private readonly goodsProvider: GoodsProvider,
+    private readonly dataBalanceRepository: DataBalanceRepository,
+    private readonly dataMissionRepository: DataMissionRepository,
+    private readonly userDetailProvider: UserDetailProvider,
+  ) {}
+
+  async getUser(): Promise<GetUserOutDto> {
+    const { userId, database } = ContextProvider.getSession();
 
     const user = await this.usersRepository.findById(userId);
+
     const userDetail =
       await this.userDetailsRepositories[database].findByUserId(userId);
+
+    await this._initializeUser(userDetail);
 
     return GetUserOutDto.of({
       user,
       userDetail,
-      session,
     });
   }
 
@@ -122,9 +145,16 @@ export class UserService {
   async createUserDetail(user: User): Promise<UserDetail> {
     const database = ContextProvider.getGameDatabase();
 
-    return await this.userDetailsRepositories[database].save(
-      UserDetailEntity.create({ userId: user.id }),
+    const userDetail = await this.userDetailsRepositories[database].save(
+      UserDetailEntity.create({
+        userId: user.id,
+        initAt: InitAt.create(ContextProvider.getNow()),
+      }),
     );
+
+    await this._createInitCharacter();
+
+    return userDetail;
   }
 
   private async _isDuplicated(email: string): Promise<void> {
@@ -154,5 +184,65 @@ export class UserService {
         INTERNAL_ERROR_CODE.USER_NOT_SATISFY_PASSWORD_POLICY,
       );
     }
+  }
+
+  private async _createInitCharacter(): Promise<void> {
+    const characterIds = this.dataBalanceRepository.findById(
+      DataBalance.BALANCE_INIT_CHARACTER,
+    ).INDEX;
+
+    const rewards = characterIds.map((it) => {
+      return {
+        goodsType: GOODS_TYPE.CHARACTER,
+        dataId: it,
+        quantity: 1,
+      } as Reward;
+    });
+
+    await this.goodsProvider.payImmediately(rewards);
+  }
+
+  private async _initializeUser(userDetail: UserDetail): Promise<UserDetail> {
+    const now = ContextProvider.getNow();
+
+    // daily
+    if (TimeUtil.isChangeDay(userDetail.initAt.daily, now)) {
+      userDetail.initAt.daily = now;
+
+      await this._initializeMission(MISSION_TYPE.DAILY);
+    }
+
+    await this.userDetailProvider.updateUserDetail(userDetail);
+
+    return userDetail;
+  }
+
+  private async _initializeMission(missionType: MissionType): Promise<void> {
+    if (missionType !== MISSION_TYPE.DAILY) {
+      throw new ServerErrorException(
+        INTERNAL_ERROR_CODE.MISSION_CAN_NOT_INIT_TYPE,
+      );
+    }
+
+    const { userId, database } = ContextProvider.getSession();
+
+    const missionRepository = this.missionsRepositories[database];
+    const missions = await missionRepository.findByUserId(userId);
+
+    if (missions.isEmpty()) {
+      return;
+    }
+
+    // update
+    const dataMissionIds = this.dataMissionRepository
+      .findByIdIn(missions.map((it) => it.dataMissionId))
+      .filter((it) => it.MISSION_TYPE === missionType)
+      .map((it) => it.ID);
+
+    const missionIds = missions
+      .filter((it) => dataMissionIds.includes(it.dataMissionId))
+      .map((it) => it.id);
+
+    await missionRepository.updateCountAndRewardAtByIdIn(missionIds);
   }
 }

@@ -32,6 +32,12 @@ import { DataGoodsProvider } from '@libs/common/provider/static-data/data-goods.
 import { BattleController } from './battle/battle.controller';
 import { BattleService } from './battle/battle.service';
 import { BattleProvider } from '@libs/common/provider/contents/battle.provider';
+import { MissionController } from './mission/mission.controller';
+import { MissionService } from './mission/mission.service';
+import { DataMissionProvider } from '@libs/common/provider/static-data/data-mission.provider';
+import { MissionProvider } from '@libs/common/provider/contents/mission.provider';
+import { AchievementProvider } from '@libs/common/provider/achievement/achievement.provider';
+import { MissionAchievementProvider } from '@libs/common/provider/achievement/mission-achievement.provider';
 
 @Module({
   imports: [
@@ -67,7 +73,12 @@ import { BattleProvider } from '@libs/common/provider/contents/battle.provider';
     GameDbModule,
     StaticModule,
   ],
-  controllers: [UserController, CharacterController, BattleController],
+  controllers: [
+    UserController,
+    CharacterController,
+    BattleController,
+    MissionController,
+  ],
   providers: [
     {
       provide: APP_PIPE,
@@ -89,6 +100,7 @@ import { BattleProvider } from '@libs/common/provider/contents/battle.provider';
     UserService,
     CharacterService,
     BattleService,
+    MissionService,
     //Service----
 
     //----Provider
@@ -97,11 +109,16 @@ import { BattleProvider } from '@libs/common/provider/contents/battle.provider';
     RewardProvider,
     UserDetailProvider,
     BattleProvider,
+    MissionProvider,
+
+    AchievementProvider,
+    MissionAchievementProvider,
     //Provider----
 
     //----DataProvider
     DataCharacterProvider,
     DataGoodsProvider,
+    DataMissionProvider,
     //DataProvider----
   ],
 })

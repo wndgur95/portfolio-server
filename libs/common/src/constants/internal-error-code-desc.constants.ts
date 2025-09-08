@@ -23,6 +23,16 @@ export const INTERNAL_ERROR_CODE_DESC = {
 
   [e.BATTLE_NOT_VALID]: '전투가 유효하지 않습니다.',
 
+  // MISSION
+  [e.MISSION_NOT_FOUND]: '미션 정보 찾을 수 없음',
+  [e.MISSION_NOT_CLEARED]: '미션 완료 안 됨',
+  [e.MISSION_ALREADY_RECEIVE_REWARD]: '미션 이미 보상 수령',
+  [e.MISSION_UNKNOWN_TYPE]: '확인 되지 않은 미션 타입',
+  [e.MISSION_CAN_NOT_INIT_TYPE]: '초기화 할 수 없는 타입',
+  [e.MISSION_ALREADY_RECEIVE_POINT_REWARD]: '별포인트 보상 이미 수령',
+  [e.MISSION_NOT_ENOUGH_POINT]: '별포인트 부족',
+  [e.MISSION_PREV_REWARD_NOT_RECEIVED]: '이전 미션의 보상을 받지 않음',
+
   [e.USER_MISMATCHED_CURRENT_USER]: '본인이 아닙니다.',
   [e.USER_CONFLICT_EMAIL]: '이미 이메일이 존재합니다.',
   [e.USER_NOT_SATISFY_PASSWORD_POLICY]: '비밀번호가 정책에 맞지 않습니다.',
