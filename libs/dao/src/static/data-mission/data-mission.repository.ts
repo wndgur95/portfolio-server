@@ -39,7 +39,7 @@ export class DataMissionRepository extends StaticBaseRepository<DataMission> {
     Object.freeze(this.items);
   }
 
-  query(query: DataMissionQuery): DataMission[] {
-    return super.query(query);
+  query(query: DataMissionQuery, func?: (data: any) => void): DataMission[] {
+    return super.query(query, func);
   }
 }

@@ -39,7 +39,7 @@ export class DataRewardRepository extends StaticBaseRepository<DataReward> {
     Object.freeze(this.items);
   }
 
-  query(query: DataRewardQuery): DataReward[] {
-    return super.query(query);
+  query(query: DataRewardQuery, func?: (data: any) => void): DataReward[] {
+    return super.query(query, func);
   }
 }

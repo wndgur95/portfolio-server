@@ -39,7 +39,7 @@ export class DataCostRepository extends StaticBaseRepository<DataCost> {
     Object.freeze(this.items);
   }
 
-  query(query: DataCostQuery): DataCost[] {
-    return super.query(query);
+  query(query: DataCostQuery, func?: (data: any) => void): DataCost[] {
+    return super.query(query, func);
   }
 }
