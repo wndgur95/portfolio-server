@@ -37,11 +37,11 @@ export class DatabaseController {
   async testUserLevelLock(
     @Body() userLevelLockInDto: UserLevelLockInDto,
   ): Promise<ResponseEntity<number>> {
-    const userDetail = await this.databaseService.testUserLevelLock(
+    const goodsOutDto = await this.databaseService.testUserLevelLock(
       userLevelLockInDto.addGold,
     );
 
-    return ResponseEntity.ok().body(userDetail.gold);
+    return ResponseEntity.ok().body(goodsOutDto.currency.gold);
   }
 
   @Post('user-level-unlock')
@@ -52,11 +52,11 @@ export class DatabaseController {
   async testUserLevelUnlock(
     @Body() userLevelLockInDto: UserLevelLockInDto,
   ): Promise<ResponseEntity<number>> {
-    const userDetail = await this.databaseService.testUserLevelLock(
+    const goodsOutDto = await this.databaseService.testUserLevelLock(
       userLevelLockInDto.addGold,
     );
 
-    return ResponseEntity.ok().body(userDetail.gold);
+    return ResponseEntity.ok().body(goodsOutDto.currency.gold);
   }
 
   @Post('row-level-lock')

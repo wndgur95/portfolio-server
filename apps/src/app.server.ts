@@ -3,6 +3,7 @@ import { INestApplication, Logger } from '@nestjs/common';
 import { SWAGGER_CUSTOM_OPTIONS } from '@libs/common/constants/swagger.constants';
 import { ApiModule } from '../api/src/api.module';
 import { GameModule } from '../game/src/game.module';
+import { ApiElementModule, GameElementModule } from './app.module';
 
 export class AppServer {
   constructor(private readonly app: INestApplication) {}
@@ -77,7 +78,7 @@ export class AppServer {
       .build();
 
     const document = SwaggerModule.createDocument(this.app, config, {
-      include: [ApiModule],
+      include: [ApiElementModule],
       deepScanRoutes: true,
     });
 
@@ -137,7 +138,7 @@ export class AppServer {
       .build();
 
     const document = SwaggerModule.createDocument(this.app, config, {
-      include: [GameModule],
+      include: [GameElementModule],
       deepScanRoutes: true,
     });
 

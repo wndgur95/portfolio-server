@@ -20,8 +20,8 @@ export class CharacterController {
     isArray: true,
     summary: '캐릭터 정보',
   })
-  async getCharacter(): Promise<ResponseEntity<CharacterDto[]>> {
-    const characterDto = await this.characterService.getCharacter();
+  async getCharacters(): Promise<ResponseEntity<CharacterDto[]>> {
+    const characterDto = await this.characterService.getCharacters();
 
     return ResponseEntity.ok().body(characterDto);
   }

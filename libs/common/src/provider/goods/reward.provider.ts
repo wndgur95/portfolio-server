@@ -93,7 +93,7 @@ export class RewardProvider {
     );
 
     const goodsOutDto = GoodsOutDto.of({
-      currency: userDetailDto.currency,
+      currency: userDetailDto?.currency,
       characters: results.filter(
         (it) => it instanceof CharacterDto,
       ) as CharacterDto[],

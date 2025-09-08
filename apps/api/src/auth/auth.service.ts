@@ -269,6 +269,7 @@ export class AuthService {
 
       const database = getDatabaseByGameDbId(gameDbId);
       ContextProvider.setGameDatabase(database);
+      ContextProvider.setUserId(user.id);
 
       await this.userService.createUserDetail(user);
     }

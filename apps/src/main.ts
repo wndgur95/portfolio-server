@@ -6,9 +6,9 @@ import { AppServer } from './app.server';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
-  const adminServer = new AppServer(app);
-  adminServer.init();
-  await adminServer.run();
+  const appServer = new AppServer(app);
+  appServer.init();
+  await appServer.run();
 }
 
 void bootstrap()

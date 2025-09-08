@@ -22,7 +22,7 @@ export class CharacterService {
   /**
    * 캐릭터 정보 받기
    */
-  async getCharacter(): Promise<CharacterDto[]> {
+  async getCharacters(): Promise<CharacterDto[]> {
     const { database, userId } = ContextProvider.getSession();
 
     const characters =

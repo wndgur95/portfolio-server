@@ -16,7 +16,7 @@ import { BattleFinishOutDto } from './dto/battle-finish-out.dto';
 export class BattleController {
   constructor(private readonly battleService: BattleService) {}
 
-  @Post('enter')
+  @Post('solo/enter')
   @ApiResponseEntity({
     type: BattleEnterOutDto,
     summary: '전투 입장',
@@ -31,7 +31,7 @@ export class BattleController {
     return ResponseEntity.ok().body(battleEnterOutDto);
   }
 
-  @Post('finish')
+  @Post('solo/finish')
   @ApiResponseEntity({
     type: BattleFinishOutDto,
     summary: '전투 종료',
