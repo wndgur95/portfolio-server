@@ -77,15 +77,15 @@ export const MISSION_STEP_TYPE = {
 export type MissionStepType =
   (typeof MISSION_STEP_TYPE)[keyof typeof MISSION_STEP_TYPE];
 
-export const CONDITION_COUNT_TYPE = {
+export const MISSION_CONDITION_TYPE = {
   NONE: 0,
   BATTLE: 1,
   KILL_ENEMY: 2,
   GACHA: 3,
   CHARACTER_LEVEL_UP: 4,
 } as const;
-export type ConditionCountType =
-  (typeof CONDITION_COUNT_TYPE)[keyof typeof CONDITION_COUNT_TYPE];
+export type MissionConditionType =
+  (typeof MISSION_CONDITION_TYPE)[keyof typeof MISSION_CONDITION_TYPE];
 
 export const RECEIVE_TYPE = {
   NONE: 0,
