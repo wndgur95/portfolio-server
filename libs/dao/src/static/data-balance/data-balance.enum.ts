@@ -4,4 +4,5 @@ export class DataBalanceEnum extends StaticBase {
   static BALANCE_CHARACTER_LEVEL_UP = 1000000;
   static BALANCE_BATTLE_TIME_REWARD = 1000001;
   static BALANCE_BATTLE_KILL_REWARD = 1000002;
+  static BALANCE_INIT_CHARACTER = 1000003;
 }
