@@ -39,7 +39,7 @@ export class DataBalanceRepository extends StaticBaseRepository<DataBalance> {
     Object.freeze(this.items);
   }
 
-  query(query: DataBalanceQuery): DataBalance[] {
-    return super.query(query);
+  query(query: DataBalanceQuery, func?: (data: any) => void): DataBalance[] {
+    return super.query(query, func);
   }
 }

@@ -39,7 +39,7 @@ export class DataCurrencyRepository extends StaticBaseRepository<DataCurrency> {
     Object.freeze(this.items);
   }
 
-  query(query: DataCurrencyQuery): DataCurrency[] {
-    return super.query(query);
+  query(query: DataCurrencyQuery, func?: (data: any) => void): DataCurrency[] {
+    return super.query(query, func);
   }
 }

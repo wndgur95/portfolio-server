@@ -39,7 +39,10 @@ export class DataLocalization_korRepository extends StaticBaseRepository<DataLoc
     Object.freeze(this.items);
   }
 
-  query(query: DataLocalization_korQuery): DataLocalization_kor[] {
-    return super.query(query);
+  query(
+    query: DataLocalization_korQuery,
+    func?: (data: any) => void,
+  ): DataLocalization_kor[] {
+    return super.query(query, func);
   }
 }

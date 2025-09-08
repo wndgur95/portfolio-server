@@ -29,7 +29,7 @@ export abstract class StaticBaseRepository<T> {
     return ids.map((id) => this.items[id]).filter((it) => !!it);
   }
 
-  query(queryInterface: QueryInterface<T>): T[] {
+  query(queryInterface: QueryInterface<T>, func?: (data: T) => void): T[] {
     const queryKey = JSON.stringify(queryInterface);
     const cached = this.cache.get(queryKey);
     if (cached) {
@@ -66,7 +66,7 @@ export abstract class StaticBaseRepository<T> {
           return false;
         }
       }
-      return true;
+      return func ? func(data) : true;
     });
 
     Object.freeze(result);

@@ -39,7 +39,10 @@ export class DataCharacterRepository extends StaticBaseRepository<DataCharacter>
     Object.freeze(this.items);
   }
 
-  query(query: DataCharacterQuery): DataCharacter[] {
-    return super.query(query);
+  query(
+    query: DataCharacterQuery,
+    func?: (data: any) => void,
+  ): DataCharacter[] {
+    return super.query(query, func);
   }
 }
