@@ -60,12 +60,11 @@ export class MissionProvider {
   /**
    * 미션 업데이트 및 생성
    */
-  async upsertMission(updateMissions: Mission[]): Promise<InsertResult> {
+  async saveMission(updateMissions: Mission[]): Promise<void> {
     const { database } = ContextProvider.getDbInfo();
 
-    return await this.missionRepositories[database].upsert(updateMissions, {
-      conflictPaths: ['id'],
-      skipUpdateIfNoValuesChanged: true,
+    await this.missionRepositories[database].save(updateMissions, {
+      reload: false,
     });
   }
 }

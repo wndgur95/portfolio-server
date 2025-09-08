@@ -72,6 +72,7 @@ export class MissionService {
     const dataRewardIds = dataMissionIds.map((dataMissionId) => {
       const dataMission =
         this._checkMissionPropsAndGetDataMission(dataMissionId);
+
       if (
         dataMission.MISSION_STEP_TYPE === MISSION_STEP_TYPE.CUMULATE &&
         !dataMission.IS_ROOT
@@ -99,7 +100,7 @@ export class MissionService {
     const goodsOutDto = await this.goodsProvider.pay(dataRewardIds);
 
     // 미션 업데이트
-    await this.missionProvider.upsertMission(missions);
+    await this.missionProvider.saveMission(missions);
 
     return ReceiveRewardOutDto.of({
       mission: MissionDto.fromEntities(missions),

@@ -99,10 +99,7 @@ export class MissionAchievementProvider
       return;
     }
 
-    await missionRepository.upsert(updateMissions, {
-      conflictPaths: ['id'],
-      skipUpdateIfNoValuesChanged: true,
-    });
+    await missionRepository.save(updateMissions, { reload: false });
 
     return updateMissions;
   }
