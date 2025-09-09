@@ -14,5 +14,8 @@ export class BattleDto extends ExcludeBaseTimeDto<BattleDto> {
   dataCharacterId: number;
 
   @ApiProperty()
+  level: number;
+
+  @ApiProperty()
   battleUid: string;
 }

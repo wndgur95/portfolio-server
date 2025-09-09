@@ -14,7 +14,7 @@ export class BattleProvider {
     private readonly dataGoodsProvider: DataGoodsProvider,
   ) {}
 
-  getBattleResultReward(time: number, kill: number): Reward[] {
+  getBattleResultReward(time: number, kill: number): [Reward[], number] {
     const timeRewardId = this.dataBalanceRepository.findById(
       BATTLE_REWARD_TIME_BALANCE,
     ).INDEX[0];
@@ -23,7 +23,7 @@ export class BattleProvider {
       BATTLE_REWARD_KILL_BALANCE,
     ).INDEX[0];
 
-    return [
+    const rewards = [
       ...this.dataGoodsProvider.getRewardsByDataRewardId(timeRewardId, {
         addValue: time,
       }),
@@ -31,5 +31,7 @@ export class BattleProvider {
         addValue: kill,
       }),
     ];
+
+    return [rewards, rewards.map((it) => it.quantity).sum()];
   }
 }

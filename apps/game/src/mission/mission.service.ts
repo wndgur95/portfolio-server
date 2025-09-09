@@ -17,8 +17,6 @@ import {
   MISSION_CONDITION_TYPE,
   MISSION_STEP_TYPE,
   MISSION_TYPE,
-  MissionConditionType,
-  MissionType,
 } from '@libs/dao/static/common.constants';
 import { GoodsProvider } from '@libs/common/provider/goods/goods.provider';
 import { AchievementProvider } from '@libs/common/provider/achievement/achievement.provider';

@@ -38,6 +38,11 @@ import { DataMissionProvider } from '@libs/common/provider/static-data/data-miss
 import { MissionProvider } from '@libs/common/provider/contents/mission.provider';
 import { AchievementProvider } from '@libs/common/provider/achievement/achievement.provider';
 import { MissionAchievementProvider } from '@libs/common/provider/achievement/mission-achievement.provider';
+import { ArenaModule } from '@libs/dao/arena/arena.module';
+import ArenaDatabaseConfig from '@libs/dao/config/arena/arena-database.config';
+import { GameController } from './default/game.controller';
+import { GameService } from './default/game.service';
+import { SoloBattleProvider } from '@libs/common/provider/contents/solo-battle.provider';
 
 @Module({
   imports: [
@@ -49,7 +54,7 @@ import { MissionAchievementProvider } from '@libs/common/provider/achievement/mi
     }),
 
     ClsModule.forRoot({ global: true, middleware: { mount: true } }),
-    ...[CommonDatabaseConfig].map((it) => {
+    ...[CommonDatabaseConfig, ArenaDatabaseConfig].map((it) => {
       return TypeOrmExModule.forRootAsync({
         name: it().name,
         inject: [it.KEY],
@@ -72,8 +77,11 @@ import { MissionAchievementProvider } from '@libs/common/provider/achievement/mi
     CommonModule,
     GameDbModule,
     StaticModule,
+
+    ArenaModule,
   ],
   controllers: [
+    GameController,
     UserController,
     CharacterController,
     BattleController,
@@ -97,6 +105,7 @@ import { MissionAchievementProvider } from '@libs/common/provider/achievement/mi
     { provide: APP_INTERCEPTOR, useClass: PayloadInterceptor },
 
     //----Service
+    GameService,
     UserService,
     CharacterService,
     BattleService,
@@ -113,6 +122,7 @@ import { MissionAchievementProvider } from '@libs/common/provider/achievement/mi
 
     AchievementProvider,
     MissionAchievementProvider,
+    SoloBattleProvider,
     //Provider----
 
     //----DataProvider

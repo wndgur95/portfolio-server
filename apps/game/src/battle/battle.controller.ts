@@ -9,6 +9,8 @@ import { BattleService } from './battle.service';
 import { BattleFinishInDto } from './dto/battle-finish-in.dto';
 import { UserLevelLock } from '@libs/common/decorator/user-level-lock.decorator';
 import { BattleFinishOutDto } from './dto/battle-finish-out.dto';
+import { GetSoloRankingOutDto } from './dto/get-solo-ranking-out.dto';
+import { GetSoloRankingInDto } from './dto/get-solo-ranking-in.dto';
 
 @Controller('game/battle')
 @ApiTags('Battle')
@@ -44,5 +46,34 @@ export class BattleController {
       await this.battleService.finishBattle(battleFinishInDto);
 
     return ResponseEntity.ok().body(battleFinishOutDto);
+  }
+
+  @Post('solo/ranking/get')
+  @ApiResponseEntity({
+    type: GetSoloRankingOutDto,
+    summary: '솔로 랭킹',
+  })
+  async getSoloRanking(
+    @Body() getSoloRankingInDto: GetSoloRankingInDto,
+  ): Promise<ResponseEntity<GetSoloRankingOutDto>> {
+    const getSoloRankingOutDto =
+      await this.battleService.getSoloRanking(getSoloRankingInDto);
+
+    return ResponseEntity.ok().body(getSoloRankingOutDto);
+  }
+
+  @Post('multi/ranking/get')
+  @ApiResponseEntity({
+    type: GetSoloRankingOutDto,
+    summary: '솔로 랭킹',
+  })
+  async getMultiRanking(
+    @Body() getSoloRankingInDto: GetSoloRankingInDto,
+  ): Promise<ResponseEntity<GetSoloRankingOutDto>> {
+    return ResponseEntity.ok().body(GetSoloRankingOutDto.of({
+      totalCount: 0,
+      myRanking: null,
+      ranking: [],
+    }));
   }
 }
