@@ -15,6 +15,9 @@ export class BattleEntity extends AbstractEntity implements Battle {
   @Column({ comment: '선택된 캐릭터 id', unsigned: true })
   dataCharacterId: number;
 
+  @Column({ comment: '선택된 캐릭터 레벨', unsigned: true })
+  level: number;
+
   @Column({ comment: 'battle uuid', nullable: true })
   battleUid: string;
 }

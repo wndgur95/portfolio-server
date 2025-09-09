@@ -9,6 +9,8 @@ import { DataBalance } from '@libs/dao/static/data-balance/data-balance.entity';
 import { ServerErrorException } from '@libs/common/exception/server-error.exception';
 import { INTERNAL_ERROR_CODE } from '@libs/common/constants/internal-error-code.constants';
 import { Character } from '@libs/dao/game/characters/interfaces/character.interface';
+import { AchievementProvider } from '@libs/common/provider/achievement/achievement.provider';
+import { MISSION_CONDITION_TYPE } from '@libs/dao/static/common.constants';
 
 @Injectable()
 export class CharacterService {
@@ -54,6 +56,12 @@ export class CharacterService {
 
     character.count -= needCount;
     character.level++;
+
+    AchievementProvider.achieve(
+      MISSION_CONDITION_TYPE.CHARACTER_LEVEL_UP,
+      [],
+      1,
+    );
 
     return await this.charactersDbRepositories[database].save(character);
   }

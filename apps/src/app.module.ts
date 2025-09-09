@@ -50,7 +50,13 @@ import { ApiServerConfig } from '../api/src/config/api.server.config';
 import { GameServerConfig } from '../game/src/config/game.server.config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { RedisThrottlerStorage } from '../api/src/auth/guard/redis-throttler-storage';
+import { ArenaModule } from '@libs/dao/arena/arena.module';
+import ArenaDatabaseConfig from '@libs/dao/config/arena/arena-database.config';
+import { GameController } from '../game/src/default/game.controller';
+import { GameService } from '../game/src/default/game.service';
+import { SoloBattleProvider } from '@libs/common/provider/contents/solo-battle.provider';
 
+//Api
 @Module({
   imports: [
     ApiServerConfig,
@@ -125,6 +131,7 @@ import { RedisThrottlerStorage } from '../api/src/auth/guard/redis-throttler-sto
 })
 export class ApiElementModule {}
 
+//Game
 @Module({
   imports: [
     GameServerConfig,
@@ -135,7 +142,7 @@ export class ApiElementModule {}
     }),
 
     ClsModule.forRoot({ global: true, middleware: { mount: true } }),
-    ...[CommonDatabaseConfig].map((it) => {
+    ...[CommonDatabaseConfig, ArenaDatabaseConfig].map((it) => {
       return TypeOrmExModule.forRootAsync({
         name: it().name,
         inject: [it.KEY],
@@ -158,8 +165,11 @@ export class ApiElementModule {}
     CommonModule,
     GameDbModule,
     StaticModule,
+
+    ArenaModule,
   ],
   controllers: [
+    GameController,
     GameUserController,
     CharacterController,
     BattleController,
@@ -167,6 +177,7 @@ export class ApiElementModule {}
   ],
   providers: [
     //----Service
+    GameService,
     GameUserService,
     CharacterService,
     BattleService,
@@ -183,6 +194,7 @@ export class ApiElementModule {}
 
     AchievementProvider,
     MissionAchievementProvider,
+    SoloBattleProvider,
     //Provider----
 
     //----DataProvider
@@ -194,6 +206,7 @@ export class ApiElementModule {}
 })
 export class GameElementModule {}
 
+//App
 @Module({
   imports: [
     AppServerConfig,

@@ -1,8 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import Redis from 'ioredis';
 import { StaticRepository } from '@libs/dao/static/static.repository';
-import { RedisFactory } from '@libs/common/databases/redis/redis.factory';
-import { RedisDbNumber } from '@libs/common/constants/redis.constants';
 import { ServerErrorException } from '@libs/common/exception/server-error.exception';
 import { INTERNAL_ERROR_CODE } from '@libs/common/constants/internal-error-code.constants';
 
