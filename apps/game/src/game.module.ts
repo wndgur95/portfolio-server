@@ -43,6 +43,9 @@ import ArenaDatabaseConfig from '@libs/dao/config/arena/arena-database.config';
 import { GameController } from './default/game.controller';
 import { GameService } from './default/game.service';
 import { SoloBattleProvider } from '@libs/common/provider/contents/solo-battle.provider';
+import { ShopController } from './shop/shop.controller';
+import { ShopService } from './shop/shop.service';
+import { GachaProvider } from '@libs/common/provider/gacha/gacha.provider';
 
 @Module({
   imports: [
@@ -86,6 +89,7 @@ import { SoloBattleProvider } from '@libs/common/provider/contents/solo-battle.p
     CharacterController,
     BattleController,
     MissionController,
+    ShopController,
   ],
   providers: [
     {
@@ -110,6 +114,7 @@ import { SoloBattleProvider } from '@libs/common/provider/contents/solo-battle.p
     CharacterService,
     BattleService,
     MissionService,
+    ShopService,
     //Service----
 
     //----Provider
@@ -119,6 +124,7 @@ import { SoloBattleProvider } from '@libs/common/provider/contents/solo-battle.p
     UserDetailProvider,
     BattleProvider,
     MissionProvider,
+    GachaProvider,
 
     AchievementProvider,
     MissionAchievementProvider,
