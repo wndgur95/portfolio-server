@@ -4,4 +4,5 @@ export interface DataGachaQuery {
   STATE?: number[];
   COUNT?: number[][];
   TIER_RATIO?: number[][];
+  COST?: number[];
 }
