@@ -4,4 +4,5 @@ export class DataGacha extends DataGachaEnum {
   STATE: number;
   COUNT: number[];
   TIER_RATIO: number[];
+  COST: number;
 }
