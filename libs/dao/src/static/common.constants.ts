@@ -93,3 +93,10 @@ export const RECEIVE_TYPE = {
   RANDOM: 2,
 } as const;
 export type ReceiveType = (typeof RECEIVE_TYPE)[keyof typeof RECEIVE_TYPE];
+
+export const RANKING_TYPE = {
+  NONE: 0,
+  SOLO: 1,
+  MULTI: 2,
+} as const;
+export type RankingType = (typeof RANKING_TYPE)[keyof typeof RANKING_TYPE];
