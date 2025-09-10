@@ -1,9 +1,7 @@
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { INestApplication, Logger } from '@nestjs/common';
 import { SWAGGER_CUSTOM_OPTIONS } from '@libs/common/constants/swagger.constants';
-import { ApiModule } from '../api/src/api.module';
-import { GameModule } from '../game/src/game.module';
-import { ApiElementModule, GameElementModule } from './app.module';
+import { ApiElementModule, BattleElementModule, GameElementModule } from './app.module';
 
 export class AppServer {
   constructor(private readonly app: INestApplication) {}
@@ -17,9 +15,10 @@ export class AppServer {
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
       credentials: true,
     });
-    // this.app.setGlobalPrefix('api');
+
     this._initializeApiSwagger();
     this._initializeGameSwagger();
+    this._initializeBattleSwagger();
   }
 
   /**
@@ -144,6 +143,38 @@ export class AppServer {
 
     SwaggerModule.setup(
       'game/api-docs',
+      this.app,
+      document,
+      SWAGGER_CUSTOM_OPTIONS,
+    );
+  }
+
+  /**
+   * OPEN API(Swagger) 초기화
+   */
+  private _initializeBattleSwagger(): void {
+    const config = new DocumentBuilder()
+      .setTitle('Battle Server')
+      .setDescription('API description')
+      .setVersion('1.0')
+      .addBasicAuth(
+        {
+          type: 'http',
+          name: 'Authorization',
+          in: 'header',
+          description: 'Username: email & Password: password',
+        },
+        'basic',
+      )
+      .build();
+
+    const document = SwaggerModule.createDocument(this.app, config, {
+      include: [BattleElementModule],
+      deepScanRoutes: true,
+    });
+
+    SwaggerModule.setup(
+      'battle/api-docs',
       this.app,
       document,
       SWAGGER_CUSTOM_OPTIONS,

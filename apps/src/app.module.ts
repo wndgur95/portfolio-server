@@ -58,6 +58,14 @@ import { SoloBattleProvider } from '@libs/common/provider/contents/solo-battle.p
 import { GachaProvider } from '@libs/common/provider/gacha/gacha.provider';
 import { ShopService } from '../game/src/shop/shop.service';
 import { ShopController } from '../game/src/shop/shop.controller';
+import { BattleServerConfig } from '../battle/src/config/battle.server.config';
+import { AuthModule as AuthBattleModule } from '../battle/src/auth/auth.module';
+import { BattleController as BattleDefaultController } from '../battle/src/default/battle.controller';
+import { BattleService as BattleDefaultService } from '../battle/src/default/battle.service';
+import { SoloBattleGateway } from '../battle/src/solo-battle/solo-battle.gateway';
+import { SoloBattleService } from '../battle/src/solo-battle/solo-battle.service';
+import { SoloBattleRedisRepository } from '@libs/dao/redis/solo-battle/solo-battle-redis.repository';
+import { KafkaModule } from '../battle/src/kafka/kafka.module';
 
 //Api
 @Module({
@@ -212,6 +220,18 @@ export class ApiElementModule {}
 })
 export class GameElementModule {}
 
+@Module({
+  imports: [BattleServerConfig, KafkaModule, StaticModule, AuthBattleModule],
+  controllers: [BattleDefaultController],
+  providers: [
+    BattleDefaultService,
+    SoloBattleGateway,
+    SoloBattleService,
+    SoloBattleRedisRepository,
+  ],
+})
+export class BattleElementModule {}
+
 //App
 @Module({
   imports: [
@@ -248,6 +268,7 @@ export class GameElementModule {}
 
     ApiElementModule,
     GameElementModule,
+    BattleElementModule,
   ],
   controllers: [],
   providers: [
