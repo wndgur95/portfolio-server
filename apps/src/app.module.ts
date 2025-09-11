@@ -228,6 +228,7 @@ export class GameElementModule {}
     SoloBattleGateway,
     SoloBattleService,
     SoloBattleRedisRepository,
+    DataCharacterProvider,
   ],
 })
 export class BattleElementModule {}

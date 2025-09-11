@@ -12,6 +12,10 @@ import { SoloBattleRedisRepository } from '@libs/dao/redis/solo-battle/solo-batt
 import { BattleController } from './default/battle.controller';
 import { BattleService } from './default/battle.service';
 import { StaticModule } from '@libs/dao/static/static.module';
+import { TransactionInterceptor } from '@libs/common/interceptor/transaction.interceptor';
+import { UserLevelLockInterceptor } from '@libs/common/interceptor/user-level-lock.interceptor';
+import { PayloadInterceptor } from '@libs/common/interceptor/payload.interceptor';
+import { DataCharacterProvider } from '@libs/common/provider/static-data/data-character.provider';
 
 @Module({
   imports: [
@@ -35,10 +39,15 @@ import { StaticModule } from '@libs/dao/static/static.module';
     },
     { provide: APP_FILTER, useClass: AllExceptionFilter },
     { provide: APP_INTERCEPTOR, useClass: RequestLogInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: UserLevelLockInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: TransactionInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: PayloadInterceptor },
     BattleService,
     SoloBattleGateway,
     SoloBattleService,
     SoloBattleRedisRepository,
+
+    DataCharacterProvider,
   ],
 })
 export class BattleModule {}

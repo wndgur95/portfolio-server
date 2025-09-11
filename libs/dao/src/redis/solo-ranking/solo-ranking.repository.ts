@@ -5,9 +5,9 @@ import {
 } from '@libs/common/constants/redis.constants';
 import { AbstractRedisRepository } from '@libs/common/databases/redis/abstract-redis.repository';
 import {
-  ScoreMember,
+  ScoreMemberDto,
   ScoreMemberDetail,
-} from '@libs/dao/redis/solo-ranking/type/score-member';
+} from '@libs/dao/redis/solo-ranking/dto/score-member.dto';
 import { ContextProvider } from '@libs/common/provider/context.provider';
 import { Session } from '@libs/dao/redis/session/session.entity';
 import { SoloScore } from '@libs/dao/arena/solo-scores/interfaces/solo-score.interface';
@@ -137,14 +137,14 @@ export class SoloRankingRepository extends AbstractRedisRepository {
     return totalRank === null ? 0 : totalRank + 1;
   }
 
-  async addScores(key: string, scoreMembers: ScoreMember[]): Promise<void> {
+  async addScores(key: string, scoreMembers: ScoreMemberDto[]): Promise<void> {
     await this.redis.zadd(
       key,
       ...flatten(scoreMembers.map((it) => [it.score, it.userId])),
     );
   }
 
-  addScore(key: string, scoreMember: ScoreMember): void {
+  addScore(key: string, scoreMember: ScoreMemberDto): void {
     const multi = this.multi;
     multi.zadd(key, ...[scoreMember.score, scoreMember.userId]);
 
