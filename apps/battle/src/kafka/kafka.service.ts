@@ -21,7 +21,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
   private isConnected = false;
 
   constructor() {
-    // Kafka 클라이언트 설정
+    // Kafka 클라이언트 설정 (PLAINTEXT)
     this.kafka = new Kafka({
       clientId: `battle-server-${process.env.SERVER_ID || Date.now()}`,
       brokers: [process.env.KAFKA_BROKERS || 'localhost:30092'],
@@ -31,7 +31,9 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
       },
     });
 
-    this.producer = this.kafka.producer();
+    this.producer = this.kafka.producer({
+      allowAutoTopicCreation: true,
+    });
     this.consumer = this.kafka.consumer({
       groupId: 'battle-server-group',
       sessionTimeout: 30000,
@@ -45,6 +47,8 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
       this.logger.log('Kafka service initialized successfully');
     } catch (error) {
       this.logger.error('Failed to initialize Kafka service:', error);
+      this.logger.warn('Kafka service will continue without connection');
+      // Kafka 연결 실패해도 서버는 계속 실행
     }
   }
 
@@ -57,13 +61,17 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
    */
   private async connect(): Promise<void> {
     try {
+      this.logger.log('Attempting to connect to Kafka...');
       await this.producer.connect();
+      this.logger.log('Producer connected successfully');
       await this.consumer.connect();
+      this.logger.log('Consumer connected successfully');
       this.isConnected = true;
       this.logger.log('Connected to Kafka');
     } catch (error) {
       this.logger.error('Failed to connect to Kafka:', error);
-      throw error;
+      this.isConnected = false;
+      // 연결 실패해도 에러를 던지지 않음
     }
   }
 

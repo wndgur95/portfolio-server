@@ -19,3 +19,6 @@ export const SESSION_EXPIRED_TIME = Number(process.env.SESSION_TTL);
 
 export const SOLO_RANKING_KEY = 'solo_ranking';
 export const RANKING_TIMESTAMP_DECIMALS = 13;
+
+export const BATTLE_INFO_KEY = 'battle_info';
+export const BASE_SOLO_BATTLE_PLAY_KEY = 'solo_battle';

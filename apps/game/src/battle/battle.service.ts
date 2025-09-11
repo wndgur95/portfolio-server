@@ -7,9 +7,6 @@ import { BattleEnterOutDto } from './dto/battle-enter-out.dto';
 import { ServerErrorException } from '@libs/common/exception/server-error.exception';
 import { INTERNAL_ERROR_CODE } from '@libs/common/constants/internal-error-code.constants';
 import { randomUUID } from 'crypto';
-import { BattleEntity } from '@libs/dao/game/battles/entities/battle.entity';
-import { BattlesDbRepositories } from '@libs/dao/game/battles/repositories/battles-db.repository';
-import { BattlesRepository } from '@libs/dao/game/battles/interfaces/battles-repository.interface';
 import { BattleFinishInDto } from './dto/battle-finish-in.dto';
 import { Transactional } from '@libs/common/decorator/transaction.decorator';
 import { BattleFinishOutDto } from './dto/battle-finish-out.dto';
@@ -19,16 +16,14 @@ import { GetSoloRankingOutDto } from './dto/get-solo-ranking-out.dto';
 import { SoloBattleProvider } from '@libs/common/provider/contents/solo-battle.provider';
 import { SoloScoresDbRepository } from '@libs/dao/arena/solo-scores/repositories/solo-scores-db.repository';
 import { SoloScoresRepository } from '@libs/dao/arena/solo-scores/interfaces/solo-scores-repository.interface';
-import { SoloScoreHistoriesDbRepository } from '@libs/dao/arena/solo-score-histories/repositories/solo-score-histories-db.repository';
-import { SoloScoreHistoriesRepository } from '@libs/dao/arena/solo-score-histories/interfaces/solo-score-histories-repository.interface';
 import { SoloScoreEntity } from '@libs/dao/arena/solo-scores/entities/solo-score.entity';
-import { Battle } from '@libs/dao/game/battles/interfaces/battle.interface';
 import { SoloScoreHistoryEntity } from '@libs/dao/arena/solo-score-histories/entities/solo-score-history.entity';
-import { SoloScore } from '@libs/dao/arena/solo-scores/interfaces/solo-score.interface';
 import { SOLO_RANKING_KEY } from '@libs/common/constants/redis.constants';
 import { GetSoloRankingInDto } from './dto/get-solo-ranking-in.dto';
 import { AchievementProvider } from '@libs/common/provider/achievement/achievement.provider';
 import { MISSION_CONDITION_TYPE } from '@libs/dao/static/common.constants';
+import { BattleInfoDto } from '@libs/dao/redis/solo-battle/dto/battle-info.dto';
+import { SoloBattleRedisRepository } from '@libs/dao/redis/solo-battle/solo-battle-redis.repository';
 
 @Injectable()
 export class BattleService {
@@ -36,46 +31,41 @@ export class BattleService {
     @Inject(CharactersRepository)
     private readonly charactersRepositories: CharactersDbRepositories,
 
-    @Inject(BattlesRepository)
-    private readonly battlesRepositories: BattlesDbRepositories,
-
     @Inject(SoloScoresRepository)
     private readonly soloScoresRepository: SoloScoresDbRepository,
-    @Inject(SoloScoreHistoriesRepository)
-    private readonly soloScoreHistoriesRepository: SoloScoreHistoriesDbRepository,
 
     private readonly goodsProvider: GoodsProvider,
     private readonly battleProvider: BattleProvider,
     private readonly soloBattleProvider: SoloBattleProvider,
+
+    private readonly soloBattleRedisRepository: SoloBattleRedisRepository,
   ) {}
 
   /**
    * 캐릭터 정보 받기
    */
-  @Transactional()
   async enterBattle(
     battleEnterInDto: BattleEnterInDto,
   ): Promise<BattleEnterOutDto> {
-    const { database, userId } = ContextProvider.getSession();
+    const { userId } = ContextProvider.getSession();
 
     await this._checkEnterBattle(battleEnterInDto);
 
     const { dataCharacterId, level } = battleEnterInDto;
 
-    const battle =
-      (await this.battlesRepositories[database].findByUserId(userId)) ??
-      BattleEntity.create({
-        userId,
-      });
+    const battleUid = randomUUID();
 
-    battle.dataCharacterId = dataCharacterId;
-    battle.level = level;
-    battle.battleUid = randomUUID();
+    const battleInfo = BattleInfoDto.create({
+      userId,
+      dataCharacterId,
+      level,
+      battleUid: battleUid,
+    });
 
-    await this.battlesRepositories[database].save(battle, { reload: false });
+    await this.soloBattleRedisRepository.setBattleInfo(userId, battleInfo);
 
     return BattleEnterOutDto.of({
-      battleUid: battle.battleUid,
+      battleUid: battleUid,
     });
   }
 
@@ -85,7 +75,7 @@ export class BattleService {
   ): Promise<BattleFinishOutDto> {
     const { battleUid, time, kill } = battleFinishInDto;
 
-    const battle = await this._checkFinishBattle(battleUid);
+    const battleInfo = await this._checkFinishBattle(battleUid);
 
     const [rewards, score] = this.battleProvider.getBattleResultReward(
       time,
@@ -94,7 +84,7 @@ export class BattleService {
 
     const goodsOutDto = await this.goodsProvider.payImmediately(rewards);
 
-    await this._processBattleResult(battle, score);
+    await this._processBattleResult(battleInfo, score);
 
     AchievementProvider.achieve(MISSION_CONDITION_TYPE.BATTLE, [], 1);
     AchievementProvider.achieve(MISSION_CONDITION_TYPE.KILL_ENEMY, [], kill);
@@ -106,17 +96,17 @@ export class BattleService {
 
   /**
    * 전투 결과 처리 공통 메서드
-   * @param battle 전투 정보
+   * @param battleInfo 전투 정보
    * @param score 점수
    * @returns 변경된 유저 본인의 soloScore 와 랭킹
    */
   private async _processBattleResult(
-    battle: Battle,
+    battleInfo: BattleInfoDto,
     score: number,
   ): Promise<void> {
     const now = ContextProvider.getNow();
     const { userId } = ContextProvider.getSession();
-    const { dataCharacterId, level } = battle;
+    const { dataCharacterId, level } = battleInfo;
 
     const soloScore =
       (await this.soloScoresRepository.findByUserId(userId)) ??
@@ -190,20 +180,18 @@ export class BattleService {
     }
   }
 
-  private async _checkFinishBattle(battleUid: string): Promise<Battle> {
-    const { database, userId } = ContextProvider.getSession();
+  private async _checkFinishBattle(battleUid: string): Promise<BattleInfoDto> {
+    const { userId } = ContextProvider.getSession();
 
-    const battle =
-      await this.battlesRepositories[database].findByUserId(userId);
+    const battleInfo =
+      await this.soloBattleRedisRepository.getBattleInfo(userId);
 
-    if (battle.battleUid != battleUid) {
+    if (battleInfo.battleUid != battleUid) {
       throw new ServerErrorException(INTERNAL_ERROR_CODE.BATTLE_NOT_VALID);
     }
 
-    await this.battlesRepositories[database].updateById(battle.id, {
-      battleUid: null,
-    });
+    this.soloBattleRedisRepository.delBattleInfoMulti(userId);
 
-    return battle;
+    return battleInfo;
   }
 }

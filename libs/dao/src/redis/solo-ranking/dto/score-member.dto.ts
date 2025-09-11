@@ -1,12 +1,12 @@
 import { SoloScoreDto } from '@libs/dao/arena/solo-scores/dto/solo-score.dto';
 
-export class ScoreMember {
+export class ScoreMemberDto {
   userId: number;
   score: number;
   rank?: number;
 
-  static create(partial?: Partial<ScoreMember>): ScoreMember {
-    return Object.assign(new ScoreMember(), partial);
+  static create(partial?: Partial<ScoreMemberDto>): ScoreMemberDto {
+    return Object.assign(new ScoreMemberDto(), partial);
   }
 }
 

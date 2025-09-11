@@ -10,7 +10,7 @@ import { TransactionalEx } from '@libs/common/decorator/transaction.decorator';
 import { DB_NAME } from '@libs/common/constants/database.constants';
 import { SoloScoreHistory } from '@libs/dao/arena/solo-score-histories/interfaces/solo-score-history.interface';
 import { RANKING_TIMESTAMP_DECIMALS, SOLO_RANKING_KEY } from '@libs/common/constants/redis.constants';
-import { ScoreMember, ScoreMemberDetail } from '@libs/dao/redis/solo-ranking/type/score-member';
+import { ScoreMemberDto, ScoreMemberDetail } from '@libs/dao/redis/solo-ranking/dto/score-member.dto';
 import { SoloRankingRepository } from '@libs/dao/redis/solo-ranking/solo-ranking.repository';
 import { SoloScoreHistoriesDbRepository } from '@libs/dao/arena/solo-score-histories/repositories/solo-score-histories-db.repository';
 import { SoloScoreHistoriesRepository } from '@libs/dao/arena/solo-score-histories/interfaces/solo-score-histories-repository.interface';
@@ -72,7 +72,7 @@ export class SoloBattleProvider {
     const soloRankingKey = SOLO_RANKING_KEY;
     const soloUserInfoKey = `${SOLO_RANKING_KEY}:${soloScore.userId}`;
 
-    const scoreMember = ScoreMember.create({
+    const scoreMember = ScoreMemberDto.create({
       userId: soloScore.userId,
       score: this.calculateSoloRedisScore(
         soloScore.score,
@@ -99,14 +99,14 @@ export class SoloBattleProvider {
   /**
    * 아레나 레디스 점수 재료 만들기
    */
-  getScoreMember(userId: number, score: number): ScoreMember {
-    return ScoreMember.create({ userId: userId, score: score });
+  getScoreMember(userId: number, score: number): ScoreMemberDto {
+    return ScoreMemberDto.create({ userId: userId, score: score });
   }
 
   /**
    * 유저 레디스 점수 빼기
    */
-  removeUserRedisScoreMember(scoreMembers: ScoreMember[]): ScoreMember[] {
+  removeUserRedisScoreMember(scoreMembers: ScoreMemberDto[]): ScoreMemberDto[] {
     const { userId } = ContextProvider.getSession();
 
     return scoreMembers.filter((it) => it.userId !== userId);
@@ -150,7 +150,7 @@ export class SoloBattleProvider {
   /**
    * 아레나 랭킹 업데이트 (Redis) - 여러 유저
    */
-  updateSoloRedisRanking(redisKey: string, scoreMember: ScoreMember): void {
+  updateSoloRedisRanking(redisKey: string, scoreMember: ScoreMemberDto): void {
     this.soloRankingRepository.addScore(redisKey, scoreMember);
   }
 

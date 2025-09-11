@@ -2,11 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { DataCharacter } from '@libs/dao/static/data-character/data-character.entity';
 import { DataCharacterRepository } from '@libs/dao/static/data-character/data-character.repository';
 import { DataBalanceRepository } from '@libs/dao/static/data-balance/data-balance.repository';
-import {
-  CHARACTER_TIER_TYPE,
-} from '@libs/dao/static/common.constants';
+import { CHARACTER_TIER_TYPE } from '@libs/dao/static/common.constants';
 import { INTERNAL_ERROR_CODE } from '@libs/common/constants/internal-error-code.constants';
 import { ServerErrorException } from '@libs/common/exception/server-error.exception';
+import { CharacterStatDto } from '@libs/dao/redis/solo-battle/dto/player.dto';
 
 @Injectable()
 export class DataCharacterProvider {
@@ -57,5 +56,22 @@ export class DataCharacterProvider {
    */
   getMaxTier(): number {
     return CHARACTER_TIER_TYPE.S_S_R;
+  }
+
+  /**
+   * 영웅 스텟 정보 가져오기
+   */
+  getStats(dataCharacterId: number, level: number): CharacterStatDto {
+    const { ATTACK, DEFENCE, MOVE_SPEED, ATTACK_SPEED, WEAPON_COUNT, HP } =
+      this.dataCharacterRepository.findById(dataCharacterId);
+
+    return CharacterStatDto.create({
+      attack: ATTACK * level* 100,
+      defence: DEFENCE * level* 100,
+      moveSpeed: MOVE_SPEED * level* 100,
+      attackSpeed: ATTACK_SPEED * level* 100,
+      weaponCount: WEAPON_COUNT * level* 100,
+      hp: HP * level* 100,
+    });
   }
 }
