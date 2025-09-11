@@ -269,7 +269,7 @@ export class BattleElementModule {}
 
     ApiElementModule,
     GameElementModule,
-    BattleElementModule,
+    // BattleElementModule,
   ],
   controllers: [],
   providers: [

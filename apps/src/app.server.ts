@@ -18,7 +18,7 @@ export class AppServer {
 
     this._initializeApiSwagger();
     this._initializeGameSwagger();
-    this._initializeBattleSwagger();
+    // this._initializeBattleSwagger();
   }
 
   /**
