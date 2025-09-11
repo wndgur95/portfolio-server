@@ -100,3 +100,11 @@ export const RANKING_TYPE = {
   MULTI: 2,
 } as const;
 export type RankingType = (typeof RANKING_TYPE)[keyof typeof RANKING_TYPE];
+
+export const PLAY_STATUS = {
+  NONE: 0,
+  PLAY: 1,
+  END: 2,
+  GIVE_UP: 3,
+} as const;
+export type PlayStatus = (typeof PLAY_STATUS)[keyof typeof PLAY_STATUS];
