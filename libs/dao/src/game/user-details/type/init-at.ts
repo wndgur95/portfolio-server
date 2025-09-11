@@ -4,6 +4,7 @@ export class InitAt {
   @Column({
     comment: '일일 초기화 시간',
     type: 'datetime',
+    default: () => 'CURRENT_TIMESTAMP',
   })
   daily: Date;
 
