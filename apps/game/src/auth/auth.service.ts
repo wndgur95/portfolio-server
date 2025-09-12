@@ -204,11 +204,7 @@ export class AuthService {
       gameDbId: user.gameDbId,
     });
 
-    await this.sessionRepository.setSession(
-      user.id,
-      session,
-      ['', ENVIRONMENT.TEST].includes(NODE_ENV) ? 0 : SESSION_EXPIRED_TIME,
-    );
+    await this.sessionRepository.setSession(user.id, session);
 
     return session;
   }

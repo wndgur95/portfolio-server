@@ -46,6 +46,7 @@ import { SoloBattleProvider } from '@libs/common/provider/contents/solo-battle.p
 import { ShopController } from './shop/shop.controller';
 import { ShopService } from './shop/shop.service';
 import { GachaProvider } from '@libs/common/provider/gacha/gacha.provider';
+import { SequenceInterceptor } from '@libs/common/interceptor/sequence.interceptor';
 
 @Module({
   imports: [
@@ -106,6 +107,7 @@ import { GachaProvider } from '@libs/common/provider/gacha/gacha.provider';
     { provide: APP_INTERCEPTOR, useClass: RequestLogInterceptor },
     { provide: APP_INTERCEPTOR, useClass: UserLevelLockInterceptor },
     { provide: APP_INTERCEPTOR, useClass: TransactionInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: SequenceInterceptor },
     { provide: APP_INTERCEPTOR, useClass: PayloadInterceptor },
 
     //----Service
