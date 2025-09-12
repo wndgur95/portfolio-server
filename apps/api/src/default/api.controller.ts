@@ -1,13 +1,10 @@
-import { Controller, Get, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiService } from './api.service';
 import { ResponseEntity } from '@libs/common/network/response-entity';
 import { ApiResponseEntity } from '@libs/common/decorator/api-response-entity';
-import { join } from 'path';
-import { Response } from 'express';
-import { marked } from 'marked';
-import { readFileSync } from 'fs';
-import { ApiBearerAuth } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
+import { ApiSecurity } from '@nestjs/swagger';
+import { ApiKeyAuthGuard } from '../auth/guard/api-key-auth.guard';
+import { GetApiKeyOutDto } from '../auth/dto/get-api-key-out.dto';
 
 @Controller('api')
 export class ApiController {
@@ -19,53 +16,45 @@ export class ApiController {
     return ResponseEntity.ok().body(this.apiService.health());
   }
 
-  @Get('/privacy-policy')
-  getPrivacyPolicy(@Res() res: Response): void {
-    const markdownPath = join(__dirname, '..', 'public', 'privacy_policy.md');
-
-    try {
-      const markdownContent = readFileSync(markdownPath, 'utf-8');
-      const htmlContent = marked(markdownContent);
-
-      const htmlWrapper = `
-        <!DOCTYPE html>
-        <html lang="ko">
-        <head>
-          <meta charset="UTF-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <title>개인정보처리방침</title>
-          <style>
-            body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
-            h1, h2, h3 { color: #222; }
-            ul { padding-left: 20px; }
-            strong { font-weight: bold; }
-          </style>
-        </head>
-        <body>
-          ${htmlContent}
-        </body>
-        </html>
-      `;
-
-      res.setHeader('Content-Type', 'text/html');
-      res.send(htmlWrapper);
-    } catch (error) {
-      res.status(500).send('개인정보처리방침을 불러오지 못했습니다.');
-    }
+  @Get('/static-data-name')
+  @ApiResponseEntity({ summary: '데이터 종류' })
+  @ApiSecurity('apiKey')
+  @UseGuards(ApiKeyAuthGuard)
+  getStaticDataName(): ResponseEntity<string[]> {
+    return ResponseEntity.ok().body(this.apiService.getStaticdataName());
   }
 
-  @Get('/privacy-policy-md')
-  @ApiBearerAuth('jwt')
-  @UseGuards(JwtAuthGuard)
-  getPrivacyPolicyMd(@Res() res: Response): void {
-    const filePath = join(__dirname, '..', 'public', 'privacy_policy.md');
+  @Get('/static-data/query/:name')
+  @ApiResponseEntity({ summary: '이름 & 쿼리로 데이터 불러오기' })
+  @ApiSecurity('apiKey')
+  @UseGuards(ApiKeyAuthGuard)
+  getStaticDataByQuery(
+    @Param('name') name: string,
+    @Query() query: Record<string, string>,
+  ): ResponseEntity<object> {
+    return ResponseEntity.ok().body(
+      this.apiService.getStaticdataByQuery(name, query),
+    );
+  }
 
-    try {
-      const markdown = readFileSync(filePath, 'utf-8');
-      res.setHeader('Content-Type', 'text/markdown');
-      res.send(markdown);
-    } catch (error) {
-      res.status(500).send('개인정보처리방침을 불러오지 못했습니다.');
-    }
+  @Get('/static-data/:name')
+  @ApiResponseEntity({ summary: '이름으로 데이터 가져오기' })
+  @ApiSecurity('apiKey')
+  @UseGuards(ApiKeyAuthGuard)
+  getStaticData(@Param('name') name: string): ResponseEntity<object[]> {
+    return ResponseEntity.ok().body(this.apiService.getStaticData(name));
+  }
+
+  @Get('/static-data/:name/:id')
+  @ApiResponseEntity({ summary: '이름 & id 로 데이터 불러오기' })
+  @ApiSecurity('apiKey')
+  @UseGuards(ApiKeyAuthGuard)
+  getStaticDataById(
+    @Param('name') name: string,
+    @Param('id') id: number,
+  ): ResponseEntity<object> {
+    return ResponseEntity.ok().body(
+      this.apiService.getStaticdataById(name, Number(id)),
+    );
   }
 }

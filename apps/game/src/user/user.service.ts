@@ -243,6 +243,8 @@ export class UserService {
       .filter((it) => dataMissionIds.includes(it.dataMissionId))
       .map((it) => it.id);
 
-    await missionRepository.updateCountAndRewardAtByIdIn(missionIds);
+    if (missionIds.length) {
+      await missionRepository.updateCountAndRewardAtByIdIn(missionIds);
+    }
   }
 }
