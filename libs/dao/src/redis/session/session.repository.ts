@@ -3,7 +3,8 @@ import { Session } from '@libs/dao/redis/session/session.entity';
 import { plainToInstance } from 'class-transformer';
 import { ContextProvider } from '@libs/common/provider/context.provider';
 import { AbstractRedisRepository } from '@libs/common/databases/redis/abstract-redis.repository';
-import { RedisDbNumber } from '@libs/common/constants/redis.constants';
+import { RedisDbNumber, SESSION_EXPIRED_TIME } from '@libs/common/constants/redis.constants';
+import { ENVIRONMENT, NODE_ENV } from '@libs/common/constants/environment.constants';
 
 @Injectable()
 export class SessionRepository extends AbstractRedisRepository {
@@ -19,9 +20,10 @@ export class SessionRepository extends AbstractRedisRepository {
     return plainToInstance(Session, result);
   }
 
-  async setSession(userId: number, session: Session, ttl = 0): Promise<void> {
+  async setSession(userId: number, session: Session): Promise<void> {
     const key = userId.toString();
     const multi = this.multi
+    const ttl = SESSION_EXPIRED_TIME;
 
     ttl > 0
         ? multi.set(key, JSON.stringify(session), 'EX', ttl) //  session, ttl 동시세팅

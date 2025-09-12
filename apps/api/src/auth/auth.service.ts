@@ -341,7 +341,6 @@ export class AuthService {
     await this.sessionRepository.setSession(
       user.id,
       session,
-      ['', ENVIRONMENT.TEST].includes(NODE_ENV) ? 0 : SESSION_EXPIRED_TIME,
     );
 
     return session;

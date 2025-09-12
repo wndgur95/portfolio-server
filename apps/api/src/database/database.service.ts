@@ -44,7 +44,7 @@ export class DatabaseService {
   async testTransaction(transactionInDto: TransactionInDto): Promise<void> {
     const { role, gold, errorPoint } = transactionInDto;
     const session = ContextProvider.getSession();
-    const { database, userId } = session;
+    const { userId } = session;
 
     await this.usersRepository.updateById(userId, { roles: role });
 

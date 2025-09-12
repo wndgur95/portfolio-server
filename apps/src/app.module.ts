@@ -66,6 +66,7 @@ import { SoloBattleGateway } from '../battle/src/solo-battle/solo-battle.gateway
 import { SoloBattleService } from '../battle/src/solo-battle/solo-battle.service';
 import { SoloBattleRedisRepository } from '@libs/dao/redis/solo-battle/solo-battle-redis.repository';
 import { KafkaModule } from '../battle/src/kafka/kafka.module';
+import { SequenceInterceptor } from '@libs/common/interceptor/sequence.interceptor';
 
 //Api
 @Module({
@@ -287,6 +288,7 @@ export class BattleElementModule {}
     { provide: APP_INTERCEPTOR, useClass: RequestLogInterceptor },
     { provide: APP_INTERCEPTOR, useClass: UserLevelLockInterceptor },
     { provide: APP_INTERCEPTOR, useClass: TransactionInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: SequenceInterceptor },
     { provide: APP_INTERCEPTOR, useClass: PayloadInterceptor },
     MissionProvider,
 
