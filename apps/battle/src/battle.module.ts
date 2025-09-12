@@ -16,6 +16,7 @@ import { TransactionInterceptor } from '@libs/common/interceptor/transaction.int
 import { UserLevelLockInterceptor } from '@libs/common/interceptor/user-level-lock.interceptor';
 import { PayloadInterceptor } from '@libs/common/interceptor/payload.interceptor';
 import { DataCharacterProvider } from '@libs/common/provider/static-data/data-character.provider';
+import { AchievementProvider } from '@libs/common/provider/achievement/achievement.provider';
 
 @Module({
   imports: [
@@ -39,9 +40,6 @@ import { DataCharacterProvider } from '@libs/common/provider/static-data/data-ch
     },
     { provide: APP_FILTER, useClass: AllExceptionFilter },
     { provide: APP_INTERCEPTOR, useClass: RequestLogInterceptor },
-    { provide: APP_INTERCEPTOR, useClass: UserLevelLockInterceptor },
-    { provide: APP_INTERCEPTOR, useClass: TransactionInterceptor },
-    { provide: APP_INTERCEPTOR, useClass: PayloadInterceptor },
     BattleService,
     SoloBattleGateway,
     SoloBattleService,

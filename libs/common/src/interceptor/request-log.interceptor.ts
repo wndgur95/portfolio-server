@@ -14,7 +14,6 @@ export class RequestLogInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const now = Date.now();
 
-    console.log(context.getArgs()[0].url);
     ContextProvider.setNow(new Date());
 
     return next.handle().pipe(

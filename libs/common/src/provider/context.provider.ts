@@ -15,15 +15,11 @@ export const context = {};
 
 export class ContextProvider {
   static get<T>(key: string): T {
-    return NODE_ENV === ENVIRONMENT.TEST
-      ? ClsServiceManager.getClsService().get(key)
-      : ClsServiceManager.getClsService().get(key);
+    return ClsServiceManager.getClsService().get(key)
   }
 
   static set<T>(key: string, value: T): void {
-    NODE_ENV === ENVIRONMENT.TEST
-      ? ClsServiceManager.getClsService().set(key, value)
-      : ClsServiceManager.getClsService().set(key, value);
+    ClsServiceManager.getClsService().set(key, value)
   }
 
   static getSession(check = true): Session {
