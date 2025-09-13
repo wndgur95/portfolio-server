@@ -38,6 +38,10 @@ import { AchievementProvider } from '@libs/common/provider/achievement/achieveme
 import { MissionAchievementProvider } from '@libs/common/provider/achievement/mission-achievement.provider';
 import { MissionProvider } from '@libs/common/provider/contents/mission.provider';
 import { DataMissionProvider } from '@libs/common/provider/static-data/data-mission.provider';
+import { StaticController } from './static/static.controller';
+import { StaticService } from './static/static.service';
+import { ErrorController } from './error/error.controller';
+import { ErrorService } from './error/error.service';
 
 @Module({
   imports: [
@@ -83,7 +87,13 @@ import { DataMissionProvider } from '@libs/common/provider/static-data/data-miss
     GameModule,
     StaticModule,
   ],
-  controllers: [ApiController, UserController, DatabaseController],
+  controllers: [
+    ApiController,
+    UserController,
+    DatabaseController,
+    StaticController,
+    ErrorController,
+  ],
   providers: [
     {
       provide: APP_PIPE,
@@ -104,6 +114,8 @@ import { DataMissionProvider } from '@libs/common/provider/static-data/data-miss
     ApiService,
     UserService,
     DatabaseService,
+    StaticService,
+    ErrorService,
 
     ValidateProvider,
 

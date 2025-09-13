@@ -23,39 +23,6 @@ export class ApiService {
     return { environment: process.env.NODE_ENV };
   }
 
-  getStaticdataName(): string[] {
-    return Object.keys(this.staticRepository.items).map((it) =>
-      it.replaceAll('Data', '').replaceAll('Repository', ''),
-    );
-  }
-
-  getStaticData(name: string): object[] {
-    const dataName = `Data${name}Repository`;
-
-    return this.staticRepository.items[dataName].values();
-  }
-
-  getStaticdataById(name: string, id: number): object {
-    const dataName = `Data${name}Repository`;
-
-    return this.staticRepository.items[dataName].findById(id);
-  }
-
-  getStaticdataByQuery(
-    name: string,
-    queryString: Record<string, string>,
-  ): object {
-    const dataName = `Data${name}Repository`;
-    const query: Record<string, any[]> = {};
-
-    Object.keys(queryString).map((it) => {
-      const element = queryString[it].split(',');
-      query[it] = [...element, ...element.map(Number)];
-    });
-
-    return this.staticRepository.items[dataName].query(query);
-  }
-
   /**
    * 데이터 구독
    */
