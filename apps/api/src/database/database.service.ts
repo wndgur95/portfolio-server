@@ -13,13 +13,11 @@ import { DB_NAME } from '@libs/common/constants/database.constants';
 import { ServerErrorException } from '@libs/common/exception/server-error.exception';
 import { INTERNAL_ERROR_CODE } from '@libs/common/constants/internal-error-code.constants';
 import { SessionRepository } from '@libs/dao/redis/session/session.repository';
-import { UserDetail } from '@libs/dao/game/user-details/interfaces/user-detail.interface';
 import { RowLevelLockInDto } from './dto/row-level-lock-in.dto';
 import { TestTablesDbRepository } from '@libs/dao/common/test-tables/repositories/test-tables-db.repository';
 import { TestTablesRepository } from '@libs/dao/common/test-tables/interfaces/test-tables-repository.interface';
 import { TestTableEntity } from '@libs/dao/common/test-tables/entities/test-table.entity';
 import { TestTable } from '@libs/dao/common/test-tables/interfaces/test-table.interface';
-import { JwtService } from '@nestjs/jwt';
 import { GoodsProvider } from '@libs/common/provider/goods/goods.provider';
 import { Reward } from '@libs/common/interface/goods.interface';
 import { GOODS_TYPE } from '@libs/dao/static/common.constants';
@@ -60,7 +58,7 @@ export class DatabaseService {
         goodsType: GOODS_TYPE.CURRENCY,
         dataId: DataCurrency.CURRENCY_GOLD,
         quantity: gold,
-      } as Reward
+      } as Reward,
     ]);
 
     // await this.userDetailsRepositories[database].updateGold(userId, gold);
@@ -90,7 +88,7 @@ export class DatabaseService {
         goodsType: GOODS_TYPE.CURRENCY,
         dataId: DataCurrency.CURRENCY_GOLD,
         quantity: addGold,
-      } as Reward
+      } as Reward,
     ]);
   }
 

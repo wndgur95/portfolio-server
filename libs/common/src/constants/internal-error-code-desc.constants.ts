@@ -94,5 +94,3 @@ export const INTERNAL_ERROR_CODE_DESC = {
   [e.DB_UPDATE_FAILED]: 'db 업데이트 실패',
   [e.UNKNOWN_FATAL_ERROR]: '알 수 없는 에러(서버에서 의도하지 않음, 확인필요)',
 } as const;
-
-export const BATCH_INTERNAL_ERROR_CODE_DESC = {} as const;

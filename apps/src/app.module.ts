@@ -67,6 +67,10 @@ import { SoloBattleService } from '../battle/src/solo-battle/solo-battle.service
 import { SoloBattleRedisRepository } from '@libs/dao/redis/solo-battle/solo-battle-redis.repository';
 import { KafkaModule } from '../battle/src/kafka/kafka.module';
 import { SequenceInterceptor } from '@libs/common/interceptor/sequence.interceptor';
+import { StaticService } from '../api/src/static/static.service';
+import { StaticController } from '../api/src/static/static.controller';
+import { ErrorController } from '../api/src/error/error.controller';
+import { ErrorService } from '../api/src/error/error.service';
 
 //Api
 @Module({
@@ -118,11 +122,15 @@ import { SequenceInterceptor } from '@libs/common/interceptor/sequence.intercept
     ApiController,
     ApiUserController,
     DatabaseController,
+    StaticController,
+    ErrorController,
   ],
   providers: [
     ApiService,
     ApiUserService,
     DatabaseService,
+    StaticService,
+    ErrorService,
 
     ValidateProvider,
 
