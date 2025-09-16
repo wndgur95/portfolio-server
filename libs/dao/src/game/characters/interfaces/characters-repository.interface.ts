@@ -15,6 +15,8 @@ export interface CharactersRepository
     userId: number,
     dataCharacterIds: number[],
   ): Promise<Character[]>;
+
+  updateLevelById(id: number, level: number): Promise<void>;
 }
 
 export const CharactersRepository = Symbol('CharactersRepository');

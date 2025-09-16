@@ -47,6 +47,7 @@ import { ShopController } from './shop/shop.controller';
 import { ShopService } from './shop/shop.service';
 import { GachaProvider } from '@libs/common/provider/gacha/gacha.provider';
 import { SequenceInterceptor } from '@libs/common/interceptor/sequence.interceptor';
+import { CharacterProvider } from '@libs/common/provider/contents/character.provider';
 
 @Module({
   imports: [
@@ -127,6 +128,7 @@ import { SequenceInterceptor } from '@libs/common/interceptor/sequence.intercept
     BattleProvider,
     MissionProvider,
     GachaProvider,
+    CharacterProvider,
 
     AchievementProvider,
     MissionAchievementProvider,

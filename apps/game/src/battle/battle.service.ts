@@ -172,11 +172,16 @@ export class BattleService {
     ].findByUserIdAndDataCharacterId(userId, dataCharacterId);
 
     if (!character) {
-      throw new ServerErrorException(INTERNAL_ERROR_CODE.CHARACTER_NOT_FOUND);
+      throw new ServerErrorException(INTERNAL_ERROR_CODE.CHARACTER_NOT_FOUND, [
+        dataCharacterId,
+      ]);
     }
 
     if (character.level != level) {
-      throw new ServerErrorException(INTERNAL_ERROR_CODE.CHARACTER_NOT_FOUND);
+      throw new ServerErrorException(
+        INTERNAL_ERROR_CODE.CHARACTER_LEVEL_NOT_MATCH,
+        [dataCharacterId],
+      );
     }
   }
 

@@ -9,8 +9,11 @@ import { ServerErrorException } from '@libs/common/exception/server-error.except
 import { CurrencyDto } from '@libs/dao/game/user-details/dto/currency.dto';
 import { Cost } from '@libs/common/interface/goods.interface';
 import { CURRENCY_PROPS } from '@libs/dao/game/user-details/type/currency';
+import { DataCharacterProvider } from '@libs/common/provider/static-data/data-character.provider';
+import { CharacterProvider } from '@libs/common/provider/contents/character.provider';
+import { CharacterDto } from '@libs/dao/game/characters/dto/character.dto';
 
-type DelegateFunctionReturn = CurrencyDto;
+type DelegateFunctionReturn = CurrencyDto | CharacterDto;
 
 type ConsumeDelegate = Partial<
   Record<GoodsType, (materials: Cost[]) => Promise<DelegateFunctionReturn[]>>
@@ -22,11 +25,17 @@ export class ConsumptionProvider {
     [GOODS_TYPE.CURRENCY]: (
       materials: Cost[],
     ): Promise<DelegateFunctionReturn[]> => this._consumeCurrency(materials),
+
+    [GOODS_TYPE.CHARACTER]: (
+      materials: Cost[],
+    ): Promise<DelegateFunctionReturn[]> => this._consumeCharacter(materials),
   };
 
   constructor(
     private readonly userDetailProvider: UserDetailProvider,
     private readonly dataCurrencyRepository: DataCurrencyRepository,
+    private readonly characterProvider: CharacterProvider,
+    private readonly dataCharacterProvider: DataCharacterProvider,
   ) {}
 
   /**
@@ -46,10 +55,9 @@ export class ConsumptionProvider {
     for (const [goodsType, materials] of [...materialMap]) {
       const func = this.consumeDelegate[goodsType];
       if (!func) {
-        throw new ServerErrorException(
-          INTERNAL_ERROR_CODE.DATA_INVALID,
-          [`${goodsType}타입은 소모 할수 없는 재화 입니다.`],
-        );
+        throw new ServerErrorException(INTERNAL_ERROR_CODE.DATA_INVALID, [
+          `${goodsType}타입은 소모 할수 없는 재화 입니다.`,
+        ]);
       }
       results.push(await func(materials));
     }
@@ -60,9 +68,7 @@ export class ConsumptionProvider {
   /**
    * 통화 소모 by enumId
    */
-  private async _consumeCurrency(
-    materials: Cost[],
-  ): Promise<CurrencyDto[]> {
+  private async _consumeCurrency(materials: Cost[]): Promise<CurrencyDto[]> {
     const userDetail = await this.userDetailProvider.getUserDetail();
 
     // 각 material 의 재화는 이전에 통합을 통해 독립적인 dataId(currency Type)으로 들어온다.
@@ -72,10 +78,9 @@ export class ConsumptionProvider {
       );
 
       if (!dataCurrency) {
-        throw new ServerErrorException(
-          INTERNAL_ERROR_CODE.DATA_INVALID,
-          [`${material.dataId}는 재화 데이터에 존재하지 않은 아이디 입니다.`],
-        );
+        throw new ServerErrorException(INTERNAL_ERROR_CODE.DATA_INVALID, [
+          `${material.dataId}는 재화 데이터에 존재하지 않은 아이디 입니다.`,
+        ]);
       }
 
       const currencyProp = CURRENCY_PROPS[dataCurrency.CURRENCY_TYPE];
@@ -100,6 +105,53 @@ export class ConsumptionProvider {
   }
 
   /**
+   * 통화 소모 by enumId
+   */
+  private async _consumeCharacter(materials: Cost[]): Promise<CharacterDto[]> {
+    const dataIds = materials.map((it) => it.dataId);
+    const characters =
+      await this.characterProvider.getCharactersByDataCharacterIds(dataIds);
+
+    const characterByDataCharacterId = Object.fromEntries(
+      characters.map((it) => [it.dataCharacterId, it]),
+    );
+
+    for (const material of materials) {
+      const { dataId, quantity } = material;
+      const character = characterByDataCharacterId[dataId];
+
+      const dataCharacter = this.dataCharacterProvider.getDataCharacter(dataId);
+
+      if (!dataCharacter) {
+        throw new ServerErrorException(INTERNAL_ERROR_CODE.DATA_INVALID, [
+          `${dataId}는 캐릭터 데이터에 존재하지 않은 아이디 입니다.`,
+        ]);
+      }
+
+      if (!character) {
+        throw new ServerErrorException(
+          INTERNAL_ERROR_CODE.CHARACTER_NOT_FOUND,
+          [dataId],
+        );
+      }
+
+      // 통화 수량 확인
+      if (character.count < quantity) {
+        throw new ServerErrorException(
+          INTERNAL_ERROR_CODE.CHARACTER_NOT_ENOUGH,
+          [dataId],
+        );
+      }
+
+      character.count -= quantity;
+    }
+
+    await this.characterProvider.saveCharacters(characters);
+
+    return CharacterDto.fromEntities(characters);
+  }
+
+  /**
    * 중복 재화 처리
    */
   private async _distinctGoods(
@@ -112,6 +164,9 @@ export class ConsumptionProvider {
 
     const goodsDto = GoodsOutDto.of({
       currency: currencyDto,
+      characters: results.filter(
+        (it) => it instanceof CharacterDto,
+      ) as CharacterDto[],
     });
 
     return ObjectUtil.removeEmptyProperties(goodsDto);

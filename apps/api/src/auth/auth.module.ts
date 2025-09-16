@@ -26,6 +26,7 @@ import { TestTablesModule } from '@libs/dao/common/test-tables/test-tables.modul
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { JwtRefreshStrategy } from './strategy/jwt-refresh.strategy';
 import { ApiKeyStrategy } from './strategy/api-key.strategy';
+import { CharacterProvider } from '@libs/common/provider/contents/character.provider';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { ApiKeyStrategy } from './strategy/api-key.strategy';
     DataGoodsProvider,
     UserDetailProvider,
     DataCharacterProvider,
+    CharacterProvider,
   ],
 })
 export class AuthModule {}

@@ -42,6 +42,7 @@ import { StaticController } from './static/static.controller';
 import { StaticService } from './static/static.service';
 import { ErrorController } from './error/error.controller';
 import { ErrorService } from './error/error.service';
+import { CharacterProvider } from '@libs/common/provider/contents/character.provider';
 
 @Module({
   imports: [
@@ -122,6 +123,7 @@ import { ErrorService } from './error/error.service';
     ConsumptionProvider,
     GoodsProvider,
     RewardProvider,
+    CharacterProvider,
 
     UserDetailProvider,
 

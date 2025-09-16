@@ -71,6 +71,7 @@ import { StaticService } from '../api/src/static/static.service';
 import { StaticController } from '../api/src/static/static.controller';
 import { ErrorController } from '../api/src/error/error.controller';
 import { ErrorService } from '../api/src/error/error.service';
+import { CharacterProvider } from '@libs/common/provider/contents/character.provider';
 
 //Api
 @Module({
@@ -137,6 +138,7 @@ import { ErrorService } from '../api/src/error/error.service';
     ConsumptionProvider,
     GoodsProvider,
     RewardProvider,
+    CharacterProvider,
 
     UserDetailProvider,
 
@@ -214,6 +216,7 @@ export class ApiElementModule {}
     BattleProvider,
     MissionProvider,
     GachaProvider,
+    CharacterProvider,
 
     AchievementProvider,
     MissionAchievementProvider,
