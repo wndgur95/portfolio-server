@@ -6,11 +6,14 @@ import { CharactersDbRepositories } from '@libs/dao/game/characters/repositories
 import { CharacterLevelUpInDto } from './dto/character-level-up-in.dto';
 import { DataBalanceRepository } from '@libs/dao/static/data-balance/data-balance.repository';
 import { DataBalance } from '@libs/dao/static/data-balance/data-balance.entity';
-import { ServerErrorException } from '@libs/common/exception/server-error.exception';
-import { INTERNAL_ERROR_CODE } from '@libs/common/constants/internal-error-code.constants';
 import { Character } from '@libs/dao/game/characters/interfaces/character.interface';
 import { AchievementProvider } from '@libs/common/provider/achievement/achievement.provider';
-import { MISSION_CONDITION_TYPE } from '@libs/dao/static/common.constants';
+import {
+  GOODS_TYPE,
+  MISSION_CONDITION_TYPE,
+} from '@libs/dao/static/common.constants';
+import { GoodsProvider } from '@libs/common/provider/goods/goods.provider';
+import { CharacterProvider } from '@libs/common/provider/contents/character.provider';
 
 @Injectable()
 export class CharacterService {
@@ -19,6 +22,8 @@ export class CharacterService {
     private readonly charactersDbRepositories: CharactersDbRepositories,
 
     private readonly dataBalanceRepository: DataBalanceRepository,
+    private readonly goodsProvider: GoodsProvider,
+    private readonly characterProvider: CharacterProvider,
   ) {}
 
   /**
@@ -42,7 +47,7 @@ export class CharacterService {
     const { database, userId } = ContextProvider.getSession();
     const { dataCharacterId } = characterLevelUpInDto;
 
-    const character = await this.charactersDbRepositories[
+    let character = await this.charactersDbRepositories[
       database
     ].findByUserIdAndDataCharacterId(userId, dataCharacterId);
 
@@ -50,12 +55,15 @@ export class CharacterService {
       DataBalance.BALANCE_CHARACTER_LEVEL_UP,
     ).INDEX[character.level];
 
-    if (needCount > character.count) {
-      throw new ServerErrorException(INTERNAL_ERROR_CODE.CHARACTER_NOT_ENOUGH);
-    }
+    character = await this._getCharacterAfterConsume(
+      character.dataCharacterId,
+      needCount,
+    );
 
-    character.count -= needCount;
-    character.level++;
+    await this.characterProvider.levelUpCharacter(
+      character,
+      character.level + 1,
+    );
 
     AchievementProvider.achieve(
       MISSION_CONDITION_TYPE.CHARACTER_LEVEL_UP,
@@ -63,6 +71,21 @@ export class CharacterService {
       1,
     );
 
-    return await this.charactersDbRepositories[database].save(character);
+    return character;
+  }
+
+  private async _getCharacterAfterConsume(
+    dataCharacterId: number,
+    needCount: number,
+  ): Promise<CharacterDto> {
+    const goodOutDto = await this.goodsProvider.consume([
+      {
+        goodsType: GOODS_TYPE.CHARACTER,
+        dataId: dataCharacterId,
+        quantity: needCount,
+      },
+    ]);
+
+    return goodOutDto.characters[0];
   }
 }

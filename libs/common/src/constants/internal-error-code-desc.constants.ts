@@ -17,9 +17,9 @@ export const INTERNAL_ERROR_CODE_DESC = {
   [e.USER_DETAIL_CURRENCY_GOLD_NOT_ENOUGH]: '골드 부족',
   [e.USER_DETAIL_CURRENCY_CASH_NOT_ENOUGH]: '캐시 부족',
 
-  [e.CHARACTER_NOT_FOUND]: '캐릭터 정보를 찾을 수 없습니다.',
-  [e.CHARACTER_NOT_ENOUGH]: '캐릭터가 부족합니다.',
-  [e.CHARACTER_LEVEL_NOT_MATCH]: '캐릭터 레벨이 다릅니다.',
+  [e.CHARACTER_NOT_FOUND]: '%P 캐릭터 정보를 찾을 수 없습니다.',
+  [e.CHARACTER_NOT_ENOUGH]: '%P 캐릭터가 부족합니다.',
+  [e.CHARACTER_LEVEL_NOT_MATCH]: '%P 캐릭터 레벨이 다릅니다.',
 
   [e.BATTLE_NOT_VALID]: '전투가 유효하지 않습니다.',
 

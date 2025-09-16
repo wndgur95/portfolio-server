@@ -34,10 +34,10 @@ export class CharacterController {
   async levelUpCharacter(
     @Body() characterLevelUpInDto: CharacterLevelUpInDto,
   ): Promise<ResponseEntity<Character>> {
-    const character = await this.characterService.levelUpCharacter(
+    const characterDto = await this.characterService.levelUpCharacter(
       characterLevelUpInDto,
     );
 
-    return ResponseEntity.ok().body(character);
+    return ResponseEntity.ok().body(characterDto);
   }
 }

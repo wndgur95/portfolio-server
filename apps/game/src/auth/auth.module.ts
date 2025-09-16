@@ -22,6 +22,7 @@ import { getGameServerTypeOrmOptions } from '@libs/dao/config/game/game-database
 import { TypeOrmExModule } from '@libs/common/databases/typeorm/typeorm-ex.module';
 import GameDatabaseConfig from '@libs/dao/config/game/game-database.config';
 import { DataSourceOptions } from 'typeorm';
+import { CharacterProvider } from '@libs/common/provider/contents/character.provider';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { DataSourceOptions } from 'typeorm';
     DataGoodsProvider,
     UserDetailProvider,
     DataCharacterProvider,
+    CharacterProvider,
   ],
 })
 export class AuthModule {}

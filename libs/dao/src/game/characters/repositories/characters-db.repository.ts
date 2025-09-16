@@ -40,4 +40,12 @@ export class CharactersDbRepository
       })
       .getMany();
   }
+
+  async updateLevelById(id: number, level: number): Promise<void> {
+    await this.queryBuilder
+      .update(this.alias)
+      .set({ level })
+      .where(`${this.alias}.id=:id`, { id })
+      .execute();
+  }
 }
