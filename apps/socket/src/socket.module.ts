@@ -4,11 +4,7 @@ import { SocketServerConfig } from './config/socket.server.config';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { AllExceptionFilter } from '@libs/common/filter/all-exception.filter';
 import { RequestLogInterceptor } from '@libs/common/interceptor/request-log.interceptor';
-import { KafkaModule } from './kafka/kafka.module';
 import { AuthModule } from './auth/auth.module';
-import { SoloBattleGateway } from './solo-battle/solo-battle.gateway';
-import { SoloBattleService } from './solo-battle/solo-battle.service';
-import { SoloBattleRedisRepository } from '@libs/dao/redis/solo-battle/solo-battle-redis.repository';
 import { SocketController } from './default/socket.controller';
 import { SocketService } from './default/socket.service';
 import { StaticModule } from '@libs/dao/static/static.module';
@@ -31,7 +27,7 @@ import { ChattingKafkaConsumerService } from './chatting-kafka/chatting-kafka-co
       secret: process.env.ACCESS_TOKEN_SECRET,
       signOptions: { expiresIn: JWT_OPTIONS.expiresIn },
     }),
-    KafkaModule,
+    // KafkaModule,
     AuthModule,
     StaticModule,
     ConfigModule,
@@ -59,9 +55,9 @@ import { ChattingKafkaConsumerService } from './chatting-kafka/chatting-kafka-co
     ChattingKafkaConsumerService,
     ChattingRepository,
 
-    SoloBattleGateway,
-    SoloBattleService,
-    SoloBattleRedisRepository,
+    // SoloBattleGateway,
+    // SoloBattleService,
+    // SoloBattleRedisRepository,
 
     DataCharacterProvider,
   ],
