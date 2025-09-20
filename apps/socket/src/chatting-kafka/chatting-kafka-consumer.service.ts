@@ -2,6 +2,7 @@ import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { ChattingKafkaService } from './chatting-kafka.service';
 import { ChatEvent } from './interfaces/chatting-kafka-event.interface';
 import { ChattingService } from '../chatting/chatting.service';
+import { EnvProvider } from '@libs/common/provider/env.provider';
 
 @Injectable()
 export class ChattingKafkaConsumerService implements OnModuleInit {
@@ -14,6 +15,7 @@ export class ChattingKafkaConsumerService implements OnModuleInit {
 
   async onModuleInit(): Promise<void> {
     try {
+      if (!EnvProvider.isProd()) return;
       const consumer = this.kafkaService.getConsumer();
       
       await consumer.subscribe({ 
@@ -35,6 +37,7 @@ export class ChattingKafkaConsumerService implements OnModuleInit {
   }
 
   private async handleKafkaMessage(topic: string, message: any): Promise<void> {
+    if (!EnvProvider.isProd()) return;
     try {
       const event: ChatEvent = JSON.parse(message.value.toString());
       

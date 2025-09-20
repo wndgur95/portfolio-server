@@ -2,7 +2,6 @@ import { LoggerService } from '@nestjs/common';
 import { format, transports } from 'winston';
 import winstonDailyRotateFile from 'winston-daily-rotate-file';
 import { utilities, WinstonModule } from 'nest-winston';
-import { EnvProvider } from '@libs/common/provider/env.provider';
 
 export class SystemLogger {
   public logger: LoggerService;
