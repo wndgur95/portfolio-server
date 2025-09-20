@@ -27,7 +27,7 @@ export class ChattingKafkaService implements OnModuleInit, OnModuleDestroy {
 
       this.producer = this.kafka.producer();
       this.consumer = this.kafka.consumer({ 
-        groupId: `chat-service-group-${process.env.SERVER_ID}`
+        groupId: `chat-service-group`
       });
 
       await this.producer.connect();
