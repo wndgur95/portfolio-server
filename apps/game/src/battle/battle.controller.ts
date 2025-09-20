@@ -12,7 +12,7 @@ import { BattleFinishOutDto } from './dto/battle-finish-out.dto';
 import { GetSoloRankingOutDto } from './dto/get-solo-ranking-out.dto';
 import { GetSoloRankingInDto } from './dto/get-solo-ranking-in.dto';
 
-@Controller('game/socket')
+@Controller('game/battle')
 @ApiTags('Battle')
 @Auth()
 export class BattleController {
