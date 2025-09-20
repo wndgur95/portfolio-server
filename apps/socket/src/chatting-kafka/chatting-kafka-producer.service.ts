@@ -4,6 +4,7 @@ import {
   ChatEvent,
   ChatEventType,
 } from './interfaces/chatting-kafka-event.interface';
+import { EnvProvider } from '@libs/common/provider/env.provider';
 
 @Injectable()
 export class ChattingKafkaProducerService {
@@ -16,6 +17,7 @@ export class ChattingKafkaProducerService {
     userId: string,
     username: string,
   ): Promise<void> {
+    if (!EnvProvider.isProd()) return;
     const event: ChatEvent = {
       type: 'room-join' as ChatEventType,
       roomId,
@@ -29,6 +31,7 @@ export class ChattingKafkaProducerService {
   }
 
   async publishRoomLeave(roomId: string, userId: string): Promise<void> {
+    if (!EnvProvider.isProd()) return;
     const event: ChatEvent = {
       type: 'room-leave' as ChatEventType,
       roomId,
@@ -41,6 +44,7 @@ export class ChattingKafkaProducerService {
   }
 
   async publishMessage(roomId: string, messageData: any): Promise<void> {
+    if (!EnvProvider.isProd()) return;
     const event: ChatEvent = {
       type: 'message-send' as ChatEventType,
       roomId,
@@ -54,6 +58,7 @@ export class ChattingKafkaProducerService {
   }
 
   async publishUserConnect(userId: string, username: string): Promise<void> {
+    if (!EnvProvider.isProd()) return;
     const event: ChatEvent = {
       type: 'user-connect' as ChatEventType,
       userId,
@@ -66,6 +71,7 @@ export class ChattingKafkaProducerService {
   }
 
   async publishUserDisconnect(userId: string): Promise<void> {
+    if (!EnvProvider.isProd()) return;
     const event: ChatEvent = {
       type: 'user-disconnect' as ChatEventType,
       userId,
@@ -81,6 +87,7 @@ export class ChattingKafkaProducerService {
     event: ChatEvent,
     key: string,
   ): Promise<void> {
+    if (!EnvProvider.isProd()) return;
     try {
       const producer = this.kafkaService.getProducer();
 

@@ -1,5 +1,6 @@
 import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
 import { Kafka, Producer, Consumer } from 'kafkajs';
+import { EnvProvider } from '@libs/common/provider/env.provider';
 
 @Injectable()
 export class ChattingKafkaService implements OnModuleInit, OnModuleDestroy {
@@ -9,6 +10,7 @@ export class ChattingKafkaService implements OnModuleInit, OnModuleDestroy {
   private consumer: Consumer;
 
   async onModuleInit(): Promise<void> {
+    if (!EnvProvider.isProd()) return;
     try {
       // 디버깅: 환경변수 값 확인
       this.logger.log(`KAFKA_BROKER 환경변수: ${process.env.KAFKA_BROKER}`);
@@ -39,6 +41,7 @@ export class ChattingKafkaService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleDestroy(): Promise<void> {
+    if (!EnvProvider.isProd()) return;
     try {
       await this.producer?.disconnect();
       await this.consumer?.disconnect();
@@ -49,6 +52,7 @@ export class ChattingKafkaService implements OnModuleInit, OnModuleDestroy {
   }
 
   getProducer(): Producer {
+    if (!EnvProvider.isProd()) return;
     if (!this.producer) {
       throw new Error('Kafka producer가 초기화되지 않았습니다.');
     }
@@ -56,6 +60,7 @@ export class ChattingKafkaService implements OnModuleInit, OnModuleDestroy {
   }
 
   getConsumer(): Consumer {
+    if (!EnvProvider.isProd()) return;
     if (!this.consumer) {
       throw new Error('Kafka consumer가 초기화되지 않았습니다.');
     }
@@ -63,6 +68,7 @@ export class ChattingKafkaService implements OnModuleInit, OnModuleDestroy {
   }
 
   getKafka(): Kafka {
+    if (!EnvProvider.isProd()) return;
     if (!this.kafka) {
       throw new Error('Kafka가 초기화되지 않았습니다.');
     }
