@@ -5,7 +5,7 @@ import { ServerErrorException } from '@libs/common/exception/server-error.except
 import { INTERNAL_ERROR_CODE } from '@libs/common/constants/internal-error-code.constants';
 
 @Injectable()
-export class BattleService {
+export class SocketService {
   private readonly redis: Redis;
 
   constructor(private readonly staticRepository: StaticRepository) {

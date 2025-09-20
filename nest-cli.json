@@ -100,13 +100,13 @@
         "tsConfigPath": "apps/deploy/tsconfig.app.json"
       }
     },
-    "battle": {
+    "socket": {
       "type": "application",
-      "root": "apps/battle",
+      "root": "apps/socket",
       "entryFile": "main",
-      "sourceRoot": "apps/battle/src",
+      "sourceRoot": "apps/socket/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/battle/tsconfig.app.json"
+        "tsConfigPath": "apps/socket/tsconfig.app.json"
       }
     }
   }

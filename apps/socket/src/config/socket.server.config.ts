@@ -13,11 +13,11 @@ const environment = NODE_ENV || 'test';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: `./config/.battle.${environment}.env`,
+      envFilePath: `./config/.socket.${environment}.env`,
       isGlobal: true,
       cache: true,
       load: [CommonDatabaseConfig, GameDatabaseConfig, ArenaDatabaseConfig],
     }),
   ],
 })
-export class BattleServerConfig {}
+export class SocketServerConfig {}
