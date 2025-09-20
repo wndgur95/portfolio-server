@@ -11,6 +11,8 @@ export const RedisDbNumber = {
   SESSION: 1,
   SOLO_RANKING: 2,
 
+  CHATTING: 5,
+
   SOLO_BATTLE_SOCKET: 10,
 };
 export type RedisDbNumber = (typeof RedisDbNumber)[keyof typeof RedisDbNumber];

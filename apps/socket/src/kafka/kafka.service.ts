@@ -23,8 +23,8 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
   constructor() {
     // Kafka 클라이언트 설정 (PLAINTEXT)
     this.kafka = new Kafka({
-      clientId: `battle-server-${process.env.SERVER_ID || Date.now()}`,
-      brokers: [process.env.KAFKA_BROKERS || 'localhost:30092'],
+      clientId: `battle-server-${process.env.SERVER_ID}`,
+      brokers: [process.env.KAFKA_BROKER],
       retry: {
         initialRetryTime: 100,
         retries: 8,
@@ -35,7 +35,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
       allowAutoTopicCreation: true,
     });
     this.consumer = this.kafka.consumer({
-      groupId: 'battle-server-group',
+      groupId: 'socket-server-group',
       sessionTimeout: 30000,
       heartbeatInterval: 3000,
     });
@@ -112,7 +112,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
             value: JSON.stringify({
               ...message,
               timestamp: Date.now(),
-              serverId: process.env.SERVER_ID || 'unknown',
+              serverId: process.env.SERVER_ID,
             }),
           },
         ],
@@ -173,7 +173,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
     data: any,
   ): Promise<RecordMetadata[]> {
     return this.publishMessage(
-      'battle-events',
+      'socket-events',
       {
         eventType,
         battleId,

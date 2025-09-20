@@ -58,20 +58,28 @@ import { SoloBattleProvider } from '@libs/common/provider/contents/solo-battle.p
 import { GachaProvider } from '@libs/common/provider/gacha/gacha.provider';
 import { ShopService } from '../game/src/shop/shop.service';
 import { ShopController } from '../game/src/shop/shop.controller';
-import { BattleServerConfig } from '../battle/src/config/battle.server.config';
-import { AuthModule as AuthBattleModule } from '../battle/src/auth/auth.module';
-import { BattleController as BattleDefaultController } from '../battle/src/default/battle.controller';
-import { BattleService as BattleDefaultService } from '../battle/src/default/battle.service';
-import { SoloBattleGateway } from '../battle/src/solo-battle/solo-battle.gateway';
-import { SoloBattleService } from '../battle/src/solo-battle/solo-battle.service';
+import { SocketServerConfig } from '../socket/src/config/socket.server.config';
+import { AuthModule as AuthBattleModule } from '../socket/src/auth/auth.module';
+import { SocketController } from '../socket/src/default/socket.controller';
+import { SocketService as SocketDefaultService } from '../socket/src/default/socket.service';
+import { SoloBattleGateway } from '../socket/src/solo-battle/solo-battle.gateway';
+import { SoloBattleService } from '../socket/src/solo-battle/solo-battle.service';
 import { SoloBattleRedisRepository } from '@libs/dao/redis/solo-battle/solo-battle-redis.repository';
-import { KafkaModule } from '../battle/src/kafka/kafka.module';
+import { KafkaModule } from '../socket/src/kafka/kafka.module';
 import { SequenceInterceptor } from '@libs/common/interceptor/sequence.interceptor';
 import { StaticService } from '../api/src/static/static.service';
 import { StaticController } from '../api/src/static/static.controller';
 import { ErrorController } from '../api/src/error/error.controller';
 import { ErrorService } from '../api/src/error/error.service';
 import { CharacterProvider } from '@libs/common/provider/contents/character.provider';
+import { ChattingGateway } from '../socket/src/chatting/chatting.gateway';
+import { ChattingService } from '../socket/src/chatting/chatting.service';
+import { ChattingRepository } from '@libs/dao/redis/chatting/chatting.repository';
+import { JwtModule } from '@nestjs/jwt';
+import { JWT_OPTIONS } from '@libs/common/constants/jwt.constants';
+import { ChattingKafkaService } from '../socket/src/chatting-kafka/chatting-kafka.service';
+import { ChattingKafkaProducerService } from '../socket/src/chatting-kafka/chatting-kafka-producer.service';
+import { ChattingKafkaConsumerService } from '../socket/src/chatting-kafka/chatting-kafka-consumer.service';
 
 //Api
 @Module({
@@ -233,17 +241,34 @@ export class ApiElementModule {}
 export class GameElementModule {}
 
 @Module({
-  imports: [BattleServerConfig, KafkaModule, StaticModule, AuthBattleModule],
-  controllers: [BattleDefaultController],
+  imports: [
+    JwtModule.register({
+      secret: process.env.ACCESS_TOKEN_SECRET,
+      signOptions: { expiresIn: JWT_OPTIONS.expiresIn },
+    }),
+    SocketServerConfig,
+    KafkaModule,
+    StaticModule,
+    AuthBattleModule,
+  ],
+  controllers: [SocketController],
   providers: [
-    BattleDefaultService,
+    SocketDefaultService,
+
+    ChattingGateway,
+    ChattingService,
+    ChattingKafkaService,
+    ChattingKafkaProducerService,
+    ChattingKafkaConsumerService,
+    ChattingRepository,
+
     SoloBattleGateway,
     SoloBattleService,
     SoloBattleRedisRepository,
     DataCharacterProvider,
   ],
 })
-export class BattleElementModule {}
+export class SocketElementModule {}
 
 //App
 @Module({
@@ -281,7 +306,7 @@ export class BattleElementModule {}
 
     ApiElementModule,
     GameElementModule,
-    // BattleElementModule,
+    SocketElementModule,
   ],
   controllers: [],
   providers: [

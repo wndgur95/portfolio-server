@@ -75,7 +75,7 @@ export class SoloBattleGateway
         client.data.currentBattleId = null; // 현재 참가 중인 배틀 ID 초기화
         client.data.lastActivity = Date.now(); // 마지막 활동 시간
         client.data.heartbeatCount = 0; // Heartbeat 카운터
-        client.data.namespace = '/solo-battle'; // 네임스페이스 정보
+        client.data.namespace = '/solo-socket'; // 네임스페이스 정보
 
         // 클라이언트 연결 시 초기화 (배틀 참가 전 상태)
         await this.soloBattleService.initializeClient(client.id);
@@ -132,7 +132,7 @@ export class SoloBattleGateway
     }
   }
 
-  @SubscribeMessage('join-battle')
+  @SubscribeMessage('join-socket')
   async handleJoinBattle(
     @ConnectedSocket() client: Socket,
     @MessageBody() data: SoloBattleDto.JoinBattleDto,
@@ -179,21 +179,21 @@ export class SoloBattleGateway
         this.logger.log(`Client ${client.id}에게 battle-joined 이벤트 발송`);
         this.logger.log(`Result: ${JSON.stringify(result)}`);
         
-        client.emit('battle-joined', {
+        client.emit('socket-joined', {
           ...result,
-          status: 'in-battle', // 배틀 중 상태
-          message: 'Successfully joined battle'
+          status: 'in-socket', // 배틀 중 상태
+          message: 'Successfully joined socket'
         });
         
         this.logger.log(`=== [SoloBattleGateway] battle-joined 이벤트 발송 완료 ===`);
       } catch (error) {
         this.logger.error(`Error joining battle:`, error);
-        client.emit('error', { message: 'Failed to join battle' });
+        client.emit('error', { message: 'Failed to join socket' });
       }
     });
   }
 
-  @SubscribeMessage('leave-battle')
+  @SubscribeMessage('leave-socket')
   async handleLeaveBattle(
     @ConnectedSocket() client: Socket,
     @MessageBody() data: SoloBattleDto.LeaveBattleDto,
@@ -209,16 +209,16 @@ export class SoloBattleGateway
         client.data.currentBattleId = null;
         
         // 클라이언트에게 배틀 퇴장 확인 및 준비 상태 알림
-        client.emit('battle-left', { 
+        client.emit('socket-left', {
           battleId: data.battleId,
           status: 'ready', // 새로운 배틀 참가 준비 상태
-          message: 'Successfully left battle. Ready for new battle.'
+          message: 'Successfully left socket. Ready for new socket.'
         });
         
         this.logger.log(`Client ${client.id} successfully left battle ${data.battleId} and is ready for new battle`);
       } catch (error) {
         this.logger.error(`Error leaving battle:`, error);
-        client.emit('error', { message: 'Failed to leave battle' });
+        client.emit('error', { message: 'Failed to leave socket' });
       }
     });
   }

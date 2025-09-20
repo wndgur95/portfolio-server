@@ -98,7 +98,7 @@ export class SoloBattleService {
         battleId,
         userId,
         connectedAt: Date.now(),
-        status: 'in-battle',
+        status: 'in-socket',
       });
 
       await this.soloBattleRepository.setClientData(clientData);
@@ -110,14 +110,14 @@ export class SoloBattleService {
       return {
         battleInfo,
         status: 'success',
-        message: 'Successfully joined battle',
+        message: 'Successfully joined socket',
       };
     } catch (error) {
       this.logger.error(`Error joining battle:`, error);
       return {
         battleInfo,
         status: 'error',
-        message: 'Failed to join battle',
+        message: 'Failed to join socket',
       };
     }
   }

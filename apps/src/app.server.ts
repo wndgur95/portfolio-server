@@ -1,7 +1,7 @@
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { INestApplication, Logger } from '@nestjs/common';
 import { SWAGGER_CUSTOM_OPTIONS } from '@libs/common/constants/swagger.constants';
-import { ApiElementModule, BattleElementModule, GameElementModule } from './app.module';
+import { ApiElementModule, SocketElementModule, GameElementModule } from './app.module';
 
 export class AppServer {
   constructor(private readonly app: INestApplication) {}
@@ -18,7 +18,7 @@ export class AppServer {
 
     this._initializeApiSwagger();
     this._initializeGameSwagger();
-    // this._initializeBattleSwagger();
+    this._initializeSocketSwagger();
   }
 
   /**
@@ -152,9 +152,9 @@ export class AppServer {
   /**
    * OPEN API(Swagger) 초기화
    */
-  private _initializeBattleSwagger(): void {
+  private _initializeSocketSwagger(): void {
     const config = new DocumentBuilder()
-      .setTitle('Battle Server')
+      .setTitle('Socket Server')
       .setDescription('API description')
       .setVersion('1.0')
       .addBasicAuth(
@@ -169,12 +169,12 @@ export class AppServer {
       .build();
 
     const document = SwaggerModule.createDocument(this.app, config, {
-      include: [BattleElementModule],
+      include: [SocketElementModule],
       deepScanRoutes: true,
     });
 
     SwaggerModule.setup(
-      'battle/api-docs',
+      'socket/api-docs',
       this.app,
       document,
       SWAGGER_CUSTOM_OPTIONS,

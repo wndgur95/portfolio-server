@@ -1,11 +1,11 @@
 import { Controller, Get } from '@nestjs/common';
-import { BattleService } from './battle.service';
+import { SocketService } from './socket.service';
 import { ResponseEntity } from '@libs/common/network/response-entity';
 import { ApiResponseEntity } from '@libs/common/decorator/api-response-entity';
 
-@Controller('battle')
-export class BattleController {
-  constructor(private readonly battleService: BattleService) {}
+@Controller('socket')
+export class SocketController {
+  constructor(private readonly battleService: SocketService) {}
 
   @Get('/health')
   @ApiResponseEntity({ summary: '헬스 체크' })
