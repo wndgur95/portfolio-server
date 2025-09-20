@@ -35,7 +35,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
       allowAutoTopicCreation: true,
     });
     this.consumer = this.kafka.consumer({
-      groupId: 'socket-server-group',
+      groupId: `socket-server-group-${process.env.SERVER_ID}`,
       sessionTimeout: 30000,
       heartbeatInterval: 3000,
     });

@@ -11,7 +11,7 @@ export class ChattingKafkaService implements OnModuleInit, OnModuleDestroy {
   async onModuleInit(): Promise<void> {
     try {
       this.kafka = new Kafka({
-        clientId: `chat-service-${process.env.NODE_ENV || 'development'}`,
+        clientId: `chat-service-${process.env.SERVER_ID}`,
         brokers: [process.env.KAFKA_BROKER],
         retry: {
           initialRetryTime: 100,
