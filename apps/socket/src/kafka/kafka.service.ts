@@ -24,7 +24,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
     // Kafka 클라이언트 설정 (PLAINTEXT)
     this.kafka = new Kafka({
       clientId: `battle-server-${process.env.SERVER_ID}`,
-      brokers: [process.env.KAFKA_BROKER],
+      brokers: [process.env.KAFKA_BROKER || 'kafka.kafka.svc.cluster.local:9092'],
       retry: {
         initialRetryTime: 100,
         retries: 8,
