@@ -407,9 +407,19 @@ export class ChattingService {
   /**
    * 원격 서버에서 온 룸 입장 이벤트 처리
    */
-  async handleRemoteRoomJoin(event: ChatEvent): Promise<void> {
+  async handleRemoteRoomJoin(event: ChatEvent, server: Server): Promise<void> {
     try {
       await this._saveRoomUser(event.roomId, event.userId, event.username);
+      
+      // Socket.IO로 룸 입장 브로드캐스트
+      const userJoinedEvent: UserJoinedEvent = {
+        userId: event.userId,
+        username: event.username,
+        roomId: event.roomId,
+        message: `${event.username}님이 채팅방에 입장했습니다.`,
+      };
+      server.to(event.roomId).emit('user-joined', userJoinedEvent);
+      
       this.logger.log(
         `Remote room join handled: ${event.roomId} - ${event.userId}`,
       );
@@ -421,9 +431,18 @@ export class ChattingService {
   /**
    * 원격 서버에서 온 룸 퇴장 이벤트 처리
    */
-  async handleRemoteRoomLeave(event: ChatEvent): Promise<void> {
+  async handleRemoteRoomLeave(event: ChatEvent, server: Server): Promise<void> {
     try {
       await this.removeRoomUser(event.roomId, event.userId);
+      
+      // Socket.IO로 룸 퇴장 브로드캐스트
+      server.to(event.roomId).emit('user-left', {
+        userId: event.userId,
+        username: event.username || `User-${String(event.userId).slice(0, 6)}`,
+        roomId: event.roomId,
+        message: '사용자가 채팅방을 떠났습니다.',
+      });
+      
       this.logger.log(
         `Remote room leave handled: ${event.roomId} - ${event.userId}`,
       );
