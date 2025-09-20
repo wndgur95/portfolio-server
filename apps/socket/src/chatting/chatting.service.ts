@@ -409,7 +409,8 @@ export class ChattingService {
    */
   async handleRemoteRoomJoin(event: ChatEvent, server: Server): Promise<void> {
     try {
-      await this._saveRoomUser(event.roomId, event.userId, event.username);
+      // Redis 저장 제거 - Producer에서 이미 처리됨
+      // await this._saveRoomUser(event.roomId, event.userId, event.username);
       
       // Socket.IO로 룸 입장 브로드캐스트
       const userJoinedEvent: UserJoinedEvent = {
@@ -433,7 +434,8 @@ export class ChattingService {
    */
   async handleRemoteRoomLeave(event: ChatEvent, server: Server): Promise<void> {
     try {
-      await this.removeRoomUser(event.roomId, event.userId);
+      // Redis 저장 제거 - Producer에서 이미 처리됨
+      // await this.removeRoomUser(event.roomId, event.userId);
       
       // Socket.IO로 룸 퇴장 브로드캐스트
       server.to(event.roomId).emit('user-left', {
