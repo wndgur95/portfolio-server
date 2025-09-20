@@ -17,7 +17,7 @@ export class ChattingKafkaService implements OnModuleInit, OnModuleDestroy {
       this.logger.log(`SERVER_ID 환경변수: ${process.env.SERVER_ID}`);
       
       this.kafka = new Kafka({
-        clientId: `chat-service-${process.env.SERVER_ID}`,
+        clientId: 'portfolio-chat-service',
         brokers: [process.env.KAFKA_BROKER || 'kafka.kafka.svc.cluster.local:9092'],
         retry: {
           initialRetryTime: 100,
