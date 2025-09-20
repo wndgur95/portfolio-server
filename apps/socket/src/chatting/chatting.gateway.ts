@@ -17,6 +17,7 @@ import {
 } from './interfaces/chat.interface';
 import { ChattingService } from './chatting.service';
 import { ChattingKafkaProducerService } from '../chatting-kafka/chatting-kafka-producer.service';
+import { ChattingKafkaConsumerService } from '../chatting-kafka/chatting-kafka-consumer.service';
 
 @WebSocketGateway({ namespace: 'socket/chat', cors: { origin: '*' } })
 export class ChattingGateway
@@ -27,12 +28,15 @@ export class ChattingGateway
   constructor(
     private readonly chattingService: ChattingService,
     private readonly kafkaProducer: ChattingKafkaProducerService,
+    private readonly kafkaConsumer: ChattingKafkaConsumerService,
   ) {}
 
   @WebSocketServer() server: Server;
 
   afterInit(): void {
     this.logger.log('웹소켓 서버 초기화');
+    // Consumer에 Server 인스턴스 전달
+    this.kafkaConsumer.setServer(this.server);
   }
 
   async handleConnection(client: Socket): Promise<void> {

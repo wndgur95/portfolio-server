@@ -435,12 +435,13 @@ export class ChattingService {
   /**
    * 원격 서버에서 온 메시지 이벤트 처리
    */
-  async handleRemoteMessage(event: ChatEvent): Promise<void> {
+  async handleRemoteMessage(event: ChatEvent, server: Server): Promise<void> {
     try {
-      // 여기서는 로컬 서버의 클라이언트들에게 메시지를 전달하는 로직이 필요
-      // 이는 Gateway에서 처리하도록 이벤트를 전달
+      // Socket.IO로 메시지 브로드캐스트
+      server.to(event.roomId).emit('message', event.messageData);
+      
       this.logger.log(
-        `Remote message handled: ${event.roomId} - ${event.userId}`,
+        `Remote message broadcasted: ${event.roomId} - ${event.userId}`,
       );
     } catch (error) {
       this.logger.error(`Failed to handle remote message:`, error);

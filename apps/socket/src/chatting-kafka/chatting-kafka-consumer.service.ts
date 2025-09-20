@@ -3,15 +3,21 @@ import { ChattingKafkaService } from './chatting-kafka.service';
 import { ChatEvent } from './interfaces/chatting-kafka-event.interface';
 import { ChattingService } from '../chatting/chatting.service';
 import { EnvProvider } from '@libs/common/provider/env.provider';
+import { Server } from 'socket.io';
 
 @Injectable()
 export class ChattingKafkaConsumerService implements OnModuleInit {
   private readonly logger = new Logger(ChattingKafkaConsumerService.name);
+  private server: Server;
 
   constructor(
     private readonly kafkaService: ChattingKafkaService,
     private readonly chattingService: ChattingService,
   ) {}
+
+  setServer(server: Server): void {
+    this.server = server;
+  }
 
   async onModuleInit(): Promise<void> {
     try {
@@ -56,7 +62,11 @@ export class ChattingKafkaConsumerService implements OnModuleInit {
           await this.chattingService.handleRemoteRoomLeave(event);
           break;
         case 'message-send':
-          await this.chattingService.handleRemoteMessage(event);
+          if (this.server) {
+            await this.chattingService.handleRemoteMessage(event, this.server);
+          } else {
+            this.logger.warn('Server instance not available for message broadcasting');
+          }
           break;
         case 'user-connect':
           await this.chattingService.handleRemoteUserConnect(event);
