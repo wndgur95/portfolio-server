@@ -56,10 +56,18 @@ export class ChattingKafkaConsumerService implements OnModuleInit {
 
       switch (event.type) {
         case 'room-join':
-          await this.chattingService.handleRemoteRoomJoin(event);
+          if (this.server) {
+            await this.chattingService.handleRemoteRoomJoin(event, this.server);
+          } else {
+            this.logger.warn('Server instance not available for room join broadcasting');
+          }
           break;
         case 'room-leave':
-          await this.chattingService.handleRemoteRoomLeave(event);
+          if (this.server) {
+            await this.chattingService.handleRemoteRoomLeave(event, this.server);
+          } else {
+            this.logger.warn('Server instance not available for room leave broadcasting');
+          }
           break;
         case 'message-send':
           if (this.server) {
