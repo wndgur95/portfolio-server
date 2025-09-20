@@ -27,20 +27,18 @@ export class SystemLogger {
       }),
     ];
 
-    if (!EnvProvider.isProd()) {
-      transportList.push(
-        new transports.Console({
-          level: 'info',
-          format: combine(
-            timestamp(),
-            utilities.format.nestLike(undefined, {
-              colors: true,
-              prettyPrint: true,
-            }),
-          ),
-        }),
-      );
-    }
+    transportList.push(
+      new transports.Console({
+        level: 'info',
+        format: combine(
+          timestamp(),
+          utilities.format.nestLike(undefined, {
+            colors: true,
+            prettyPrint: true,
+          }),
+        ),
+      }),
+    );
 
     this.logger = WinstonModule.createLogger({
       transports: transportList,
