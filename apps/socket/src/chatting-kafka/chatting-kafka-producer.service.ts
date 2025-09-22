@@ -85,7 +85,7 @@ export class ChattingKafkaProducerService {
         topic,
         messages: [
           {
-            key,
+            // key 제거 - 라운드 로빈으로 파티션 분산
             value: JSON.stringify(event),
             timestamp: Date.now().toString(),
           },
