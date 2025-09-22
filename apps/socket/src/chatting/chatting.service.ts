@@ -359,6 +359,11 @@ export class ChattingService {
   async consumerJoinRoom(event: ChatEvent): Promise<void> {
     const { roomId, userId, socketId, username } = event;
 
+    if (!this.server) {
+      this.logger.error('Server instance not available for room join broadcasting');
+      return;
+    }
+
     // 룸의 다른 사용자들에게 입장 알림
     const userJoinedEvent: UserJoinedEvent = {
       userId: userId,
@@ -371,6 +376,8 @@ export class ChattingService {
       .to(roomId)
       .except(socketId)
       .emit('user-joined', userJoinedEvent);
+    
+    this.logger.log(`Room join broadcasted via Socket.IO: ${roomId} - ${userId}`);
   }
 
   /**
@@ -411,7 +418,13 @@ export class ChattingService {
   async consumerChatMessage(event: ChatEvent): Promise<void> {
     const { roomId, messageData } = event;
 
+    if (!this.server) {
+      this.logger.error('Server instance not available for message broadcasting');
+      return;
+    }
+
     this.server.to(roomId).emit('message', messageData);
+    this.logger.log(`Message broadcasted via Socket.IO: ${roomId} - ${messageData.userId}`);
   }
 
   private _checkChatMessage(client: Socket): boolean {
