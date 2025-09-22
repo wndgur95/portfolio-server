@@ -17,91 +17,129 @@ import {
 } from './interfaces/chat.interface';
 import { ChatEvent } from '../chatting-kafka/interfaces/chatting-kafka-event.interface';
 import { ChattingKafkaProducerService } from '../chatting-kafka/chatting-kafka-producer.service';
+import { EnvProvider } from '@libs/common/provider/env.provider';
 
 @Injectable()
 export class ChattingService {
   private readonly logger = new Logger(ChattingService.name);
+  private readonly shortServerId = null;
+  private server: Server;
 
   constructor(
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
     private readonly chattingRepository: ChattingRepository,
-    private readonly kafkaProducer: ChattingKafkaProducerService,
-  ) {}
+    private readonly chattingKafkaProducerService: ChattingKafkaProducerService,
+  ) {
+    const splitServerId = process.env.SERVER_ID.split('-');
+    this.shortServerId = splitServerId[splitServerId.length - 1];
+  }
 
-  async connectUser(payload: JwtPayload, client: Socket): Promise<void> {
-    await this._saveUserData(payload.id, client.id, payload);
-
-    // Kafka에 사용자 연결 이벤트 발행
-    await this.kafkaProducer.publishUserConnect(
-      String(client.data.userId),
-      client.data.email || client.data.username,
-    );
-
-    // 연결 성공 이벤트 전송 (동일 포맷)
-    client.emit('authenticated', {
-      userId: payload.id,
-      username: client.data.username,
-    });
+  setServer(server: Server): void {
+    this.server = server;
   }
 
   /**
    * 기존 연결 해제 (Redis 기반)
    */
-  async disconnectExistingConnection(
-    server: Server,
-    userId: number,
-  ): Promise<boolean> {
+  async getConnectedSocketId(userId: number): Promise<string> {
     if (!userId) return;
-    try {
-      const existingSocketId = await this._getExistingSocketId(userId);
-      if (!existingSocketId) {
-        return false; // 기존 연결 없음
-      }
 
-      const fetched = await server.fetchSockets();
+    return await this._getExistingSocketId(userId);
+  }
 
-      const existingSocket =
-        fetched.find((s: any) => s.id === existingSocketId) || null;
+  async connectUser(payload: JwtPayload, client: Socket): Promise<void> {
+    await this._saveUserData(payload.id, client.id, payload);
 
-      if (existingSocket) {
-        this.logger.log(
-          `기존 연결 발견: userId=${userId}, socketId=${existingSocketId}`,
-        );
-        existingSocket.emit('error', {
-          message: '다른 위치에서 로그인되어 기존 연결이 종료됩니다.',
-        });
-        existingSocket.disconnect(true);
-        this.logger.log(
-          `기존 연결 해제 완료: userId=${userId}, socketId=${existingSocketId}`,
-        );
-        return true;
-      } else {
-        // 소켓이 서버에 없으면 Redis 데이터만 정리
-        await this._deleteUserData(userId);
-        this.logger.log(
-          `기존 소켓이 서버에 없어 Redis 데이터만 정리: userId=${userId}`,
-        );
-        return false;
-      }
-    } catch (error) {
-      this.logger.error(`기존 연결 해제 실패: ${error.message}`);
-      return false;
-    }
+    // 연결 성공 이벤트 전송 (동일 포맷)
+    client.emit('authenticated', {
+      userId: payload.id,
+      username: client.data.username,
+      serverId: this.shortServerId,
+    });
+  }
+
+  async producerDisconnectUser(socketId: string): Promise<boolean> {
+    if (!socketId) return;
+
+    const event =
+      await this.chattingKafkaProducerService.publishUserDisconnect(socketId);
+
+    if (!EnvProvider.isProd()) await this.consumerDisconnectUser(event);
+  }
+
+  async consumerDisconnectUser(event: ChatEvent): Promise<boolean> {
+    if (!event.socketId) return;
+
+    const fetched = await this.server.fetchSockets();
+
+    const existingSocket =
+      fetched.find((s: any) => s.id === event.socketId) || null;
+
+    if (!existingSocket) return;
+
+    existingSocket.emit('error', {
+      message: '다른 위치에서 로그인되어 기존 연결이 종료됩니다.',
+    });
+    existingSocket.disconnect(true);
+  }
+
+  /**
+   * 다른 모든 룸에서 제거 및 정리
+   */
+  async producerLeaveRoom(client: Socket): Promise<void> {
+    const roomId = client.data.currentRoom;
+    if (!roomId) return;
+
+    client.leave(roomId);
+    client.data.currentRoom = null;
+
+    await this.removeRoomUser(roomId, client.data.userId);
+
+    // 퇴장한 클라이언트에게 성공 메시지
+    const roomLeftEvent: RoomLeftEvent = {
+      roomId: roomId,
+      message: `채팅방 "${roomId}"에서 퇴장했습니다.`,
+    };
+    client.emit('room-left', roomLeftEvent);
+
+    await this._cleanupEmptyRoom(client, String(roomId));
+
+    const event = await this.chattingKafkaProducerService.publishRoomLeave(
+      roomId,
+      client.data.userId,
+      client.data.username,
+    );
+
+    if (!EnvProvider.isProd()) await this.consumerLeaveRoom(event);
+  }
+
+  /**
+   * 다른 모든 룸에서 제거 및 정리
+   */
+  async consumerLeaveRoom(event: ChatEvent): Promise<void> {
+    const { roomId, userId, username } = event;
+
+    this.server.to(roomId).emit('user-left', {
+      userId: userId,
+      username: username,
+      roomId: roomId,
+      message: `${username}가 채팅방을 떠났습니다.`,
+    });
   }
 
   /**
    * 사용자 데이터 삭제
    */
   async disconnectUser(client: Socket): Promise<void> {
-    if (!client.data.userId) return;
+    const userId = client.data.userId;
+    if (!userId) return;
 
-    await this._deleteUserData(client.data.userId);
+    const currentSocketId = await this._getExistingSocketId(userId);
 
-    // Kafka에 사용자 연결 해제 이벤트 발행
-    await this.kafkaProducer.publishUserDisconnect(
-      client.data.userId.toString(),
-    );
+    if (currentSocketId != client.id) return;
+
+    await this._deleteUserData(userId);
   }
 
   /**
@@ -120,14 +158,13 @@ export class ChattingService {
   /**
    * 룸 비밀번호 저장
    */
-  async saveRoomPassword(roomId: string, password: string): Promise<void> {
-    try {
-      const roomPasswordKey = `room:${roomId}:password`;
-      await this.chattingRepository.setex(roomPasswordKey, 3600, password); // 1시간 TTL
-      this.logger.log(`Saved room password: ${roomId}`);
-    } catch (error) {
-      this.logger.error(`Failed to save room password: ${error.message}`);
-    }
+  private async _saveRoomPassword(
+    roomId: string,
+    password: string,
+  ): Promise<void> {
+    const roomPasswordKey = `room:${roomId}:password`;
+
+    await this.chattingRepository.setex(roomPasswordKey, 3600, password); // 1시간 TTL
   }
 
   /**
@@ -159,10 +196,8 @@ export class ChattingService {
     try {
       const key = `room:${roomId}:users`;
       const current = await this.chattingRepository.get(key);
-      if (!current) {
-        this.logger.log(`No room users key for room ${roomId}`);
-        return;
-      }
+      if (!current) return;
+
       let list: UserData[] = [];
       try {
         list = JSON.parse(current);
@@ -175,9 +210,6 @@ export class ChattingService {
       } else {
         await this.chattingRepository.setex(key, 3600, JSON.stringify(next));
       }
-      this.logger.log(
-        `Removed user from room (Redis-JSON): roomId=${roomId}, userId=${userId}`,
-      );
     } catch (error) {
       this.logger.error(`Failed to remove room user: ${error.message}`);
     }
@@ -190,8 +222,6 @@ export class ChattingService {
     client: Socket,
     roomId: string,
   ): Promise<{ userId: string; username: string }[]> {
-    this.logger.log(`Getting room users for room: ${roomId}`);
-
     const key = `room:${roomId}:users`;
     const current = await this.chattingRepository.get(key);
     let list: UserData[] = [];
@@ -207,16 +237,11 @@ export class ChattingService {
       username: u.username || `User-${String(u.userId).slice(0, 6)}`,
     }));
 
-    this.logger.log(`Found ${roomUsers.length} users in room ${roomId}`);
-
     const roomUsersResponse: RoomUsersResponse = {
       roomId,
       users: roomUsers,
     };
 
-    this.logger.log(
-      `Sending room users response: ${JSON.stringify(roomUsersResponse)}`,
-    );
     client.emit('room-users', roomUsersResponse);
 
     return roomUsers;
@@ -251,27 +276,28 @@ export class ChattingService {
     client: any,
     roomId: string,
     password: string,
-  ): Promise<{ roomExists: boolean; ok: boolean }> {
+  ): Promise<{ isExist: boolean; ok: boolean }> {
     const storedPassword = await this._getRoomPassword(roomId);
 
-    const roomExists = storedPassword !== null;
-    if (roomExists) {
+    const isExist = storedPassword !== null;
+
+    if (isExist) {
       if (password !== storedPassword) {
         client.emit('error', { message: '비밀번호가 올바르지 않습니다.' });
-        return { roomExists, ok: false };
+        return { isExist, ok: false };
       }
 
-      return { roomExists, ok: true };
+      return { isExist, ok: true };
     }
 
     if (!password || password.trim() === '') {
       client.emit('error', {
         message: '새 룸을 생성하려면 비밀번호를 입력해주세요.',
       });
-      return { roomExists, ok: false };
+      return { isExist, ok: false };
     }
 
-    await this.saveRoomPassword(roomId, password);
+    await this._saveRoomPassword(roomId, password);
 
     const roomData = {
       roomId,
@@ -280,55 +306,18 @@ export class ChattingService {
       createdByEmail: client.data.email,
     };
 
-    await this._saveRoomInfo(roomId, roomData, client.data.userId);
+    await this._saveRoomInfo(roomId, roomData);
 
-    return { roomExists, ok: true };
-  }
-
-  /**
-   * 다른 모든 룸에서 제거 및 정리
-   */
-  async leaveRoom(server: Server, client: Socket): Promise<void> {
-    const roomId = client.data.currentRoom;
-    if (!roomId) return;
-
-    client.leave(roomId);
-    client.data.currentRoom = null;
-
-    await this.removeRoomUser(roomId, client.data.userId || client.id);
-
-    if (server) {
-      server.to(roomId).emit('user-left', {
-        userId: client.id,
-        username:
-          client.data.username || `User-${String(client.id).slice(0, 6)}`,
-        roomId: roomId,
-        message: '사용자가 채팅방을 떠났습니다.',
-      });
-    }
-
-    // 퇴장한 클라이언트에게 성공 메시지
-    const roomLeftEvent: RoomLeftEvent = {
-      roomId: roomId,
-      message: `채팅방 "${roomId}"에서 퇴장했습니다.`,
-    };
-    client.emit('room-left', roomLeftEvent);
-
-    await this._cleanupEmptyRoom(client, String(roomId));
-
-    await this.kafkaProducer.publishRoomLeave(
-      roomId,
-      client.data.userId || client.id,
-    );
+    return { isExist, ok: true };
   }
 
   /**
    * 룸 입장 후 클라이언트 데이터 세팅 및 Redis 반영
    */
-  async joinRoom(
+  async producerJoinRoom(
     client: any,
     roomId: string,
-    roomExists: boolean,
+    isExist: boolean,
   ): Promise<void> {
     client.join(roomId);
 
@@ -341,46 +330,63 @@ export class ChattingService {
       client.data.username,
     );
 
-    this.logger.log(`Client ${client.id} joined room: ${roomId}`);
-
-    // Kafka 에 룸 입장 이벤트 발행
-    await this.kafkaProducer.publishRoomJoin(
-      roomId,
-      client.data.userId || client.id,
-      client.data.username,
-    );
-
-    // 룸의 다른 사용자들에게 입장 알림
-    const userJoinedEvent: UserJoinedEvent = {
-      userId: client.id,
-      username: client.data.username,
-      roomId: roomId,
-      message: `${client.data.username}님이 채팅방에 입장했습니다.`,
-    };
-    client.to(roomId).emit('user-joined', userJoinedEvent);
-
     // 입장한 클라이언트에게 성공 메시지
     const roomJoinedEvent: RoomJoinedEvent = {
       roomId: roomId,
       username: client.data.username,
-      message: roomExists
+      message: isExist
         ? `채팅방 "${roomId}"에 입장했습니다.`
         : `채팅방 "${roomId}"에 입장했습니다. (새 룸이 생성되었습니다)`,
     };
     client.emit('room-joined', roomJoinedEvent);
+
+    if (!isExist) return;
+
+    // Kafka 에 룸 입장 이벤트 발행
+    const event = await this.chattingKafkaProducerService.publishRoomJoin(
+      client.id,
+      roomId,
+      client.data.userId,
+      client.data.username,
+    );
+
+    if (!EnvProvider.isProd()) await this.consumerJoinRoom(event);
+  }
+
+  /**
+   * 룸 입장 후 클라이언트 데이터 세팅 및 Redis 반영
+   */
+  async consumerJoinRoom(event: ChatEvent): Promise<void> {
+    const { roomId, userId, socketId, username } = event;
+
+    // 룸의 다른 사용자들에게 입장 알림
+    const userJoinedEvent: UserJoinedEvent = {
+      userId: userId,
+      username: username,
+      roomId: roomId,
+      message: `${username}님이 방에 입장했습니다.`,
+    };
+
+    this.server
+      .to(roomId)
+      .except(socketId)
+      .emit('user-joined', userJoinedEvent);
   }
 
   /**
    * 메시지 DTO 생성 (텍스트 전처리 포함)
    */
-  async chatMessage(
-    server: Server,
+  async producerChatMessage(
     client: Socket,
-    roomId: string,
     text: string,
     username?: string,
   ): Promise<void> {
+    if (!this._checkChatMessage(client)) return;
+
+    const roomId = client.data.currentRoom;
+
     const processed = this._handleMessage(text);
+
     const chatMessageDto = {
       id: Date.now(),
       userId: client.id,
@@ -394,101 +400,40 @@ export class ChattingService {
     } as OutgoingChatMessageDto;
 
     // Kafka 에 메시지 이벤트 발행
-    await this.kafkaProducer.publishMessage(roomId, chatMessageDto);
+    const event = await this.chattingKafkaProducerService.publishMessage(
+      roomId,
+      chatMessageDto,
+    );
 
-    // 해당 룸의 다른 사용자들에게만 메시지 전송 (자신 제외)
-    server.to(roomId).emit('message', chatMessageDto);
-
-    this.logger.log(`Message sent to room ${roomId} by ${client.id}: ${text}`);
+    if (!EnvProvider.isProd()) await this.consumerChatMessage(event);
   }
 
-  // ===== Kafka 이벤트 처리 메서드들 =====
+  async consumerChatMessage(event: ChatEvent): Promise<void> {
+    const { roomId, messageData } = event;
 
-  /**
-   * 원격 서버에서 온 룸 입장 이벤트 처리
-   */
-  async handleRemoteRoomJoin(event: ChatEvent, server: Server): Promise<void> {
-    try {
-      // Redis 저장 제거 - Producer에서 이미 처리됨
-      // await this._saveRoomUser(event.roomId, event.userId, event.username);
-      
-      // Socket.IO로 룸 입장 브로드캐스트
-      const userJoinedEvent: UserJoinedEvent = {
-        userId: event.userId,
-        username: event.username,
-        roomId: event.roomId,
-        message: `${event.username}님이 채팅방에 입장했습니다.`,
-      };
-      server.to(event.roomId).emit('user-joined', userJoinedEvent);
-      
-      this.logger.log(
-        `Remote room join handled: ${event.roomId} - ${event.userId}`,
-      );
-    } catch (error) {
-      this.logger.error(`Failed to handle remote room join:`, error);
-    }
+    this.server.to(roomId).emit('message', messageData);
   }
 
-  /**
-   * 원격 서버에서 온 룸 퇴장 이벤트 처리
-   */
-  async handleRemoteRoomLeave(event: ChatEvent, server: Server): Promise<void> {
-    try {
-      // Redis 저장 제거 - Producer에서 이미 처리됨
-      // await this.removeRoomUser(event.roomId, event.userId);
-      
-      // Socket.IO로 룸 퇴장 브로드캐스트
-      server.to(event.roomId).emit('user-left', {
-        userId: event.userId,
-        username: event.username || `User-${String(event.userId).slice(0, 6)}`,
-        roomId: event.roomId,
-        message: '사용자가 채팅방을 떠났습니다.',
+  private _checkChatMessage(client: Socket): boolean {
+    // client.data에서 현재 룸 ID 가져오기
+    const roomId = client.data.currentRoom;
+
+    if (!roomId) {
+      client.emit('error', {
+        message: '룸에 입장하지 않았습니다.',
       });
-      
-      this.logger.log(
-        `Remote room leave handled: ${event.roomId} - ${event.userId}`,
-      );
-    } catch (error) {
-      this.logger.error(`Failed to handle remote room leave:`, error);
+      return false;
     }
-  }
 
-  /**
-   * 원격 서버에서 온 메시지 이벤트 처리
-   */
-  async handleRemoteMessage(event: ChatEvent, server: Server): Promise<void> {
-    try {
-      // Socket.IO로 메시지 브로드캐스트
-      server.to(event.roomId).emit('message', event.messageData);
-      
-      this.logger.log(
-        `Remote message broadcasted: ${event.roomId} - ${event.userId}`,
-      );
-    } catch (error) {
-      this.logger.error(`Failed to handle remote message:`, error);
+    // 클라이언트가 해당 룸에 있는지 확인
+    if (!client.rooms.has(roomId)) {
+      client.emit('error', {
+        message: '해당 룸에 입장하지 않았습니다.',
+      });
+      return false;
     }
-  }
 
-  /**
-   * 원격 서버에서 온 사용자 연결 이벤트 처리
-   */
-  async handleRemoteUserConnect(event: ChatEvent): Promise<void> {
-    try {
-      this.logger.log(`Remote user connect handled: ${event.userId}`);
-    } catch (error) {
-      this.logger.error(`Failed to handle remote user connect:`, error);
-    }
-  }
-
-  /**
-   * 원격 서버에서 온 사용자 연결 해제 이벤트 처리
-   */
-  async handleRemoteUserDisconnect(event: ChatEvent): Promise<void> {
-    try {
-      this.logger.log(`Remote user disconnect handled: ${event.userId}`);
-    } catch (error) {
-      this.logger.error(`Failed to handle remote user disconnect:`, error);
-    }
+    return true;
   }
 
   /**
@@ -570,42 +515,26 @@ export class ChattingService {
    * 사용자 데이터 삭제
    */
   private async _deleteUserData(userId: number): Promise<void> {
-    try {
-      const userKey = `user:${userId}:data`;
-      await this.chattingRepository.del(userKey);
-      this.logger.log(`사용자 데이터 삭제: userId=${userId}`);
-    } catch (error) {
-      this.logger.error(`사용자 데이터 삭제 실패: ${error.message}`);
-    }
+    const userKey = `user:${userId}:data`;
+    await this.chattingRepository.del(userKey);
   }
 
   /**
    * 룸 정보 저장 (JWT 기반 사용자 정보 포함)
    */
-  private async _saveRoomInfo(
-    roomId: string,
-    roomData: any,
-    creatorUserId?: number,
-  ): Promise<void> {
-    try {
-      const roomKey = `room:${roomId}`;
-      const roomInfo: RoomInfo = {
-        ...roomData,
-        createdAt: new Date().toISOString(),
-        userCount: 0,
-      };
+  private async _saveRoomInfo(roomId: string, roomData: any): Promise<void> {
+    const roomKey = `room:${roomId}`;
+    const roomInfo: RoomInfo = {
+      ...roomData,
+      createdAt: new Date().toISOString(),
+      userCount: 0,
+    };
 
-      await this.chattingRepository.setex(
-        roomKey,
-        3600, // 1시간 TTL
-        JSON.stringify(roomInfo),
-      );
-      this.logger.log(
-        `룸 정보 저장: roomId=${roomId}, creatorUserId=${creatorUserId}`,
-      );
-    } catch (error) {
-      this.logger.error(`룸 정보 저장 실패: ${error.message}`);
-    }
+    await this.chattingRepository.setex(
+      roomKey,
+      3600, // 1시간 TTL
+      JSON.stringify(roomInfo),
+    );
   }
 
   /**
@@ -682,26 +611,22 @@ export class ChattingService {
     userId: string,
     username: string,
   ): Promise<void> {
-    try {
-      const key = `room:${roomId}:users`;
-      const current = await this.chattingRepository.get(key);
-      let list: UserData[] = [];
-      if (current) {
-        try {
-          list = JSON.parse(current);
-        } catch (_) {
-          list = [];
-        }
+    const key = `room:${roomId}:users`;
+    const current = await this.chattingRepository.get(key);
+    let list: UserData[] = [];
+
+    if (current) {
+      try {
+        list = JSON.parse(current);
+      } catch (_) {
+        list = [];
       }
-      const now = new Date().toISOString();
-      const without = list.filter((u) => String(u.userId) !== String(userId));
-      without.push({ userId: String(userId), username, joinedAt: now });
-      await this.chattingRepository.setex(key, 3600, JSON.stringify(without));
-      this.logger.log(
-        `Saved user to room (Redis-JSON): roomId=${roomId}, userId=${userId}`,
-      );
-    } catch (error) {
-      this.logger.error(`Failed to save room user: ${error.message}`);
     }
+
+    const now = new Date().toISOString();
+    const without = list.filter((u) => String(u.userId) !== String(userId));
+
+    without.push({ userId: String(userId), username, joinedAt: now });
+    await this.chattingRepository.setex(key, 3600, JSON.stringify(without));
   }
 }

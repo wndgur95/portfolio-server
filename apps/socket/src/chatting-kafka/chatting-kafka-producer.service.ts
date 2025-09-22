@@ -10,16 +10,17 @@ import { EnvProvider } from '@libs/common/provider/env.provider';
 export class ChattingKafkaProducerService {
   private readonly logger = new Logger(ChattingKafkaProducerService.name);
 
-  constructor(private readonly kafkaService: ChattingKafkaService) {}
+  constructor(private readonly chattingKafkaService: ChattingKafkaService) {}
 
   async publishRoomJoin(
+    socketId: string,
     roomId: string,
     userId: string,
     username: string,
-  ): Promise<void> {
-    if (!EnvProvider.isProd()) return;
+  ): Promise<ChatEvent> {
     const event: ChatEvent = {
       type: 'room-join' as ChatEventType,
+      socketId,
       roomId,
       userId,
       username,
@@ -27,24 +28,27 @@ export class ChattingKafkaProducerService {
       serverId: process.env.SERVER_ID,
     };
 
-    await this.publishEvent('chat-events', event, roomId);
+    return await this.publishEvent('chat-events', event, roomId);
   }
 
-  async publishRoomLeave(roomId: string, userId: string): Promise<void> {
-    if (!EnvProvider.isProd()) return;
+  async publishRoomLeave(
+    roomId: string,
+    userId: string,
+    username: string,
+  ): Promise<ChatEvent> {
     const event: ChatEvent = {
       type: 'room-leave' as ChatEventType,
       roomId,
       userId,
+      username,
       timestamp: new Date().toISOString(),
       serverId: process.env.SERVER_ID,
     };
 
-    await this.publishEvent('chat-events', event, roomId);
+    return await this.publishEvent('chat-events', event, roomId);
   }
 
-  async publishMessage(roomId: string, messageData: any): Promise<void> {
-    if (!EnvProvider.isProd()) return;
+  async publishMessage(roomId: string, messageData: any): Promise<ChatEvent> {
     const event: ChatEvent = {
       type: 'message-send' as ChatEventType,
       roomId,
@@ -54,42 +58,28 @@ export class ChattingKafkaProducerService {
       serverId: process.env.SERVER_ID,
     };
 
-    await this.publishEvent('chat-events', event, roomId);
+    return await this.publishEvent('chat-events', event, roomId);
   }
 
-  async publishUserConnect(userId: string, username: string): Promise<void> {
-    if (!EnvProvider.isProd()) return;
-    const event: ChatEvent = {
-      type: 'user-connect' as ChatEventType,
-      userId,
-      username,
-      timestamp: new Date().toISOString(),
-      serverId: process.env.SERVER_ID,
-    };
-
-    await this.publishEvent('chat-events', event, userId);
-  }
-
-  async publishUserDisconnect(userId: string): Promise<void> {
-    if (!EnvProvider.isProd()) return;
+  async publishUserDisconnect(socketId: string): Promise<ChatEvent> {
     const event: ChatEvent = {
       type: 'user-disconnect' as ChatEventType,
-      userId,
+      socketId,
       timestamp: new Date().toISOString(),
       serverId: process.env.SERVER_ID,
     };
 
-    await this.publishEvent('chat-events', event, userId);
+    return await this.publishEvent('chat-events', event, socketId);
   }
 
   private async publishEvent(
     topic: string,
     event: ChatEvent,
     key: string,
-  ): Promise<void> {
-    if (!EnvProvider.isProd()) return;
+  ): Promise<ChatEvent> {
+    if (!EnvProvider.isProd()) return event;
     try {
-      const producer = this.kafkaService.getProducer();
+      const producer = this.chattingKafkaService.getProducer();
 
       await producer.send({
         topic,
