@@ -54,7 +54,6 @@ import { ChattingKafkaConsumerService } from './chatting-kafka/chatting-kafka-co
     ChattingKafkaProducerService,
     ChattingKafkaConsumerService,
     ChattingRepository,
-
     // SoloBattleGateway,
     // SoloBattleService,
     // SoloBattleRedisRepository,

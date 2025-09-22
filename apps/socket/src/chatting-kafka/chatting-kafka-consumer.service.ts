@@ -3,35 +3,30 @@ import { ChattingKafkaService } from './chatting-kafka.service';
 import { ChatEvent } from './interfaces/chatting-kafka-event.interface';
 import { ChattingService } from '../chatting/chatting.service';
 import { EnvProvider } from '@libs/common/provider/env.provider';
-import { Server } from 'socket.io';
 
 @Injectable()
 export class ChattingKafkaConsumerService implements OnModuleInit {
   private readonly logger = new Logger(ChattingKafkaConsumerService.name);
-  private server: Server;
 
   constructor(
-    private readonly kafkaService: ChattingKafkaService,
+    private readonly chattingKafkaService: ChattingKafkaService,
     private readonly chattingService: ChattingService,
   ) {}
-
-  setServer(server: Server): void {
-    this.server = server;
-  }
 
   async onModuleInit(): Promise<void> {
     try {
       if (!EnvProvider.isProd()) return;
-      const consumer = this.kafkaService.getConsumer();
-      
-      await consumer.subscribe({ 
+      const consumer = this.chattingKafkaService.getConsumer();
+
+      await consumer.subscribe({
         topics: ['chat-events'],
-        fromBeginning: false 
+        fromBeginning: false,
       });
 
       await consumer.run({
-        eachMessage: async ({ topic, partition, message }) => {
-          await this.handleKafkaMessage(topic, message);
+        eachMessage: async ({ message }) => {
+          const event = JSON.parse(message.value.toString());
+          await this._handleKafkaMessage(event);
         },
       });
 
@@ -42,45 +37,25 @@ export class ChattingKafkaConsumerService implements OnModuleInit {
     }
   }
 
-  private async handleKafkaMessage(topic: string, message: any): Promise<void> {
-    if (!EnvProvider.isProd()) return;
+  private async _handleKafkaMessage(event: ChatEvent): Promise<void> {
     try {
-      const event: ChatEvent = JSON.parse(message.value.toString());
-      
       // 자신이 발행한 이벤트는 무시 (무한 루프 방지)
-      if (event.serverId === process.env.SERVER_ID) {
-        return;
-      }
-
-      this.logger.log(`Kafka 이벤트 수신: ${event.type} - ${event.roomId || event.userId}`);
+      // if (event.serverId === process.env.SERVER_ID) {
+      //   return;
+      // }
 
       switch (event.type) {
         case 'room-join':
-          if (this.server) {
-            await this.chattingService.handleRemoteRoomJoin(event, this.server);
-          } else {
-            this.logger.warn('Server instance not available for room join broadcasting');
-          }
+          await this.chattingService.consumerJoinRoom(event);
           break;
         case 'room-leave':
-          if (this.server) {
-            await this.chattingService.handleRemoteRoomLeave(event, this.server);
-          } else {
-            this.logger.warn('Server instance not available for room leave broadcasting');
-          }
+          await this.chattingService.consumerLeaveRoom(event);
           break;
         case 'message-send':
-          if (this.server) {
-            await this.chattingService.handleRemoteMessage(event, this.server);
-          } else {
-            this.logger.warn('Server instance not available for message broadcasting');
-          }
-          break;
-        case 'user-connect':
-          await this.chattingService.handleRemoteUserConnect(event);
+          await this.chattingService.consumerChatMessage(event);
           break;
         case 'user-disconnect':
-          await this.chattingService.handleRemoteUserDisconnect(event);
+          await this.chattingService.consumerDisconnectUser(event);
           break;
         default:
           this.logger.warn(`알 수 없는 이벤트 타입: ${event.type}`);

@@ -1,4 +1,9 @@
-import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  OnModuleInit,
+  OnModuleDestroy,
+  Logger,
+} from '@nestjs/common';
 import { Kafka, Producer, Consumer } from 'kafkajs';
 import { EnvProvider } from '@libs/common/provider/env.provider';
 
@@ -15,24 +20,26 @@ export class ChattingKafkaService implements OnModuleInit, OnModuleDestroy {
       // 디버깅: 환경변수 값 확인
       this.logger.log(`KAFKA_BROKER 환경변수: ${process.env.KAFKA_BROKER}`);
       this.logger.log(`SERVER_ID 환경변수: ${process.env.SERVER_ID}`);
-      
+
       this.kafka = new Kafka({
-        clientId: 'portfolio-chat-service',
-        brokers: [process.env.KAFKA_BROKER || 'kafka.kafka.svc.cluster.local:9092'],
+        clientId: `${process.env.NODE_ENV}-portfolio-chat-service`,
+        brokers: [
+          process.env.KAFKA_BROKER || 'kafka.kafka.svc.cluster.local:9092',
+        ],
         retry: {
           initialRetryTime: 100,
-          retries: 8
-        }
+          retries: 8,
+        },
       });
 
       this.producer = this.kafka.producer();
-      this.consumer = this.kafka.consumer({ 
-        groupId: `chat-service-group`
+      this.consumer = this.kafka.consumer({
+        groupId: `${process.env.NODE_ENV}-chat-service-group`,
       });
 
       await this.producer.connect();
       await this.consumer.connect();
-      
+
       this.logger.log('Kafka 연결 성공');
     } catch (error) {
       this.logger.error('Kafka 연결 실패:', error);
