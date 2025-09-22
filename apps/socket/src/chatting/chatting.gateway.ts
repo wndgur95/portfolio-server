@@ -10,14 +10,16 @@ import {
 } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
-import {
-  ChatMessageDto,
-  JoinRoomDto,
-  ErrorEvent,
-} from './interfaces/chat.interface';
+import { ChatMessageDto, JoinRoomDto } from './interfaces/chat.interface';
 import { ChattingService } from './chatting.service';
 
-@WebSocketGateway({ namespace: 'socket/chat', cors: { origin: '*' } })
+@WebSocketGateway({
+  namespace: 'socket/chat',
+  cors: {
+    origin: [process.env.CORS_DOMAIN],
+    credentials: true,
+  },
+})
 export class ChattingGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {

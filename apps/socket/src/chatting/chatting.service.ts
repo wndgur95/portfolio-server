@@ -156,27 +156,6 @@ export class ChattingService {
   }
 
   /**
-   * 룸 비밀번호 저장
-   */
-  private async _saveRoomPassword(
-    roomId: string,
-    password: string,
-  ): Promise<void> {
-    const roomPasswordKey = `room:${roomId}:password`;
-
-    await this.chattingRepository.setex(roomPasswordKey, 3600, password); // 1시간 TTL
-  }
-
-  /**
-   * 룸 비밀번호 가져오기
-   */
-  private async _getRoomPassword(roomId: string): Promise<string> {
-    const roomPasswordKey = `room:${roomId}:password`;
-
-    return await this.chattingRepository.get(roomPasswordKey);
-  }
-
-  /**
    * 룸 비밀번호 삭제
    */
   async deleteRoomPassword(roomId: string): Promise<void> {
@@ -425,6 +404,28 @@ export class ChattingService {
 
     this.server.to(roomId).emit('message', messageData);
     this.logger.log(`Message broadcasted via Socket.IO: ${roomId} - ${messageData.userId}`);
+  }
+
+
+  /**
+   * 룸 비밀번호 저장
+   */
+  private async _saveRoomPassword(
+    roomId: string,
+    password: string,
+  ): Promise<void> {
+    const roomPasswordKey = `room:${roomId}:password`;
+
+    await this.chattingRepository.setex(roomPasswordKey, 3600, password); // 1시간 TTL
+  }
+
+  /**
+   * 룸 비밀번호 가져오기
+   */
+  private async _getRoomPassword(roomId: string): Promise<string> {
+    const roomPasswordKey = `room:${roomId}:password`;
+
+    return await this.chattingRepository.get(roomPasswordKey);
   }
 
   private _checkChatMessage(client: Socket): boolean {
