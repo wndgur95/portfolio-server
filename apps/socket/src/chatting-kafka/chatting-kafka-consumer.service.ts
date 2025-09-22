@@ -26,6 +26,7 @@ export class ChattingKafkaConsumerService implements OnModuleInit {
       await consumer.run({
         eachMessage: async ({ message }) => {
           const event = JSON.parse(message.value.toString());
+          this.logger.log(`Kafka 메시지 수신: ${event.type} - ${event.roomId || event.socketId}`);
           await this._handleKafkaMessage(event);
         },
       });
@@ -39,6 +40,8 @@ export class ChattingKafkaConsumerService implements OnModuleInit {
 
   private async _handleKafkaMessage(event: ChatEvent): Promise<void> {
     try {
+      this.logger.log(`Kafka 메시지 처리 시작: ${event.type} - ${event.roomId || event.socketId}`);
+      
       // 자신이 발행한 이벤트는 무시 (무한 루프 방지)
       // if (event.serverId === process.env.SERVER_ID) {
       //   return;
