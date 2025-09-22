@@ -32,9 +32,12 @@ export class ChattingKafkaService implements OnModuleInit, OnModuleDestroy {
         },
       });
 
+      const splitServerId = process.env.SERVER_ID.split('-');
+      const shortServerId = splitServerId[splitServerId.length - 1];
+
       this.producer = this.kafka.producer();
       this.consumer = this.kafka.consumer({
-        groupId: `${process.env.NODE_ENV}-chat-service-group`,
+        groupId: `chat-service-group-${shortServerId}`,
       });
 
       await this.producer.connect();
