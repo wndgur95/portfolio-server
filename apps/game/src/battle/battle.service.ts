@@ -24,6 +24,9 @@ import { AchievementProvider } from '@libs/common/provider/achievement/achieveme
 import { MISSION_CONDITION_TYPE } from '@libs/dao/static/common.constants';
 import { BattleInfoDto } from '@libs/dao/redis/solo-battle/dto/battle-info.dto';
 import { SoloBattleRedisRepository } from '@libs/dao/redis/solo-battle/solo-battle-redis.repository';
+import { MongoLogProvider } from '@libs/common/provider/mongo-log/mongo-log.provider';
+import { EnterBattleCollection } from '@libs/dao/mongo/mongo-log/collection/battle/enter-battle.collection';
+import { FinishBattleCollection } from '@libs/dao/mongo/mongo-log/collection/battle/finish-battle.collection';
 
 @Injectable()
 export class BattleService {
@@ -64,6 +67,11 @@ export class BattleService {
 
     await this.soloBattleRedisRepository.setBattleInfo(userId, battleInfo);
 
+    MongoLogProvider.setMongoLog(
+      'solo-battle',
+      new EnterBattleCollection({ battleInfo, reason: 'enter-battle' }),
+    );
+
     return BattleEnterOutDto.of({
       battleUid: battleUid,
     });
@@ -88,6 +96,15 @@ export class BattleService {
 
     AchievementProvider.achieve(MISSION_CONDITION_TYPE.BATTLE, [], 1);
     AchievementProvider.achieve(MISSION_CONDITION_TYPE.KILL_ENEMY, [], kill);
+
+    MongoLogProvider.setMongoLog(
+      'solo-battle',
+      new FinishBattleCollection({
+        battleInfo,
+        goods: goodsOutDto,
+        reason: 'finish-battle'
+      }),
+    );
 
     return BattleFinishOutDto.of({
       goods: goodsOutDto,

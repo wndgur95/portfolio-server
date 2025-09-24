@@ -125,14 +125,30 @@ export class ContextProvider {
   }
 
   static getMongoLogs(): MongoLogs {
-    return this.get('mongoLog');
+    return this.get('mongo-log');
   }
 
   static setMongoLogs(mongoLogs: MongoLogs): void {
-    this.set('mongoLog', mongoLogs);
+    this.set('mongo-log', mongoLogs);
   }
 
   static releaseMongoLogs(): void {
-    ContextProvider.set('mongoLog', undefined);
+    ContextProvider.set('mongo-log', undefined);
+  }
+
+  static getAddReason(): string {
+    return this.get('mongo-log-add-reason');
+  }
+
+  static setAddReason(reason: string): void {
+    this.set('mongo-log-add-reason', reason);
+  }
+
+  static getReason(): string {
+    return this.get('mongo-log-reason');
+  }
+
+  static setReason(reason: string): void {
+    this.set('mongo-log-reason', reason);
   }
 }

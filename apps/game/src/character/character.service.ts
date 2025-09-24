@@ -14,6 +14,9 @@ import {
 } from '@libs/dao/static/common.constants';
 import { GoodsProvider } from '@libs/common/provider/goods/goods.provider';
 import { CharacterProvider } from '@libs/common/provider/contents/character.provider';
+import { MongoLogProvider } from '@libs/common/provider/mongo-log/mongo-log.provider';
+import { FinishBattleCollection } from '@libs/dao/mongo/mongo-log/collection/battle/finish-battle.collection';
+import { CharacterLevelUpCollection } from '@libs/dao/mongo/mongo-log/collection/character/character-level-up.collection';
 
 @Injectable()
 export class CharacterService {
@@ -69,6 +72,14 @@ export class CharacterService {
       MISSION_CONDITION_TYPE.CHARACTER_LEVEL_UP,
       [],
       1,
+    );
+
+    MongoLogProvider.setMongoLog(
+      'character-level-up',
+      new CharacterLevelUpCollection({
+        character,
+        reason: 'character-level-up',
+      }),
     );
 
     return character;

@@ -23,11 +23,12 @@ export class BaseMongoLogCollection extends BaseLogCollection {
 
   constructor(partial?: Partial<BaseMongoLogCollection>) {
     super(partial);
-    Object.assign(this, partial);
 
     const { nid, gameDbId, userId } = ContextProvider.getUserInfo();
     this.nid = nid;
     this.gameDbId = gameDbId;
     this.userId = userId;
+
+    Object.assign(this, partial);
   }
 }
