@@ -1,8 +1,4 @@
 import { ClsServiceManager } from 'nestjs-cls';
-import {
-  ENVIRONMENT,
-  NODE_ENV,
-} from '@libs/common/constants/environment.constants';
 import { JwtPayload } from '@libs/common/constants/jwt.constants';
 import { ChainableCommander } from 'ioredis/built/utils/RedisCommander';
 import { getDatabaseByGameDbId } from '@libs/dao/config/game/game-database-config.util';

@@ -14,7 +14,10 @@ export class RequestLogInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const now = Date.now();
 
-    console.log(context.getArgs()[0].url);
+    const url = context.getArgs()[0].url;
+    if (!url.endsWith('health')) {
+      Logger.log(url);
+    }
 
     ContextProvider.setNow(new Date());
     ContextProvider.setAddReason(context.getArgs()[0].url)

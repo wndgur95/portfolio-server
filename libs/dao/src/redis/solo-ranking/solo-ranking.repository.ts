@@ -9,7 +9,6 @@ import {
   ScoreMemberDetail,
 } from '@libs/dao/redis/solo-ranking/dto/score-member.dto';
 import { ContextProvider } from '@libs/common/provider/context.provider';
-import { Session } from '@libs/dao/redis/session/session.entity';
 import { SoloScore } from '@libs/dao/arena/solo-scores/interfaces/solo-score.interface';
 
 @Injectable()

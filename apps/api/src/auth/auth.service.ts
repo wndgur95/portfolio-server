@@ -33,11 +33,6 @@ import { GoogleOAuthProvider, FirebaseAdminProvider } from '@libs/common/http';
 import { UpdateRoleUserDto } from './dto/update-role-user.dto';
 import { UsersDbRepository } from '@libs/dao/common/users/repositories/users-db.repository';
 import { Session } from '@libs/dao/redis/session/session.entity';
-import {
-  ENVIRONMENT,
-  NODE_ENV,
-} from '@libs/common/constants/environment.constants';
-import { SESSION_EXPIRED_TIME } from '@libs/common/constants/redis.constants';
 import { SessionRepository } from '@libs/dao/redis/session/session.repository';
 import { TimeUtil } from '@libs/common/utils/time.util';
 import { TestTablesDbRepository } from '@libs/dao/common/test-tables/repositories/test-tables-db.repository';

@@ -2,7 +2,6 @@ import {
   Injectable,
   CanActivate,
   ExecutionContext,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { WsException } from '@nestjs/websockets';
 import { AuthService } from '../auth.service';

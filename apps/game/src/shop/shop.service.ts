@@ -7,9 +7,7 @@ import { AchievementProvider } from '@libs/common/provider/achievement/achieveme
 import { MISSION_CONDITION_TYPE } from '@libs/dao/static/common.constants';
 import { Transactional } from '@libs/common/decorator/transaction.decorator';
 import { MongoLogProvider } from '@libs/common/provider/mongo-log/mongo-log.provider';
-import { ReceiveMissionCollection } from '@libs/dao/mongo/mongo-log/collection/mission/receive-mission.collection';
 import { GachaCollection } from '@libs/dao/mongo/mongo-log/collection/shop/gacha.collection';
-import { ContextProvider } from '@libs/common/provider/context.provider';
 
 @Injectable()
 export class ShopService {

@@ -15,7 +15,6 @@ import {
 import { GoodsProvider } from '@libs/common/provider/goods/goods.provider';
 import { CharacterProvider } from '@libs/common/provider/contents/character.provider';
 import { MongoLogProvider } from '@libs/common/provider/mongo-log/mongo-log.provider';
-import { FinishBattleCollection } from '@libs/dao/mongo/mongo-log/collection/battle/finish-battle.collection';
 import { CharacterLevelUpCollection } from '@libs/dao/mongo/mongo-log/collection/character/character-level-up.collection';
 
 @Injectable()

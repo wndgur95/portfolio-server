@@ -21,7 +21,6 @@ import {
 import { GoodsProvider } from '@libs/common/provider/goods/goods.provider';
 import { AchievementProvider } from '@libs/common/provider/achievement/achievement.provider';
 import { MongoLogProvider } from '@libs/common/provider/mongo-log/mongo-log.provider';
-import { AchieveCollection } from '@libs/dao/mongo/mongo-log/collection/mission/achieve.collection';
 import { ReceiveMissionCollection } from '@libs/dao/mongo/mongo-log/collection/mission/receive-mission.collection';
 
 @Injectable()
