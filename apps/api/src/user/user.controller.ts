@@ -1,4 +1,4 @@
-import { Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Controller, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ResponseEntity } from '@libs/common/network/response-entity';
 import { ApiResponseEntity } from '@libs/common/decorator/api-response-entity';

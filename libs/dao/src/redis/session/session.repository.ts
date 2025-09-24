@@ -4,7 +4,6 @@ import { plainToInstance } from 'class-transformer';
 import { ContextProvider } from '@libs/common/provider/context.provider';
 import { AbstractRedisRepository } from '@libs/common/databases/redis/abstract-redis.repository';
 import { RedisDbNumber, SESSION_EXPIRED_TIME } from '@libs/common/constants/redis.constants';
-import { ENVIRONMENT, NODE_ENV } from '@libs/common/constants/environment.constants';
 
 @Injectable()
 export class SessionRepository extends AbstractRedisRepository {

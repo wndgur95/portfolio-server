@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ContextProvider } from '@libs/common/provider/context.provider';
 import { UpdateResult } from 'typeorm/query-builder/result/UpdateResult';
-import { InsertResult } from 'typeorm/query-builder/result/InsertResult';
 import { DataMissionProvider } from '@libs/common/provider/static-data/data-mission.provider';
 import { MissionsRepository } from '@libs/dao/game/missions/interfaces/missions-repository.interface';
 import { MissionsDbRepositories } from '@libs/dao/game/missions/repositories/missions-db.repository';

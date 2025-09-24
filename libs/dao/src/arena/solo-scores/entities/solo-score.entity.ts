@@ -1,4 +1,4 @@
-import { Column, Entity, Index } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 import { AbstractEntity, BaseTimeEntity } from '@libs/common/databases/typeorm/abstract.entity';
 import { SoloScore } from '@libs/dao/arena/solo-scores/interfaces/solo-score.interface';
 
