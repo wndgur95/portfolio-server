@@ -1,7 +1,10 @@
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { INestApplication, Logger } from '@nestjs/common';
 import { SWAGGER_CUSTOM_OPTIONS } from '@libs/common/constants/swagger.constants';
-import { ApiElementModule, SocketElementModule, GameElementModule } from './app.module';
+import { ApiElementModule } from './modules/api-element.module';
+import { GameElementModule } from './modules/game-element.module';
+import { SocketElementModule } from './modules/socker-element.module';
+import { LogElementModule } from './modules/log-element.module';
 
 export class AppServer {
   constructor(private readonly app: INestApplication) {}
@@ -19,6 +22,7 @@ export class AppServer {
     this._initializeApiSwagger();
     this._initializeGameSwagger();
     this._initializeSocketSwagger();
+    this._initializeLogSwagger();
   }
 
   /**
@@ -175,6 +179,38 @@ export class AppServer {
 
     SwaggerModule.setup(
       'socket/api-docs',
+      this.app,
+      document,
+      SWAGGER_CUSTOM_OPTIONS,
+    );
+  }
+
+  /**
+   * OPEN API(Swagger) 초기화
+   */
+  private _initializeLogSwagger(): void {
+    const config = new DocumentBuilder()
+      .setTitle('Log Server')
+      .setDescription('API description')
+      .setVersion('1.0')
+      .addApiKey(
+        {
+          type: 'apiKey',
+          name: 'nfToken',
+          in: 'header',
+          description: 'internal api',
+        },
+        'nfToken',
+      )
+      .build();
+
+    const document = SwaggerModule.createDocument(this.app, config, {
+      include: [LogElementModule],
+      deepScanRoutes: true,
+    });
+
+    SwaggerModule.setup(
+      'log/api-docs',
       this.app,
       document,
       SWAGGER_CUSTOM_OPTIONS,

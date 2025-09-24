@@ -2,7 +2,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { INestApplication, Logger } from '@nestjs/common';
 import { SWAGGER_CUSTOM_OPTIONS } from '@libs/common/constants/swagger.constants';
 
-export class DeployServer {
+export class LogServer {
   constructor(private readonly app: INestApplication) {}
 
   /**
@@ -16,7 +16,7 @@ export class DeployServer {
    * execute server
    */
   async run(): Promise<void> {
-    Logger.log('Game Server is running on port ' + process.env.SERVER_PORT);
+    Logger.log('Log Server is running on port ' + process.env.SERVER_PORT);
     await this.app.listen(process.env.SERVER_PORT, '0.0.0.0');
   }
 
@@ -26,33 +26,24 @@ export class DeployServer {
   private _initializeSwagger(): void {
     if (!['prod'].includes(process.env.NODE_ENV)) {
       const config = new DocumentBuilder()
-        .setTitle('Dino Deploy Server')
-        .setDescription('The Game API description')
+        .setTitle('Log Server')
+        .setDescription('The Log API description')
         .setVersion('1.0')
         .addApiKey(
           {
             type: 'apiKey',
-            name: 'X-API-KEY',
+            name: 'nfToken',
             in: 'header',
-            description: 'eh internal api',
+            description: 'internal api',
           },
-          'apiKey',
-        )
-        .addBasicAuth(
-          {
-            type: 'http',
-            name: 'Authorization',
-            in: 'header',
-            description: 'Username: accountKey & Password: sessionKey',
-          },
-          'basic',
+          'nfToken',
         )
         .build();
 
       const document = SwaggerModule.createDocument(this.app, config);
 
       SwaggerModule.setup(
-        'api-docs',
+        'log/api-docs',
         this.app,
         document,
         SWAGGER_CUSTOM_OPTIONS,

@@ -27,7 +27,7 @@ export class UserLevelLockInterceptor implements NestInterceptor {
   }
 
   async release(): Promise<void> {
-    const database = ContextProvider.getGameDatabase();
+    const { database } = ContextProvider.getUserInfo();
 
     if (!database) {
       return await this.releaseQueryRunner();

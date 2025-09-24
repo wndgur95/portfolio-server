@@ -48,11 +48,14 @@ import { ShopService } from './shop/shop.service';
 import { GachaProvider } from '@libs/common/provider/gacha/gacha.provider';
 import { SequenceInterceptor } from '@libs/common/interceptor/sequence.interceptor';
 import { CharacterProvider } from '@libs/common/provider/contents/character.provider';
+import { LogServerProvider } from '@libs/common/http/log-server.provider';
+import { MongoLogInterceptor } from '@libs/common/interceptor/mongo-log.interceptor';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
     GameServerConfig,
-
+    HttpModule.register({ timeout: 5000, maxRedirects: 5 }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, 'public'), // dist/apps/api/public
       serveRoot: '/public', // → http://localhost:3000/public/privacy_policy.html
@@ -106,6 +109,7 @@ import { CharacterProvider } from '@libs/common/provider/contents/character.prov
     },
     { provide: APP_FILTER, useClass: AllExceptionFilter },
     { provide: APP_INTERCEPTOR, useClass: RequestLogInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: MongoLogInterceptor },
     { provide: APP_INTERCEPTOR, useClass: UserLevelLockInterceptor },
     { provide: APP_INTERCEPTOR, useClass: TransactionInterceptor },
     { provide: APP_INTERCEPTOR, useClass: SequenceInterceptor },
@@ -133,6 +137,7 @@ import { CharacterProvider } from '@libs/common/provider/contents/character.prov
     AchievementProvider,
     MissionAchievementProvider,
     SoloBattleProvider,
+    LogServerProvider,
     //Provider----
 
     //----DataProvider

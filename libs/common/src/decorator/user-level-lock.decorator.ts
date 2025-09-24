@@ -16,9 +16,7 @@ export function UserLevelLock(): MethodDecorator {
     const overrideMethod = async function (
       ...originMethodArgs: unknown[]
     ): Promise<unknown> {
-      const userId = ContextProvider.getUserId();
-
-      const database = ContextProvider.getGameDatabase();
+      const { database, userId } = ContextProvider.getUserInfo();
 
       const queryRunners = TypeOrmHelper.getQueryRunners();
 

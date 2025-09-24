@@ -49,11 +49,11 @@ export class ChattingService {
   }
 
   async connectUser(payload: JwtPayload, client: Socket): Promise<void> {
-    await this._saveUserData(payload.id, client.id, payload);
+    await this._saveUserData(payload.userId, client.id, payload);
 
     // 연결 성공 이벤트 전송 (동일 포맷)
     client.emit('authenticated', {
-      userId: payload.id,
+      userId: payload.userId,
       username: client.data.username,
       serverId: this.shortServerId,
     });
@@ -241,9 +241,9 @@ export class ChattingService {
     const payload = await this._validateJwtToken(jwt);
     if (!payload) return null;
 
-    client.data.userId = payload.id;
+    client.data.userId = payload.userId;
     client.data.email = payload.email;
-    client.data.username = `User-${payload.id}`;
+    client.data.username = `User-${payload.userId}`;
 
     return payload;
   }

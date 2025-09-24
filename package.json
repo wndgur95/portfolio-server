@@ -32,6 +32,7 @@
     "@nestjs/throttler": "^6.4.0",
     "@nestjs/typeorm": "^10.0.2",
     "@nestjs/websockets": "^10.4.20",
+    "@nestjs/mongoose": "^10.0.6",
     "@types/bcrypt": "^5.0.2",
     "@types/passport-http": "^0.3.11",
     "@types/passport-jwt": "^4.0.1",
@@ -68,7 +69,9 @@
     "typeorm-naming-strategies": "^4.1.0",
     "typescript-eslint": "^7.10.0",
     "winston": "^3.17.0",
-    "winston-daily-rotate-file": "^5.0.0"
+    "winston-daily-rotate-file": "^5.0.0",
+    "mongodb": "^6.6.2",
+    "mongoose": "^8.4.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.3.0",

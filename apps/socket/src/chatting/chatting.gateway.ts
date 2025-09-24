@@ -43,7 +43,7 @@ export class ChattingGateway
       }
 
       const socketId = await this.chattingService.getConnectedSocketId(
-        payload.id,
+        payload.userId,
       );
 
       await this.chattingService.connectUser(payload, client);

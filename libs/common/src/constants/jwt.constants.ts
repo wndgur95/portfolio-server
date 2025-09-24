@@ -27,7 +27,8 @@ export const PASSWORD_POLICY = {
 } as const;
 
 export interface JwtPayload {
-  id: number;
+  userId: number;
+  nid: string;
   email?: string;
   platformId?: string;
   roles: UserRoles;

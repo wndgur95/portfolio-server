@@ -130,7 +130,7 @@ export class RewardProvider {
    * - 캐릭터 중복 불 가능
    * */
   private async _payCharacter(rewards: Reward[]): Promise<CharacterDto[]> {
-    const { database, userId } = ContextProvider.getDbInfo();
+    const { database, userId } = ContextProvider.getUserInfo();
 
     const dataCharacterIds = rewards.map((it) => it.dataId);
 
