@@ -14,16 +14,9 @@ export const SWAGGER_REQUIRED = ![
   ENVIRONMENT.STAGING,
 ].includes(NODE_ENV);
 
-export const LOCATE = {
-  CACHE: 'cache',
-  CREATE_USER: 'create_user',
-  USER: 'user',
-  HOME: 'home',
-  DATA_DEPLOY: 'data_deploy',
-  RELATIONSHIP: 'relationship',
-  DIFF: 'diff',
-  DATA_HISTORY: 'data_history',
-  DATA_RANGE: 'data_range',
-  GOODS_LIMIT: 'goods_limit',
+export const GAME_CODE = {
+  SURVIVE: 'SURVIVE',
 };
-export type Locate = (typeof LOCATE)[keyof typeof LOCATE];
+export type GameCode = (typeof GAME_CODE)[keyof typeof GAME_CODE];
+
+

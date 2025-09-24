@@ -38,7 +38,7 @@ export class MissionAchievementProvider
    * 업적 달성
    */
   async achieve(achievements: Achievement[]): Promise<Mission[]> {
-    const { userId, database } = ContextProvider.getDbInfo();
+    const { userId, database } = ContextProvider.getUserInfo();
     const missionRepository = this.missionRepositories[database];
     const missions = await missionRepository.findByUserId(userId);
 

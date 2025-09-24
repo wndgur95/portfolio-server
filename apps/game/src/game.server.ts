@@ -26,7 +26,7 @@ export class GameServer {
   private _initializeSwagger(): void {
     if (!['prod'].includes(process.env.NODE_ENV)) {
       const config = new DocumentBuilder()
-        .setTitle('Dino Game Server')
+        .setTitle('Survive Game Server')
         .setDescription('The Game API description')
         .setVersion('1.0')
         .addApiKey(

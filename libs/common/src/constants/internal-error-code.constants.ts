@@ -7,12 +7,18 @@ export const INTERNAL_ERROR_CODE = {
   SESSION_SEQUENCE_NOT_FOUND: 5, // 유효하지 않은 시퀀스
 
   API_KEY_NOT_VALID: 10, // 유효하지않은 api key
+  API_SECURITY_NF_TOKEN_INVALIDATE: 12, // nfToken 유효 하지 않음
 
   // USER DETAIL : 51 ~ 100
   USER_DETAIL_NOT_FOUND: 51, // 유저 상세 정보를 찾을 수 없음
   USER_DETAIL_UNKNOWN_CURRENCY_TYPE: 52, // 확인 되지 않은 통화
   USER_DETAIL_CURRENCY_GOLD_NOT_ENOUGH: 53, // 골드 부족
   USER_DETAIL_CURRENCY_CASH_NOT_ENOUGH: 54, // 캐시 부족
+
+  // COMMON LOG: 101 ~ 120
+  MONGO_LOG_DATA_PARSE_ERROR: 101, // 로그 데이터 파싱 에러
+  MONGO_LOG_DATA_EMPTY: 102, // 로그 데이터 empty
+  MONGO_LOG_UNSUPPORTED_GAME_CODE: 103, // 지원하지 않는 게임 코드
 
   CHARACTER_NOT_FOUND: 201, // 캐릭터 정보를 찾을 수 없음
   CHARACTER_NOT_ENOUGH: 202, // 캐릭터가 충분하지 않다

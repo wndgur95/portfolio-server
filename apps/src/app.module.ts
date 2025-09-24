@@ -9,271 +9,35 @@ import { DataSourceOptions } from 'typeorm';
 import { getGameServerTypeOrmOptions } from '@libs/dao/config/game/game-database-config.util';
 import GameDatabaseConfig from '@libs/dao/config/game/game-database.config';
 import { RedisModule } from '@libs/dao/redis/redis.module';
-import { AuthModule as ApiAuthModule } from '../api/src/auth/auth.module';
-import { AuthModule as GameAuthModule } from '../game/src/auth/auth.module';
 import { CommonModule } from '@libs/dao/common/common.module';
 import { GameModule as GameDbModule } from '@libs/dao/game/game.module';
 import { StaticModule } from '@libs/dao/static/static.module';
-import { UserController as ApiUserController } from '../api/src/user/user.controller';
-import { UserController as GameUserController } from '../game/src/user/user.controller';
-import { CharacterController } from '../game/src/character/character.controller';
-import { BattleController } from '../game/src/battle/battle.controller';
-import { MissionController } from '../game/src/mission/mission.controller';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { AllExceptionFilter } from '@libs/common/filter/all-exception.filter';
 import { RequestLogInterceptor } from '@libs/common/interceptor/request-log.interceptor';
 import { UserLevelLockInterceptor } from '@libs/common/interceptor/user-level-lock.interceptor';
 import { TransactionInterceptor } from '@libs/common/interceptor/transaction.interceptor';
 import { PayloadInterceptor } from '@libs/common/interceptor/payload.interceptor';
-import { UserService as ApiUserService } from '../api/src/user/user.service';
-import { UserService as GameUserService } from '../game/src/user/user.service';
-import { CharacterService } from '../game/src/character/character.service';
-import { BattleService } from '../game/src/battle/battle.service';
-import { MissionService } from '../game/src/mission/mission.service';
-import { ConsumptionProvider } from '@libs/common/provider/goods/consumption.provider';
-import { GoodsProvider } from '@libs/common/provider/goods/goods.provider';
-import { RewardProvider } from '@libs/common/provider/goods/reward.provider';
-import { UserDetailProvider } from '@libs/common/provider/contents/user-detail.provider';
-import { BattleProvider } from '@libs/common/provider/contents/battle.provider';
 import { MissionProvider } from '@libs/common/provider/contents/mission.provider';
 import { AchievementProvider } from '@libs/common/provider/achievement/achievement.provider';
 import { MissionAchievementProvider } from '@libs/common/provider/achievement/mission-achievement.provider';
 import { DataCharacterProvider } from '@libs/common/provider/static-data/data-character.provider';
 import { DataGoodsProvider } from '@libs/common/provider/static-data/data-goods.provider';
 import { DataMissionProvider } from '@libs/common/provider/static-data/data-mission.provider';
-import { ApiController } from '../api/src/default/api.controller';
-import { DatabaseController } from '../api/src/database/database.controller';
-import { ApiService } from '../api/src/default/api.service';
-import { DatabaseService } from '../api/src/database/database.service';
-import { ValidateProvider } from '@libs/common/provider/validate.provider';
-import { ApiServerConfig } from '../api/src/config/api.server.config';
-import { GameServerConfig } from '../game/src/config/game.server.config';
-import { ThrottlerModule } from '@nestjs/throttler';
-import { RedisThrottlerStorage } from '../api/src/auth/guard/redis-throttler-storage';
-import { ArenaModule } from '@libs/dao/arena/arena.module';
-import ArenaDatabaseConfig from '@libs/dao/config/arena/arena-database.config';
-import { GameController } from '../game/src/default/game.controller';
-import { GameService } from '../game/src/default/game.service';
-import { SoloBattleProvider } from '@libs/common/provider/contents/solo-battle.provider';
-import { GachaProvider } from '@libs/common/provider/gacha/gacha.provider';
-import { ShopService } from '../game/src/shop/shop.service';
-import { ShopController } from '../game/src/shop/shop.controller';
-import { SocketServerConfig } from '../socket/src/config/socket.server.config';
-import { AuthModule as AuthBattleModule } from '../socket/src/auth/auth.module';
-import { SocketController } from '../socket/src/default/socket.controller';
-import { SocketService as SocketDefaultService } from '../socket/src/default/socket.service';
-import { SoloBattleGateway } from '../socket/src/solo-battle/solo-battle.gateway';
-import { SoloBattleService } from '../socket/src/solo-battle/solo-battle.service';
-import { SoloBattleRedisRepository } from '@libs/dao/redis/solo-battle/solo-battle-redis.repository';
-import { KafkaModule } from '../socket/src/kafka/kafka.module';
 import { SequenceInterceptor } from '@libs/common/interceptor/sequence.interceptor';
-import { StaticService } from '../api/src/static/static.service';
-import { StaticController } from '../api/src/static/static.controller';
-import { ErrorController } from '../api/src/error/error.controller';
-import { ErrorService } from '../api/src/error/error.service';
-import { CharacterProvider } from '@libs/common/provider/contents/character.provider';
-import { ChattingGateway } from '../socket/src/chatting/chatting.gateway';
-import { ChattingService } from '../socket/src/chatting/chatting.service';
-import { ChattingRepository } from '@libs/dao/redis/chatting/chatting.repository';
-import { JwtModule } from '@nestjs/jwt';
-import { JWT_OPTIONS } from '@libs/common/constants/jwt.constants';
-import { ChattingKafkaService } from '../socket/src/chatting-kafka/chatting-kafka.service';
-import { ChattingKafkaProducerService } from '../socket/src/chatting-kafka/chatting-kafka-producer.service';
-import { ChattingKafkaConsumerService } from '../socket/src/chatting-kafka/chatting-kafka-consumer.service';
-
-//Api
-@Module({
-  imports: [
-    ApiServerConfig,
-
-    ThrottlerModule.forRoot({
-      throttlers: [
-        {
-          ttl: 60000, // 1분
-          limit: 10, // 10번 요청
-        },
-      ],
-      storage: new RedisThrottlerStorage(),
-    }),
-
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, 'public'), // dist/apps/api/public
-      serveRoot: '/public', // → http://localhost:3000/public/privacy_policy.html
-    }),
-
-    ClsModule.forRoot({ global: true, middleware: { mount: true } }),
-    ...[CommonDatabaseConfig].map((it) => {
-      return TypeOrmExModule.forRootAsync({
-        name: it().name,
-        inject: [it.KEY],
-        useFactory: async (config: DataSourceOptions) => config,
-      });
-    }),
-
-    ...getGameServerTypeOrmOptions().map((options) =>
-      TypeOrmExModule.forRootAsync({
-        name: options.name,
-        inject: [GameDatabaseConfig.KEY],
-        useFactory: (configs: Record<string, DataSourceOptions>) =>
-          Object.values(configs).find((it) => it.name === options.name),
-      }),
-    ),
-
-    RedisModule,
-
-    ApiAuthModule,
-    CommonModule,
-    GameDbModule,
-    StaticModule,
-  ],
-  controllers: [
-    //App
-    ApiController,
-    ApiUserController,
-    DatabaseController,
-    StaticController,
-    ErrorController,
-  ],
-  providers: [
-    ApiService,
-    ApiUserService,
-    DatabaseService,
-    StaticService,
-    ErrorService,
-
-    ValidateProvider,
-
-    ConsumptionProvider,
-    GoodsProvider,
-    RewardProvider,
-    CharacterProvider,
-
-    UserDetailProvider,
-
-    DataCharacterProvider,
-    DataGoodsProvider,
-
-    AchievementProvider,
-    MissionAchievementProvider,
-    MissionProvider,
-    DataMissionProvider,
-  ],
-})
-export class ApiElementModule {}
-
-//Game
-@Module({
-  imports: [
-    GameServerConfig,
-
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, 'public'), // dist/apps/api/public
-      serveRoot: '/public', // → http://localhost:3000/public/privacy_policy.html
-    }),
-
-    ClsModule.forRoot({ global: true, middleware: { mount: true } }),
-    ...[CommonDatabaseConfig, ArenaDatabaseConfig].map((it) => {
-      return TypeOrmExModule.forRootAsync({
-        name: it().name,
-        inject: [it.KEY],
-        useFactory: async (config: DataSourceOptions) => config,
-      });
-    }),
-
-    ...getGameServerTypeOrmOptions().map((options) =>
-      TypeOrmExModule.forRootAsync({
-        name: options.name,
-        inject: [GameDatabaseConfig.KEY],
-        useFactory: (configs: Record<string, DataSourceOptions>) =>
-          Object.values(configs).find((it) => it.name === options.name),
-      }),
-    ),
-
-    RedisModule,
-
-    GameAuthModule,
-    CommonModule,
-    GameDbModule,
-    StaticModule,
-
-    ArenaModule,
-  ],
-  controllers: [
-    GameController,
-    GameUserController,
-    CharacterController,
-    BattleController,
-    MissionController,
-    ShopController,
-  ],
-  providers: [
-    //----Service
-    GameService,
-    GameUserService,
-    CharacterService,
-    BattleService,
-    MissionService,
-    ShopService,
-    //Service----
-
-    //----Provider
-    ConsumptionProvider,
-    GoodsProvider,
-    RewardProvider,
-    UserDetailProvider,
-    BattleProvider,
-    MissionProvider,
-    GachaProvider,
-    CharacterProvider,
-
-    AchievementProvider,
-    MissionAchievementProvider,
-    SoloBattleProvider,
-    //Provider----
-
-    //----DataProvider
-    DataCharacterProvider,
-    DataGoodsProvider,
-    DataMissionProvider,
-    //DataProvider----
-  ],
-})
-export class GameElementModule {}
-
-@Module({
-  imports: [
-    JwtModule.register({
-      secret: process.env.ACCESS_TOKEN_SECRET,
-      signOptions: { expiresIn: JWT_OPTIONS.expiresIn },
-    }),
-    SocketServerConfig,
-    KafkaModule,
-    StaticModule,
-    AuthBattleModule,
-  ],
-  controllers: [SocketController],
-  providers: [
-    SocketDefaultService,
-
-    ChattingGateway,
-    ChattingService,
-    ChattingKafkaService,
-    ChattingKafkaProducerService,
-    ChattingKafkaConsumerService,
-    ChattingRepository,
-
-    SoloBattleGateway,
-    SoloBattleService,
-    SoloBattleRedisRepository,
-    DataCharacterProvider,
-  ],
-})
-export class SocketElementModule {}
+import { ApiElementModule } from './modules/api-element.module';
+import { GameElementModule } from './modules/game-element.module';
+import { SocketElementModule } from './modules/socker-element.module';
+import { LogElementModule } from './modules/log-element.module';
+import { MongoLogInterceptor } from '@libs/common/interceptor/mongo-log.interceptor';
+import { LogServerProvider } from '@libs/common/http/log-server.provider';
+import { HttpModule } from '@nestjs/axios';
 
 //App
 @Module({
   imports: [
     AppServerConfig,
+    HttpModule.register({ timeout: 5000, maxRedirects: 5 }),
 
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, 'public'), // dist/apps/api/public
@@ -307,6 +71,7 @@ export class SocketElementModule {}
     ApiElementModule,
     GameElementModule,
     SocketElementModule,
+    LogElementModule,
   ],
   controllers: [],
   providers: [
@@ -322,6 +87,7 @@ export class SocketElementModule {}
     },
     { provide: APP_FILTER, useClass: AllExceptionFilter },
     { provide: APP_INTERCEPTOR, useClass: RequestLogInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: MongoLogInterceptor },
     { provide: APP_INTERCEPTOR, useClass: UserLevelLockInterceptor },
     { provide: APP_INTERCEPTOR, useClass: TransactionInterceptor },
     { provide: APP_INTERCEPTOR, useClass: SequenceInterceptor },
@@ -330,6 +96,7 @@ export class SocketElementModule {}
 
     AchievementProvider,
     MissionAchievementProvider,
+    LogServerProvider,
     //Provider----
 
     //----DataProvider

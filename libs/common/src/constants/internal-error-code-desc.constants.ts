@@ -10,12 +10,17 @@ export const INTERNAL_ERROR_CODE_DESC = {
   [e.SESSION_SEQUENCE_NOT_FOUND]: '유효하지 않은 시퀀스',
 
   [e.API_KEY_NOT_VALID]: '유효하지 않은 api key',
+  [e.API_SECURITY_NF_TOKEN_INVALIDATE]: '유효하지 않은 nf token',
 
   // USER DETAIL
   [e.USER_DETAIL_NOT_FOUND]: '유저 상세 정보를 찾을 수 없음',
   [e.USER_DETAIL_UNKNOWN_CURRENCY_TYPE]: '확인 되지 않은 통화',
   [e.USER_DETAIL_CURRENCY_GOLD_NOT_ENOUGH]: '골드 부족',
   [e.USER_DETAIL_CURRENCY_CASH_NOT_ENOUGH]: '캐시 부족',
+
+  [e.MONGO_LOG_DATA_PARSE_ERROR]: '로그 데이터 파싱 에러',
+  [e.MONGO_LOG_DATA_EMPTY]: '로그 데이터 empty',
+  [e.MONGO_LOG_UNSUPPORTED_GAME_CODE]: '지원하지 않는 게임 코드',
 
   [e.CHARACTER_NOT_FOUND]: '%P 캐릭터 정보를 찾을 수 없습니다.',
   [e.CHARACTER_NOT_ENOUGH]: '%P 캐릭터가 부족합니다.',

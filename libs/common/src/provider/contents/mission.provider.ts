@@ -19,7 +19,7 @@ export class MissionProvider {
    * 다중 미션 조회
    */
   async getMission(): Promise<Mission[]> {
-    const { userId, database } = ContextProvider.getDbInfo();
+    const { userId, database } = ContextProvider.getUserInfo();
 
     return await this.missionRepositories[database].findByUserId(userId);
   }
@@ -30,7 +30,7 @@ export class MissionProvider {
   async getMissionsByDataMissionIds(
     dataMissionIds: number[],
   ): Promise<Mission[]> {
-    const { userId, database } = ContextProvider.getDbInfo();
+    const { userId, database } = ContextProvider.getUserInfo();
 
     const currentAndPrevMissions =
       this.dataMissionProvider.getCurrentAndPrevStepDataMission(dataMissionIds);
@@ -50,7 +50,7 @@ export class MissionProvider {
     missionIds: number[],
     rewardAt: Date,
   ): Promise<UpdateResult> {
-    const { database } = ContextProvider.getDbInfo();
+    const { database } = ContextProvider.getUserInfo();
 
     return await this.missionRepositories[database].updateByIdIn(missionIds, {
       rewardAt: rewardAt,
@@ -61,7 +61,7 @@ export class MissionProvider {
    * 미션 업데이트 및 생성
    */
   async saveMission(updateMissions: Mission[]): Promise<void> {
-    const { database } = ContextProvider.getDbInfo();
+    const { database } = ContextProvider.getUserInfo();
 
     await this.missionRepositories[database].save(updateMissions, {
       reload: false,

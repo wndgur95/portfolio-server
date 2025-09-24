@@ -130,7 +130,7 @@ export class AuthService {
 
   validateUser(payload: JwtPayload): boolean {
     ContextProvider.setJwt(payload);
-    if (payload.gameDbId) ContextProvider.setGameDatabase(payload.database);
+    if (payload.gameDbId) ContextProvider.setUserInfo(payload);
     return !!payload;
   }
 
@@ -158,7 +158,8 @@ export class AuthService {
   async refreshToken(user: User): Promise<AuthSignUserOutDto> {
     // 새로운 토큰 생성
     const newPayload: JwtPayload = {
-      id: user.id,
+      userId: user.id,
+      nid: user.nid,
       email: user.email ?? '',
       roles: user.roles,
       gameDbId: user.gameDbId || 0,
@@ -258,29 +259,30 @@ export class AuthService {
    */
   @TransactionalEx(DB_NAME.COMMON)
   private async _handleLogin(user: User): Promise<AuthSignUserOutDto> {
-    if (!user.gameDbId) {
-      const gameDbId = 100 + (user.id % getGameShardDatabases.length);
-
-      user.gameDbId = gameDbId;
-
-      await this.usersRepository.updateById(user.id, {
-        gameDbId,
-      });
-
-      const database = getDatabaseByGameDbId(gameDbId);
-      ContextProvider.setGameDatabase(database);
-      ContextProvider.setUserId(user.id);
-
-      await this.userService.createUserDetail(user);
-    }
-
     const payload: JwtPayload = {
-      id: user.id,
+      userId: user.id,
+      nid: user.nid,
       email: user.email ?? '',
       roles: user.roles,
       gameDbId: user.gameDbId || 0,
       database: user.gameDbId ? getDatabaseByGameDbId(user.gameDbId) : '',
     };
+
+    if (!user.gameDbId) {
+      const gameDbId = 100 + (user.id % getGameShardDatabases.length);
+
+      user.gameDbId = gameDbId;
+      payload.gameDbId = gameDbId;
+
+      await this.usersRepository.updateById(user.id, {
+        gameDbId,
+      });
+
+      ContextProvider.setUserInfo(payload);
+      payload.database = ContextProvider.getUserInfo().database;
+
+      await this.userService.createUserDetail(user);
+    }
 
     const accessToken = this._getAuthToken(payload);
     const refreshToken = this._getRefreshToken(payload);
@@ -303,13 +305,13 @@ export class AuthService {
   ): Promise<AuthSignUserOutDto> {
     const { roles } = updateRoleUserDto;
 
-    const { id } = ContextProvider.getJwt();
+    const { userId } = ContextProvider.getJwt();
 
-    await this.usersRepository.updateById(id, {
+    await this.usersRepository.updateById(userId, {
       roles: roles,
     });
 
-    const user = await this.usersRepository.findById(id);
+    const user = await this.usersRepository.findById(userId);
 
     return await this._handleLogin(user);
   }
@@ -338,10 +340,7 @@ export class AuthService {
       gameDbId: user.gameDbId,
     });
 
-    await this.sessionRepository.setSession(
-      user.id,
-      session,
-    );
+    await this.sessionRepository.setSession(user.id, session);
 
     return session;
   }

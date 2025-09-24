@@ -143,7 +143,7 @@ export class UserService {
 
   @Transactional(DB_NAME.COMMON)
   async createUserDetail(user: User): Promise<UserDetail> {
-    const database = ContextProvider.getGameDatabase();
+    const { database } = ContextProvider.getUserInfo();
 
     const userDetail = await this.userDetailsRepositories[database].save(
       UserDetailEntity.create({

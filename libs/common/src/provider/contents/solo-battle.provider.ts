@@ -29,14 +29,14 @@ export class SoloBattleProvider {
 
   @TransactionalEx(DB_NAME.ARENA)
   async getSoloScore(): Promise<SoloScore> {
-    const userId = ContextProvider.getUserId();
+    const { userId } = ContextProvider.getUserInfo();
 
     return await this.soloScoresRepository.findByUserId(userId);
   }
 
   @TransactionalEx(DB_NAME.ARENA)
   async createSoloScore(): Promise<SoloScore> {
-    const userId = ContextProvider.getUserId();
+    const { userId } = ContextProvider.getUserInfo();
 
     const soloScore = SoloScoreEntity.create({
       userId: userId,

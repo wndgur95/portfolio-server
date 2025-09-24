@@ -22,14 +22,11 @@ import { INTERNAL_ERROR_CODE } from '@libs/common/constants/internal-error-code.
 import { GoogleOAuthProvider, FirebaseAdminProvider } from '@libs/common/http';
 import { UsersDbRepository } from '@libs/dao/common/users/repositories/users-db.repository';
 import { Session } from '@libs/dao/redis/session/session.entity';
-import {
-  ENVIRONMENT,
-  NODE_ENV,
-} from '@libs/common/constants/environment.constants';
-import { SESSION_EXPIRED_TIME } from '@libs/common/constants/redis.constants';
 import { SessionRepository } from '@libs/dao/redis/session/session.repository';
 import { TimeUtil } from '@libs/common/utils/time.util';
 import { UserService } from '../user/user.service';
+import { MongoLogProvider } from '@libs/common/provider/mongo-log/mongo-log.provider';
+import { LoginCollection } from '@libs/dao/mongo/mongo-log/collection/auth/login.collection';
 
 @Injectable()
 export class AuthService {
@@ -141,29 +138,30 @@ export class AuthService {
    */
   @TransactionalEx(DB_NAME.COMMON)
   private async _handleLogin(user: User): Promise<AuthSignUserOutDto> {
-    if (!user.gameDbId) {
-      const gameDbId = 100 + (user.id % getGameShardDatabases.length);
-
-      user.gameDbId = gameDbId;
-
-      await this.usersRepository.updateById(user.id, {
-        gameDbId,
-      });
-
-      const database = getDatabaseByGameDbId(gameDbId);
-      ContextProvider.setGameDatabase(database);
-      ContextProvider.setUserId(user.id);
-
-      await this.userService.createUserDetail(user);
-    }
-
     const payload: JwtPayload = {
-      id: user.id,
+      userId: user.id,
+      nid: user.nid,
       email: user.email ?? '',
       roles: user.roles,
       gameDbId: user.gameDbId || 0,
       database: user.gameDbId ? getDatabaseByGameDbId(user.gameDbId) : '',
     };
+
+    if (!user.gameDbId) {
+      const gameDbId = 100 + (user.id % getGameShardDatabases.length);
+
+      user.gameDbId = gameDbId;
+      payload.gameDbId = gameDbId;
+
+      await this.usersRepository.updateById(user.id, {
+        gameDbId,
+      });
+
+      ContextProvider.setUserInfo(payload);
+      payload.database = ContextProvider.getUserInfo().database;
+
+      await this.userService.createUserDetail(user);
+    }
 
     const accessToken = this._getAuthToken(payload);
     const refreshToken = this._getRefreshToken(payload);
@@ -173,6 +171,11 @@ export class AuthService {
     await this.usersRepository.updateById(user.id, {
       refreshToken: refreshToken,
     });
+
+    MongoLogProvider.setMongoLog(
+      'login',
+      new LoginCollection({ reason: 'login' }),
+    );
 
     return AuthSignUserOutDto.of(user)
       .setAuthToken(accessToken)

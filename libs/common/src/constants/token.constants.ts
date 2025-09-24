@@ -5,3 +5,6 @@ export const AUTH_TOKEN_SECRET_KEY =
 export interface AuthToken {
   ttl: number;
 }
+
+export const NF_TOKEN_SECRET_KEY =
+  process.env.NODE_ENV + 'log nf token secret key';

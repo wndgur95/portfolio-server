@@ -91,13 +91,13 @@
         "tsConfigPath": "apps/game/tsconfig.app.json"
       }
     },
-    "deploy": {
+    "log": {
       "type": "application",
-      "root": "apps/deploy",
+      "root": "apps/log",
       "entryFile": "main",
-      "sourceRoot": "apps/deploy/src",
+      "sourceRoot": "apps/log/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/deploy/tsconfig.app.json"
+        "tsConfigPath": "apps/log/tsconfig.app.json"
       }
     },
     "socket": {

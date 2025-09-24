@@ -19,7 +19,7 @@ export class UserDetailProvider {
    * 유저 디테일 조회
    */
   async getUserDetail(): Promise<UserDetail> {
-    const { userId, database } = ContextProvider.getDbInfo();
+    const { userId, database } = ContextProvider.getUserInfo();
 
     const userDetail =
       await this.userDetailsRepositories[database].findByUserId(userId);
@@ -51,7 +51,7 @@ export class UserDetailProvider {
    * 유저 디테일 업데이트
    */
   async updateUserDetail(userDetail: UserDetail): Promise<UpdateResult> {
-    const { database } = ContextProvider.getDbInfo();
+    const { database } = ContextProvider.getUserInfo();
 
     return await this.userDetailsRepositories[database].updateById(
       userDetail.id,

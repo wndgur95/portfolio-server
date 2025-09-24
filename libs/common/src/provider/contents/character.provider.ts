@@ -15,7 +15,7 @@ export class CharacterProvider {
    * 캐릭터 조회
    */
   async getCharacters(): Promise<Character[]> {
-    const { userId, database } = ContextProvider.getDbInfo();
+    const { userId, database } = ContextProvider.getUserInfo();
 
     return await this.charactersRepositories[database].findByUserId(userId);
   }
@@ -26,7 +26,7 @@ export class CharacterProvider {
   async getCharactersByDataCharacterIds(
     dataCharacterIds: number[],
   ): Promise<Character[]> {
-    const { userId, database } = ContextProvider.getDbInfo();
+    const { userId, database } = ContextProvider.getUserInfo();
 
     return await this.charactersRepositories[
       database
@@ -40,7 +40,7 @@ export class CharacterProvider {
     characters: Character[],
     reload = false,
   ): Promise<Character[]> {
-    const { database } = ContextProvider.getDbInfo();
+    const { database } = ContextProvider.getUserInfo();
 
     return await this.charactersRepositories[database].save(characters, {
       reload,
@@ -55,7 +55,7 @@ export class CharacterProvider {
     level: number,
   ): Promise<Character> {
     character.level = level;
-    const { database } = ContextProvider.getDbInfo();
+    const { database } = ContextProvider.getUserInfo();
 
     await this.charactersRepositories[database].updateLevelById(
       character.id,

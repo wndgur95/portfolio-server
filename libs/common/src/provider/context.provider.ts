@@ -9,17 +9,19 @@ import { getDatabaseByGameDbId } from '@libs/dao/config/game/game-database-confi
 import { ServerErrorException } from '@libs/common/exception/server-error.exception';
 import { INTERNAL_ERROR_CODE } from '@libs/common/constants/internal-error-code.constants';
 import { Session } from '@libs/dao/redis/session/session.entity';
+import { MongoLogs } from '@libs/dao/mongo/mongo-log/dto/mongo-log.dto';
+import { CommonUserInfoDto } from '@libs/common/dto/common-user-info.dto';
 
 // test debugging 용
 export const context = {};
 
 export class ContextProvider {
   static get<T>(key: string): T {
-    return ClsServiceManager.getClsService().get(key)
+    return ClsServiceManager.getClsService().get(key);
   }
 
   static set<T>(key: string, value: T): void {
-    ClsServiceManager.getClsService().set(key, value)
+    ClsServiceManager.getClsService().set(key, value);
   }
 
   static getSession(check = true): Session {
@@ -40,10 +42,7 @@ export class ContextProvider {
   }
 
   static setSession(session: Session): void {
-    ContextProvider.setGameDatabase(
-      session.database ?? getDatabaseByGameDbId(session.gameDbId),
-    );
-    ContextProvider.setUserId(session.userId);
+    ContextProvider.setUserInfo(session);
     ContextProvider.set('session', session);
   }
 
@@ -61,32 +60,23 @@ export class ContextProvider {
   }
 
   static setJwt(jwt: JwtPayload): void {
-    ContextProvider.setGameDatabase(jwt.database);
-    ContextProvider.setUserId(jwt.id);
+    ContextProvider.setUserInfo(jwt);
     ContextProvider.set('jwt', jwt);
   }
 
-  static getDbInfo(): { database: string; userId: number } {
-    return {
-      database: ContextProvider.getGameDatabase(),
-      userId: ContextProvider.getUserId(),
-    };
+  static getUserInfo(): CommonUserInfoDto {
+    return ContextProvider.get('user-info') ?? CommonUserInfoDto.emptyDto;
   }
 
-  static getUserId(): number {
-    return ContextProvider.get('user-id');
-  }
+  static setUserInfo(userInfo: JwtPayload | Session): void {
+    const commonUserInfo = {
+      userId: userInfo.userId,
+      gameDbId: userInfo.gameDbId,
+      database: userInfo.database ?? getDatabaseByGameDbId(userInfo.gameDbId),
+      nid: userInfo.nid,
+    } as CommonUserInfoDto;
 
-  static setUserId(userId: number): void {
-    ContextProvider.set('user-id', userId);
-  }
-
-  static getGameDatabase(): string {
-    return ContextProvider.get('game-database');
-  }
-
-  static setGameDatabase(gameDatabase: string): void {
-    ContextProvider.set('game-database', gameDatabase);
+    ContextProvider.set('user-info', commonUserInfo);
   }
 
   /**
@@ -132,5 +122,17 @@ export class ContextProvider {
 
   static releaseRedisMultiPool(): void {
     ContextProvider.set('dsp-redis', undefined);
+  }
+
+  static getMongoLogs(): MongoLogs {
+    return this.get('mongoLog');
+  }
+
+  static setMongoLogs(mongoLogs: MongoLogs): void {
+    this.set('mongoLog', mongoLogs);
+  }
+
+  static releaseMongoLogs(): void {
+    ContextProvider.set('mongoLog', undefined);
   }
 }
