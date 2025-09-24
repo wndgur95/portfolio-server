@@ -12,6 +12,9 @@ import { CURRENCY_PROPS } from '@libs/dao/game/user-details/type/currency';
 import { DataCharacterProvider } from '@libs/common/provider/static-data/data-character.provider';
 import { CharacterProvider } from '@libs/common/provider/contents/character.provider';
 import { CharacterDto } from '@libs/dao/game/characters/dto/character.dto';
+import { MongoLogProvider } from '@libs/common/provider/mongo-log/mongo-log.provider';
+import { ConsumeCurrencyCollection } from '@libs/dao/mongo/mongo-log/collection/goods/consume-currency.collection';
+import { ConsumeCharacterCollection } from '@libs/dao/mongo/mongo-log/collection/goods/consume-character.collection';
 
 type DelegateFunctionReturn = CurrencyDto | CharacterDto;
 
@@ -101,6 +104,13 @@ export class ConsumptionProvider {
 
     await this.userDetailProvider.updateUserDetail(userDetail);
 
+    MongoLogProvider.setMongoLog(
+      'consume-currency',
+      new ConsumeCurrencyCollection({
+        userDetail,
+      }),
+    );
+
     return [CurrencyDto.fromEntity(userDetail.currency)];
   }
 
@@ -147,6 +157,16 @@ export class ConsumptionProvider {
     }
 
     await this.characterProvider.saveCharacters(characters);
+
+    MongoLogProvider.setMongoLog(
+      'consume-character',
+      characters.map(
+        (it) =>
+          new ConsumeCharacterCollection({
+            character: it,
+          }),
+      ),
+    );
 
     return CharacterDto.fromEntities(characters);
   }

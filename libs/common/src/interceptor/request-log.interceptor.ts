@@ -15,7 +15,9 @@ export class RequestLogInterceptor implements NestInterceptor {
     const now = Date.now();
 
     console.log(context.getArgs()[0].url);
+
     ContextProvider.setNow(new Date());
+    ContextProvider.setAddReason(context.getArgs()[0].url)
 
     return next.handle().pipe(
       tap(() => {

@@ -20,6 +20,9 @@ import {
 } from '@libs/dao/static/common.constants';
 import { GoodsProvider } from '@libs/common/provider/goods/goods.provider';
 import { AchievementProvider } from '@libs/common/provider/achievement/achievement.provider';
+import { MongoLogProvider } from '@libs/common/provider/mongo-log/mongo-log.provider';
+import { AchieveCollection } from '@libs/dao/mongo/mongo-log/collection/mission/achieve.collection';
+import { ReceiveMissionCollection } from '@libs/dao/mongo/mongo-log/collection/mission/receive-mission.collection';
 
 @Injectable()
 export class MissionService {
@@ -99,6 +102,17 @@ export class MissionService {
 
     // 미션 업데이트
     await this.missionProvider.saveMission(missions);
+
+    MongoLogProvider.setMongoLog(
+      'receive-mission',
+      missions.map((it) => {
+        return new ReceiveMissionCollection({
+          mission: it,
+          goods: goodsOutDto,
+          reason: 'receive-mission'
+        });
+      }),
+    );
 
     return ReceiveRewardOutDto.of({
       mission: MissionDto.fromEntities(missions),

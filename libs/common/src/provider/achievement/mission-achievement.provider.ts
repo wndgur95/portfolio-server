@@ -10,6 +10,9 @@ import { MissionsDbRepositories } from '@libs/dao/game/missions/repositories/mis
 import { MissionsRepository } from '@libs/dao/game/missions/interfaces/missions-repository.interface';
 import { MissionEntity } from '@libs/dao/game/missions/entities/mission.entity';
 import { Mission } from '@libs/dao/game/missions/interfaces/mission.interface';
+import { MongoLogProvider } from '@libs/common/provider/mongo-log/mongo-log.provider';
+import { EnterBattleCollection } from '@libs/dao/mongo/mongo-log/collection/battle/enter-battle.collection';
+import { AchieveCollection } from '@libs/dao/mongo/mongo-log/collection/mission/achieve.collection';
 
 interface DataMissionInfo extends DataMission {
   prevCount?: number;
@@ -100,6 +103,15 @@ export class MissionAchievementProvider
     }
 
     await missionRepository.save(updateMissions, { reload: false });
+
+    MongoLogProvider.setMongoLog(
+      'achieve',
+      updateMissions.map((it) => {
+        return new AchieveCollection({
+          mission: it,
+        });
+      }),
+    );
 
     return updateMissions;
   }

@@ -19,6 +19,10 @@ import { DataCharacterProvider } from '@libs/common/provider/static-data/data-ch
 import { UserDetailEntity } from '@libs/dao/game/user-details/entities/user-detail.entity';
 import { CURRENCY_PROPS } from '@libs/dao/game/user-details/type/currency';
 import { CharacterEntity } from '@libs/dao/game/characters/entities/character.entity';
+import { MongoLogProvider } from '@libs/common/provider/mongo-log/mongo-log.provider';
+import { GachaCollection } from '@libs/dao/mongo/mongo-log/collection/shop/gacha.collection';
+import { PayCurrencyCollection } from '@libs/dao/mongo/mongo-log/collection/goods/pay-currency.collection';
+import { PayCharacterCollection } from '@libs/dao/mongo/mongo-log/collection/goods/pay-character.collection';
 
 type DelegateFunctionReturn = UserDetailDto | CurrencyDto | CharacterDto;
 
@@ -35,12 +39,9 @@ export class RewardProvider {
     private readonly charactersRepositories: CharactersDbRepositories,
 
     private readonly userDetailProvider: UserDetailProvider,
-
-    private readonly dataGoodsProvider: DataGoodsProvider,
     private readonly dataCharacterProvider: DataCharacterProvider,
 
     private readonly dataCurrencyRepository: DataCurrencyRepository,
-    private readonly dataBalanceRepository: DataBalanceRepository,
   ) {
     this.rewardDelegate = {
       [GOODS_TYPE.CURRENCY]: (rewards): Promise<DelegateFunctionReturn[]> =>
@@ -122,6 +123,13 @@ export class RewardProvider {
 
     await this.userDetailProvider.updateUserDetail(userDetail);
 
+    MongoLogProvider.setMongoLog(
+      'pay-currency',
+      new PayCurrencyCollection({
+        userDetail,
+      }),
+    );
+
     return [CurrencyDto.fromEntity(userDetail.currency)];
   }
 
@@ -165,6 +173,16 @@ export class RewardProvider {
     const characterRepository = this.charactersRepositories[database];
     characters = await characterRepository.save(
       Object.values(characterByDataCharacterId),
+    );
+
+    MongoLogProvider.setMongoLog(
+      'pay-character',
+      characters.map(
+        (it) =>
+          new PayCharacterCollection({
+            character: it,
+          }),
+      ),
     );
 
     return CharacterDto.fromEntities(characters);

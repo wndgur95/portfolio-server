@@ -6,6 +6,10 @@ import { GachaProvider } from '@libs/common/provider/gacha/gacha.provider';
 import { AchievementProvider } from '@libs/common/provider/achievement/achievement.provider';
 import { MISSION_CONDITION_TYPE } from '@libs/dao/static/common.constants';
 import { Transactional } from '@libs/common/decorator/transaction.decorator';
+import { MongoLogProvider } from '@libs/common/provider/mongo-log/mongo-log.provider';
+import { ReceiveMissionCollection } from '@libs/dao/mongo/mongo-log/collection/mission/receive-mission.collection';
+import { GachaCollection } from '@libs/dao/mongo/mongo-log/collection/shop/gacha.collection';
+import { ContextProvider } from '@libs/common/provider/context.provider';
 
 @Injectable()
 export class ShopService {
@@ -31,9 +35,18 @@ export class ShopService {
     const rewardGoods = await this.goodsProvider.payImmediately(rewards);
 
     AchievementProvider.achieve(MISSION_CONDITION_TYPE.GACHA, [], count);
+    const goodsOutDto = this.goodsProvider.merge(consumedGoods, rewardGoods);
+
+    MongoLogProvider.setMongoLog(
+      'gacha',
+      new GachaCollection({
+        goods: goodsOutDto,
+        reason: 'gacha'
+      }),
+    );
 
     return GachaOutDto.of({
-      goods: this.goodsProvider.merge(consumedGoods, rewardGoods),
+      goods: goodsOutDto,
       gachaCharacterIds,
     });
   }
