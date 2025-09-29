@@ -1,5 +1,5 @@
-import { Body, Controller, Headers, Post, UseGuards } from '@nestjs/common';
-import { ApiHeader, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { MongoLogService } from './mongo-log.service';
 import { CreateMongoLogInDto } from './dto/create-mongo-log-in.dto';
 import { ApiResponseEntity } from '@libs/common/decorator/api-response-entity';
@@ -15,9 +15,7 @@ export class MongoLogController {
   @ApiResponseEntity({ summary: '공통 로그' })
   @UseGuards(NfTokenGuard)
   @ApiSecurity('nfToken')
-  @ApiHeader({ name: 'gameCd' })
   async setLog(
-    @Headers('gameCd') gameCd: string,
     @Body() createMongoLogInDto: CreateMongoLogInDto,
   ): Promise<ResponseEntity<unknown>> {
     await this.mongoLogService.setMongoLog(createMongoLogInDto);

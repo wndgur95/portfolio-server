@@ -5,6 +5,7 @@ import { ApiElementModule } from './modules/api-element.module';
 import { GameElementModule } from './modules/game-element.module';
 import { SocketElementModule } from './modules/socker-element.module';
 import { LogElementModule } from './modules/log-element.module';
+import { AdminElementModule } from './modules/admin-element.module';
 
 export class AppServer {
   constructor(private readonly app: INestApplication) {}
@@ -211,6 +212,66 @@ export class AppServer {
 
     SwaggerModule.setup(
       'log/api-docs',
+      this.app,
+      document,
+      SWAGGER_CUSTOM_OPTIONS,
+    );
+  }
+
+  /**
+   * OPEN API(Swagger) 초기화
+   */
+  private _initializeAdminSwagger(): void {
+    const config = new DocumentBuilder()
+      .setTitle('Admin Server')
+      .setDescription('API description')
+      .setVersion('1.0')
+      .addApiKey(
+        {
+          type: 'apiKey',
+          name: 'X-API-KEY',
+          in: 'header',
+          description: 'api',
+        },
+        'apiKey',
+      )
+      .addBasicAuth(
+        {
+          type: 'http',
+          name: 'Authorization',
+          in: 'header',
+          description: 'Username: email & Password: password',
+        },
+        'basic',
+      )
+      .addBearerAuth(
+        {
+          type: 'http',
+          name: 'Authorization',
+          in: 'header',
+          description: 'refresh token',
+        },
+        'jwt-refresh',
+      )
+      .addBearerAuth(
+        {
+          type: 'http',
+          name: 'Authorization',
+          in: 'header',
+          description: 'jwt auth',
+        },
+        'jwt',
+      )
+      .addBearerAuth({ type: 'http' }, 'kakao-token')
+      .build();
+
+    const document = SwaggerModule.createDocument(this.app, config, {
+      include: [AdminElementModule],
+      deepScanRoutes: true,
+    });
+
+    SwaggerModule.setup(
+      'admin/api-docs',
       this.app,
       document,
       SWAGGER_CUSTOM_OPTIONS,

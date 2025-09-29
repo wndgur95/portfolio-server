@@ -52,7 +52,7 @@ export class AdminServer {
       const document = SwaggerModule.createDocument(this.app, config);
 
       SwaggerModule.setup(
-        'api-docs',
+        'admin/api-docs',
         this.app,
         document,
         SWAGGER_CUSTOM_OPTIONS,
