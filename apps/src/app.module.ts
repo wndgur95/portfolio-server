@@ -72,6 +72,7 @@ import { HttpModule } from '@nestjs/axios';
     GameElementModule,
     SocketElementModule,
     LogElementModule,
+    // AdminElementModule,
   ],
   controllers: [],
   providers: [
