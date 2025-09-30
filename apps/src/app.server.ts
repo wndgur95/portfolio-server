@@ -24,6 +24,7 @@ export class AppServer {
     this._initializeGameSwagger();
     this._initializeSocketSwagger();
     this._initializeLogSwagger();
+    this._initializeAdminSwagger();
   }
 
   /**
@@ -263,6 +264,15 @@ export class AppServer {
         'jwt',
       )
       .addBearerAuth({ type: 'http' }, 'kakao-token')
+      .addApiKey(
+        {
+          type: 'apiKey',
+          name: 'selected-user-id',
+          in: 'header',
+          description: 'selected user id',
+        },
+        'selected-user-id',
+      )
       .build();
 
     const document = SwaggerModule.createDocument(this.app, config, {

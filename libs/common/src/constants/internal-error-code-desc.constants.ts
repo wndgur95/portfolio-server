@@ -10,6 +10,7 @@ export const INTERNAL_ERROR_CODE_DESC = {
   [e.SESSION_SEQUENCE_NOT_FOUND]: '유효하지 않은 시퀀스',
 
   [e.API_KEY_NOT_VALID]: '유효하지 않은 api key',
+  [e.AUTH_SERVER_NETWORK_ERROR]:'%P',
   [e.API_SECURITY_NF_TOKEN_INVALIDATE]: '유효하지 않은 nf token',
 
   // USER DETAIL

@@ -1,9 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { MongoLogRepositories, MongoLogRepository } from '@libs/common/databases/mongo/mongo-log-repository.interface';
 import { CreateMongoLogInDto } from '@libs/dao/mongo/mongo-log/dto/create-mongo-log-in.dto';
-import { MongoLog } from '@libs/common/databases/mongo/mongo-log.interface';
 import { ServerErrorException } from '@libs/common/exception/server-error.exception';
 import { INTERNAL_ERROR_CODE } from '@libs/common/constants/internal-error-code.constants';
+import {
+  MongoLogRepositories,
+  MongoLogRepository,
+} from '@libs/dao/mongo/mongo-log/interfaces/mongo-log-repository.interface';
+import { MongoLog } from '@libs/dao/mongo/mongo-log/interfaces/mongo-log.interface';
+import { GetMongoLogsInDto } from '@libs/common/dto/get-mongo-logs-in.dto';
+import { GetMongoLogsOutDto } from '@libs/common/dto/get-mongo-logs-out.dto';
 
 @Injectable()
 export class MongoLogService {
@@ -31,6 +36,49 @@ export class MongoLogService {
     }
 
     return await this.mongoLogRepositories[gameCd].set(parseData);
+  }
+
+  async getMongoLog(
+    getMongoLogsInDto: GetMongoLogsInDto,
+  ): Promise<GetMongoLogsOutDto> {
+    const { gameCode, collectionName, nid, page, take } =
+      getMongoLogsInDto;
+
+    let { startAt, endAt } = getMongoLogsInDto;
+
+    startAt = new Date(startAt)
+      .toISOString()
+      .replace('T', ' ')
+      .replace('Z', '');
+
+    endAt = new Date(endAt).toISOString().replace('T', ' ').replace('Z', '');
+
+    let logs: any[];
+    if (nid) {
+      logs = await this.mongoLogRepositories[gameCode].findByNidAndTimeRange(
+        collectionName,
+        nid,
+        startAt,
+        endAt,
+      );
+    } else {
+      logs = await this.mongoLogRepositories[gameCode].findByTimeRange(
+        collectionName,
+        startAt,
+        endAt,
+      );
+    }
+
+    const totalCount = logs.length;
+    let resultLog = logs;
+    // take 1이면 전체리스트 받아가게함.( csv download )
+    if (1 !== take) {
+      const startIndex = (page - 1) * take;
+      const endIndex = startIndex + take;
+      resultLog = logs.slice(startIndex, endIndex);
+    }
+
+    return GetMongoLogsOutDto.of({ logs: resultLog, totalCount: totalCount });
   }
 
   /**

@@ -16,6 +16,7 @@ import { GoodsProvider } from '@libs/common/provider/goods/goods.provider';
 import { CharacterProvider } from '@libs/common/provider/contents/character.provider';
 import { MongoLogProvider } from '@libs/common/provider/mongo-log/mongo-log.provider';
 import { CharacterLevelUpCollection } from '@libs/dao/mongo/mongo-log/collection/character/character-level-up.collection';
+import { MONGO_LOG_COLLECTION } from '@libs/common/constants/mongo-log.constants';
 
 @Injectable()
 export class CharacterService {
@@ -74,7 +75,7 @@ export class CharacterService {
     );
 
     MongoLogProvider.setMongoLog(
-      'character-level-up',
+      MONGO_LOG_COLLECTION.CHARACTER_LEVEL_UP,
       new CharacterLevelUpCollection({
         character,
         reason: 'character-level-up',

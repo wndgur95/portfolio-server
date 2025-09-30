@@ -12,6 +12,7 @@ import { MissionEntity } from '@libs/dao/game/missions/entities/mission.entity';
 import { Mission } from '@libs/dao/game/missions/interfaces/mission.interface';
 import { MongoLogProvider } from '@libs/common/provider/mongo-log/mongo-log.provider';
 import { AchieveCollection } from '@libs/dao/mongo/mongo-log/collection/mission/achieve.collection';
+import { MONGO_LOG_COLLECTION } from '@libs/common/constants/mongo-log.constants';
 
 interface DataMissionInfo extends DataMission {
   prevCount?: number;
@@ -104,7 +105,7 @@ export class MissionAchievementProvider
     await missionRepository.save(updateMissions, { reload: false });
 
     MongoLogProvider.setMongoLog(
-      'achieve',
+      MONGO_LOG_COLLECTION.ACHIEVE,
       updateMissions.map((it) => {
         return new AchieveCollection({
           mission: it,

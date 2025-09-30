@@ -2,6 +2,7 @@ import { EntityRepository } from '@libs/common/databases/typeorm/typeorm-ex.deco
 import { AbstractRepository } from '@libs/common/databases/typeorm/abstract.repository';
 import { UserEntity } from '@libs/dao/common/users/entities/user.entity';
 import { UsersRepository } from '@libs/dao/common/users/interfaces/users-repository.interface';
+import { FilterValue } from '@libs/common/dto/pagination-in.dto';
 
 @EntityRepository(UserEntity)
 export class UsersDbRepository
@@ -35,6 +36,21 @@ export class UsersDbRepository
       .take(take)
       .skip(skip)
       .orderBy(`${this.alias}.id`, orderBy)
+      .getManyAndCount();
+  }
+
+  async findAllWithFilterAndCount(
+    take: number,
+    skip: number,
+    orderBy: 'ASC' | 'DESC',
+    filter?: Record<string, FilterValue>,
+  ): Promise<[UserEntity[], number]> {
+    const qb = this.queryBuilder;
+
+    return await this.applyDynamicFilters(qb, filter)
+      .take(take)
+      .skip(skip)
+      .orderBy(`${qb.alias}.id`, orderBy)
       .getManyAndCount();
   }
 }

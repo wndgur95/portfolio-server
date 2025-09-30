@@ -32,6 +32,10 @@ import { LogElementModule } from './modules/log-element.module';
 import { MongoLogInterceptor } from '@libs/common/interceptor/mongo-log.interceptor';
 import { LogServerProvider } from '@libs/common/http/log-server.provider';
 import { HttpModule } from '@nestjs/axios';
+import { GetUserIdInterceptor } from '../admin/src/interceptor/get-user-id.interceptor';
+import { AdminElementModule } from './modules/admin-element.module';
+import ArenaDatabaseConfig from '@libs/dao/config/arena/arena-database.config';
+import { ArenaModule } from '@libs/dao/arena/arena.module';
 
 //App
 @Module({
@@ -45,7 +49,7 @@ import { HttpModule } from '@nestjs/axios';
     }),
 
     ClsModule.forRoot({ global: true, middleware: { mount: true } }),
-    ...[CommonDatabaseConfig].map((it) => {
+    ...[CommonDatabaseConfig, ArenaDatabaseConfig].map((it) => {
       return TypeOrmExModule.forRootAsync({
         name: it().name,
         inject: [it.KEY],
@@ -67,12 +71,13 @@ import { HttpModule } from '@nestjs/axios';
     CommonModule,
     GameDbModule,
     StaticModule,
+    ArenaModule,
 
     ApiElementModule,
     GameElementModule,
     SocketElementModule,
     LogElementModule,
-    // AdminElementModule,
+    AdminElementModule,
   ],
   controllers: [],
   providers: [
@@ -93,6 +98,7 @@ import { HttpModule } from '@nestjs/axios';
     { provide: APP_INTERCEPTOR, useClass: TransactionInterceptor },
     { provide: APP_INTERCEPTOR, useClass: SequenceInterceptor },
     { provide: APP_INTERCEPTOR, useClass: PayloadInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: GetUserIdInterceptor },
     MissionProvider,
 
     AchievementProvider,

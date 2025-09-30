@@ -22,6 +22,7 @@ import { GoodsProvider } from '@libs/common/provider/goods/goods.provider';
 import { AchievementProvider } from '@libs/common/provider/achievement/achievement.provider';
 import { MongoLogProvider } from '@libs/common/provider/mongo-log/mongo-log.provider';
 import { ReceiveMissionCollection } from '@libs/dao/mongo/mongo-log/collection/mission/receive-mission.collection';
+import { MONGO_LOG_COLLECTION } from '@libs/common/constants/mongo-log.constants';
 
 @Injectable()
 export class MissionService {
@@ -103,7 +104,7 @@ export class MissionService {
     await this.missionProvider.saveMission(missions);
 
     MongoLogProvider.setMongoLog(
-      'receive-mission',
+      MONGO_LOG_COLLECTION.RECEIVE_MISSION,
       missions.map((it) => {
         return new ReceiveMissionCollection({
           mission: it,

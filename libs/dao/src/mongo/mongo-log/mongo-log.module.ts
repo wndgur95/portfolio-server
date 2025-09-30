@@ -3,7 +3,7 @@ import { SurviveMongoLogDocumentRepository } from '@libs/dao/mongo/mongo-log/rep
 import {
   MongoLogRepositories,
   MongoLogRepository,
-} from '@libs/common/databases/mongo/mongo-log-repository.interface';
+} from '@libs/dao/mongo/mongo-log/interfaces/mongo-log-repository.interface';
 
 @Module({
   providers: [

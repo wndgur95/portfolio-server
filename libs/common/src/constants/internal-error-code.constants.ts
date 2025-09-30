@@ -9,6 +9,8 @@ export const INTERNAL_ERROR_CODE = {
   API_KEY_NOT_VALID: 10, // 유효하지않은 api key
   API_SECURITY_NF_TOKEN_INVALIDATE: 12, // nfToken 유효 하지 않음
 
+  AUTH_SERVER_NETWORK_ERROR: 31,
+
   // USER DETAIL : 51 ~ 100
   USER_DETAIL_NOT_FOUND: 51, // 유저 상세 정보를 찾을 수 없음
   USER_DETAIL_UNKNOWN_CURRENCY_TYPE: 52, // 확인 되지 않은 통화

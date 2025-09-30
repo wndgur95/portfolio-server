@@ -12,6 +12,13 @@ export interface MissionsRepository
   ): Promise<Mission[]>;
 
   updateCountAndRewardAtByIdIn(missionIds: number[]): Promise<void>;
+
+  findAllWithFilterAndCount(
+    take: number,
+    skip: number,
+    orderBy: 'ASC' | 'DESC',
+    filter?: any,
+  ): Promise<[Mission[], number]>;
 }
 
 export const MissionsRepository = Symbol('MissionsRepository');

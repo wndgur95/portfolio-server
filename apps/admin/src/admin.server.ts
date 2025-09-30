@@ -26,8 +26,8 @@ export class AdminServer {
   private _initializeSwagger(): void {
     if (!['prod'].includes(process.env.NODE_ENV)) {
       const config = new DocumentBuilder()
-        .setTitle('Dino Admin Server')
-        .setDescription('The Game API description')
+        .setTitle('Admin Server')
+        .setDescription('The Admin API description')
         .setVersion('1.0')
         .addApiKey(
           {
@@ -46,6 +46,26 @@ export class AdminServer {
             description: 'Username: accountKey & Password: sessionKey',
           },
           'basic',
+        )
+        .addBearerAuth(
+          {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+            name: 'JWT',
+            description: 'Enter JWT token',
+            in: 'header',
+          },
+          'jwt',
+        )
+        .addApiKey(
+          {
+            type: 'apiKey',
+            name: 'selected-user-id',
+            in: 'header',
+            description: 'selected user id',
+          },
+          'selected-user-id',
         )
         .build();
 
