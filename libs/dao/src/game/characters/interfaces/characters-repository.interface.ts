@@ -17,6 +17,13 @@ export interface CharactersRepository
   ): Promise<Character[]>;
 
   updateLevelById(id: number, level: number): Promise<void>;
+
+  findAllWithFilterAndCount(
+    take: number,
+    skip: number,
+    orderBy: 'ASC' | 'DESC',
+    filter?: any,
+  ): Promise<[Character[], number]>;
 }
 
 export const CharactersRepository = Symbol('CharactersRepository');

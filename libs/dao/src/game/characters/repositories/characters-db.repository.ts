@@ -3,6 +3,7 @@ import { AbstractRepository } from '@libs/common/databases/typeorm/abstract.repo
 import { CharacterEntity } from '@libs/dao/game/characters/entities/character.entity';
 import { CharactersRepository } from '@libs/dao/game/characters/interfaces/characters-repository.interface';
 import { Character } from '@libs/dao/game/characters/interfaces/character.interface';
+import { FilterValue } from '@libs/common/dto/pagination-in.dto';
 
 export type CharactersDbRepositories = Record<string, CharactersRepository>;
 
@@ -47,5 +48,20 @@ export class CharactersDbRepository
       .set({ level })
       .where(`${this.alias}.id=:id`, { id })
       .execute();
+  }
+
+  async findAllWithFilterAndCount(
+    take: number,
+    skip: number,
+    orderBy: 'ASC' | 'DESC',
+    filter?: Record<string, FilterValue>,
+  ): Promise<[Character[], number]> {
+    const qb = this.queryBuilder;
+
+    return await this.applyDynamicFilters(qb, filter)
+      .take(take)
+      .skip(skip)
+      .orderBy(`${qb.alias}.id`, orderBy)
+      .getManyAndCount();
   }
 }

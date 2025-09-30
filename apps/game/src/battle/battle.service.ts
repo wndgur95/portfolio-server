@@ -27,6 +27,7 @@ import { SoloBattleRedisRepository } from '@libs/dao/redis/solo-battle/solo-batt
 import { MongoLogProvider } from '@libs/common/provider/mongo-log/mongo-log.provider';
 import { EnterBattleCollection } from '@libs/dao/mongo/mongo-log/collection/battle/enter-battle.collection';
 import { FinishBattleCollection } from '@libs/dao/mongo/mongo-log/collection/battle/finish-battle.collection';
+import { MONGO_LOG_COLLECTION } from '@libs/common/constants/mongo-log.constants';
 
 @Injectable()
 export class BattleService {
@@ -68,7 +69,7 @@ export class BattleService {
     await this.soloBattleRedisRepository.setBattleInfo(userId, battleInfo);
 
     MongoLogProvider.setMongoLog(
-      'solo-battle',
+      MONGO_LOG_COLLECTION.SOLO_BATTLE,
       new EnterBattleCollection({ battleInfo, reason: 'enter-battle' }),
     );
 
@@ -98,7 +99,7 @@ export class BattleService {
     AchievementProvider.achieve(MISSION_CONDITION_TYPE.KILL_ENEMY, [], kill);
 
     MongoLogProvider.setMongoLog(
-      'solo-battle',
+      MONGO_LOG_COLLECTION.SOLO_BATTLE,
       new FinishBattleCollection({
         battleInfo,
         goods: goodsOutDto,

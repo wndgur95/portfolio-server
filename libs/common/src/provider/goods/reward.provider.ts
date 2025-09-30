@@ -20,6 +20,7 @@ import { CharacterEntity } from '@libs/dao/game/characters/entities/character.en
 import { MongoLogProvider } from '@libs/common/provider/mongo-log/mongo-log.provider';
 import { PayCurrencyCollection } from '@libs/dao/mongo/mongo-log/collection/goods/pay-currency.collection';
 import { PayCharacterCollection } from '@libs/dao/mongo/mongo-log/collection/goods/pay-character.collection';
+import { MONGO_LOG_COLLECTION } from '@libs/common/constants/mongo-log.constants';
 
 type DelegateFunctionReturn = UserDetailDto | CurrencyDto | CharacterDto;
 
@@ -121,7 +122,7 @@ export class RewardProvider {
     await this.userDetailProvider.updateUserDetail(userDetail);
 
     MongoLogProvider.setMongoLog(
-      'pay-currency',
+      MONGO_LOG_COLLECTION.PAT_CURRENCY,
       new PayCurrencyCollection({
         userDetail,
       }),
@@ -173,7 +174,7 @@ export class RewardProvider {
     );
 
     MongoLogProvider.setMongoLog(
-      'pay-character',
+      MONGO_LOG_COLLECTION.PAT_CHARACTER,
       characters.map(
         (it) =>
           new PayCharacterCollection({

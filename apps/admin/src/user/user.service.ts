@@ -15,7 +15,6 @@ import { PASSWORD_POLICY } from '@libs/common/constants/jwt.constants';
 import joiPasswordComplexity from 'joi-password-complexity';
 import { ContextProvider } from '@libs/common/provider/context.provider';
 import { UsersDbRepository } from '@libs/dao/common/users/repositories/users-db.repository';
-import { GetUserOutDto } from './dto/get-user-out.dto';
 import { randomUUID } from 'crypto';
 import { GoodsProvider } from '@libs/common/provider/goods/goods.provider';
 import { Reward } from '@libs/common/interface/goods.interface';
@@ -32,6 +31,9 @@ import { MissionsRepository } from '@libs/dao/game/missions/interfaces/missions-
 import { DataMissionRepository } from '@libs/dao/static/data-mission/data-mission.repository';
 import { UserDetailProvider } from '@libs/common/provider/contents/user-detail.provider';
 import { InitAt } from '@libs/dao/game/user-details/type/init-at';
+import { PaginationInDto } from '@libs/common/dto/pagination-in.dto';
+import { UserFilterDto } from './dto/user-filter.dto';
+import { PaginationOutDto } from '@libs/common/dto/pagination-out.dto';
 
 @Injectable()
 export class UserService {
@@ -49,20 +51,29 @@ export class UserService {
     private readonly userDetailProvider: UserDetailProvider,
   ) {}
 
-  async getUser(): Promise<GetUserOutDto> {
-    const { userId, database } = ContextProvider.getSession();
-
-    const user = await this.usersRepository.findById(userId);
-
-    const userDetail =
-      await this.userDetailsRepositories[database].findByUserId(userId);
-
-    await this._initializeUser(userDetail);
-
-    return GetUserOutDto.of({
-      user,
-      userDetail,
-    });
+  async getUsers(
+    pagination: PaginationInDto<UserFilterDto>,
+  ): Promise<[User[], PaginationOutDto]> {
+    const take = pagination.size ?? 20;
+    const page = pagination.page ?? 1;
+    const skip = (page - 1) * take;
+    const order = pagination.order ?? 'DESC';
+    const [users, total] = await this.usersRepository.findAllWithFilterAndCount(
+      take,
+      skip,
+      order,
+      pagination.filter,
+    );
+    return [
+      users,
+      PaginationOutDto.of({
+        total,
+        page,
+        size: take,
+        order,
+        filter: pagination.filter,
+      }),
+    ];
   }
 
   async login(email: string, password: string): Promise<User> {

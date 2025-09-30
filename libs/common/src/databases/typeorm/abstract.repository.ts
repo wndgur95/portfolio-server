@@ -10,6 +10,7 @@ import { TypeOrmHelper } from '@libs/common/databases/typeorm/typeorm.helper';
 import { ServerErrorException } from '@libs/common/exception/server-error.exception';
 import { INTERNAL_ERROR_CODE } from '@libs/common/constants/internal-error-code.constants';
 import { AbstractRepositoryInterface } from '@libs/common/databases/typeorm/abstract-repository.interface';
+import { FilterValue } from '@libs/common/dto/pagination-in.dto';
 
 export abstract class AbstractRepository<Entity>
   extends Repository<Entity>
@@ -117,5 +118,66 @@ export abstract class AbstractRepository<Entity>
       .from(this.alias)
       .whereInIds(ids)
       .execute();
+  }
+
+  /**
+   * 동적 필터를 쿼리빌더에 적용
+   */
+  protected applyDynamicFilters(
+    qb: SelectQueryBuilder<Entity>,
+    filter?: Record<string, FilterValue>,
+  ): SelectQueryBuilder<Entity> {
+    if (filter) {
+      Object.entries(filter).forEach(([field, filter]) => {
+        if (!filter || !filter.type) return;
+        if (['eq', 'gte', 'lte'].includes(filter.type)) {
+          if (filter.type === 'eq')
+            qb.andWhere(`${qb.alias}.${field} = :${field}`, {
+              [field]: filter.value,
+            });
+          if (filter.type === 'gte')
+            qb.andWhere(`${qb.alias}.${field} >= :${field}_gte`, {
+              [`${field}_gte`]: filter.value,
+            });
+          if (filter.type === 'lte')
+            qb.andWhere(`${qb.alias}.${field} <= :${field}_lte`, {
+              [`${field}_lte`]: filter.value,
+            });
+        }
+        if (filter.type === 'like') {
+          qb.andWhere(`${qb.alias}.${field} LIKE :${field}_like`, {
+            [`${field}_like`]: `%${filter.value}%`,
+          });
+        }
+        if (filter.type === 'eq' && typeof filter.value === 'string') {
+          qb.andWhere(`${qb.alias}.${field} = :${field}_str`, {
+            [`${field}_str`]: filter.value,
+          });
+        }
+        if (
+          filter.type === 'between' &&
+          Array.isArray(filter.value) &&
+          filter.value.length === 2
+        ) {
+          qb.andWhere(
+            `${qb.alias}.${field} BETWEEN :${field}_from AND :${field}_to`,
+            {
+              [`${field}_from`]: filter.value[0],
+              [`${field}_to`]: filter.value[1],
+            },
+          );
+        }
+        if (
+          filter.type === 'in' &&
+          Array.isArray(filter.value) &&
+          filter.value.length > 0
+        ) {
+          qb.andWhere(`${qb.alias}.${field} IN (:...${field}_in)`, {
+            [`${field}_in`]: filter.value,
+          });
+        }
+      });
+    }
+    return qb;
   }
 }

@@ -27,6 +27,7 @@ import { TimeUtil } from '@libs/common/utils/time.util';
 import { UserService } from '../user/user.service';
 import { MongoLogProvider } from '@libs/common/provider/mongo-log/mongo-log.provider';
 import { LoginCollection } from '@libs/dao/mongo/mongo-log/collection/auth/login.collection';
+import { MONGO_LOG_COLLECTION } from '@libs/common/constants/mongo-log.constants';
 
 @Injectable()
 export class AuthService {
@@ -173,7 +174,7 @@ export class AuthService {
     });
 
     MongoLogProvider.setMongoLog(
-      'login',
+      MONGO_LOG_COLLECTION.LOGIN,
       new LoginCollection({ reason: 'login' }),
     );
 

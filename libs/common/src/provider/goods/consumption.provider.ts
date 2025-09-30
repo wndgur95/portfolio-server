@@ -15,6 +15,7 @@ import { CharacterDto } from '@libs/dao/game/characters/dto/character.dto';
 import { MongoLogProvider } from '@libs/common/provider/mongo-log/mongo-log.provider';
 import { ConsumeCurrencyCollection } from '@libs/dao/mongo/mongo-log/collection/goods/consume-currency.collection';
 import { ConsumeCharacterCollection } from '@libs/dao/mongo/mongo-log/collection/goods/consume-character.collection';
+import { MONGO_LOG_COLLECTION } from '@libs/common/constants/mongo-log.constants';
 
 type DelegateFunctionReturn = CurrencyDto | CharacterDto;
 
@@ -105,7 +106,7 @@ export class ConsumptionProvider {
     await this.userDetailProvider.updateUserDetail(userDetail);
 
     MongoLogProvider.setMongoLog(
-      'consume-currency',
+      MONGO_LOG_COLLECTION.CONSUME_CURRENCY,
       new ConsumeCurrencyCollection({
         userDetail,
       }),
@@ -159,7 +160,7 @@ export class ConsumptionProvider {
     await this.characterProvider.saveCharacters(characters);
 
     MongoLogProvider.setMongoLog(
-      'consume-character',
+      MONGO_LOG_COLLECTION.CONSUME_CHARACTER,
       characters.map(
         (it) =>
           new ConsumeCharacterCollection({

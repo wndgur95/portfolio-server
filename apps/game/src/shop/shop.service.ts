@@ -8,6 +8,7 @@ import { MISSION_CONDITION_TYPE } from '@libs/dao/static/common.constants';
 import { Transactional } from '@libs/common/decorator/transaction.decorator';
 import { MongoLogProvider } from '@libs/common/provider/mongo-log/mongo-log.provider';
 import { GachaCollection } from '@libs/dao/mongo/mongo-log/collection/shop/gacha.collection';
+import { MONGO_LOG_COLLECTION } from '@libs/common/constants/mongo-log.constants';
 
 @Injectable()
 export class ShopService {
@@ -36,7 +37,7 @@ export class ShopService {
     const goodsOutDto = this.goodsProvider.merge(consumedGoods, rewardGoods);
 
     MongoLogProvider.setMongoLog(
-      'gacha',
+      MONGO_LOG_COLLECTION.GACHA,
       new GachaCollection({
         goods: goodsOutDto,
         reason: 'gacha'

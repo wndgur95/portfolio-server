@@ -30,12 +30,30 @@ import { AchievementProvider } from '@libs/common/provider/achievement/achieveme
 import { MissionAchievementProvider } from '@libs/common/provider/achievement/mission-achievement.provider';
 import { MissionProvider } from '@libs/common/provider/contents/mission.provider';
 import { DataMissionProvider } from '@libs/common/provider/static-data/data-mission.provider';
+import { GetUserIdInterceptor } from './interceptor/get-user-id.interceptor';
+import { UserDetailController } from './user-detail/user-detail.controller';
+import { UserDetailService } from './user-detail/user-detail.service';
+import { AdminController } from './default/admin.controller';
+import { AdminService } from './default/admin.service';
+import { CharacterController } from './character/character.controller';
+import { CharacterService } from './character/character.service';
+import { MissionController } from './mission/mission.controller';
+import { MissionService } from './mission/mission.service';
+import { ArenaController } from './arena/arena.controller';
+import { ArenaService } from './arena/arena.service';
+import ArenaDatabaseConfig from '@libs/dao/config/arena/arena-database.config';
+import { ArenaModule } from '@libs/dao/arena/arena.module';
+import { MongoLogController } from './mongo-log/mongo-log.controller';
+import { MongoLogService } from './mongo-log/mongo-log.service';
+import { LogServerProvider } from '@libs/common/http/log-server.provider';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
     AdminServerConfig,
+    HttpModule.register({ timeout: 5000, maxRedirects: 5 }),
     ClsModule.forRoot({ global: true, middleware: { mount: true } }),
-    ...[CommonDatabaseConfig].map((it) => {
+    ...[CommonDatabaseConfig, ArenaDatabaseConfig].map((it) => {
       return TypeOrmExModule.forRootAsync({
         name: it().name,
         inject: [it.KEY],
@@ -58,8 +76,17 @@ import { DataMissionProvider } from '@libs/common/provider/static-data/data-miss
     CommonModule,
     GameModule,
     StaticModule,
+    ArenaModule,
   ],
-  controllers: [UserController],
+  controllers: [
+    AdminController,
+    UserController,
+    UserDetailController,
+    CharacterController,
+    MissionController,
+    ArenaController,
+    MongoLogController,
+  ],
   providers: [
     {
       provide: APP_PIPE,
@@ -76,7 +103,14 @@ import { DataMissionProvider } from '@libs/common/provider/static-data/data-miss
     { provide: APP_INTERCEPTOR, useClass: UserLevelLockInterceptor },
     { provide: APP_INTERCEPTOR, useClass: TransactionInterceptor },
     { provide: APP_INTERCEPTOR, useClass: PayloadInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: GetUserIdInterceptor },
+    AdminService,
     UserService,
+    UserDetailService,
+    CharacterService,
+    MissionService,
+    ArenaService,
+    MongoLogService,
 
     ConsumptionProvider,
     GoodsProvider,
@@ -84,6 +118,8 @@ import { DataMissionProvider } from '@libs/common/provider/static-data/data-miss
     CharacterProvider,
 
     UserDetailProvider,
+
+    LogServerProvider,
 
     DataCharacterProvider,
     DataGoodsProvider,

@@ -42,6 +42,27 @@ export class ContextProvider {
     ContextProvider.set('session', session);
   }
 
+  static getSelectedUser(): CommonUserInfoDto {
+    const session: Session = ContextProvider.get('selected-user');
+
+    if (!session) {
+      throw new ServerErrorException(INTERNAL_ERROR_CODE.SESSION_NOT_FOUND);
+    }
+
+    return session
+      ? {
+          ...session,
+          database: session.gameDbId
+            ? getDatabaseByGameDbId(session.gameDbId)
+            : null,
+        }
+      : null;
+  }
+
+  static setSelectedUser(session: Session): void {
+    ContextProvider.set('selected-user', session);
+  }
+
   static getNow(): Date {
     // return new Date('2025-02-17T05:25:45.134Z');
     return ContextProvider.get('now') ?? new Date();
