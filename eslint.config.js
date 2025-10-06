@@ -29,5 +29,6 @@ module.exports = tsEslint.config({
     '@typescript-eslint/explicit-function-return-type': 'error',
     '@typescript-eslint/ban-types': ['error', { types: { Function: false } }],
     'no-console': ['error', { allow: ['warn', 'error', 'debug'] }],
+    '@typescript-eslint/no-empty-function': 'off',
   },
 });

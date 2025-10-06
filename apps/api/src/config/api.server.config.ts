@@ -8,6 +8,7 @@ import CommonDatabaseConfig from '@libs/dao/config/common/common-database.config
 import { NODE_ENV } from '@libs/common/constants/environment.constants';
 import GameDatabaseConfig from '@libs/dao/config/game/game-database.config';
 import ArenaDatabaseConfig from '@libs/dao/config/arena/arena-database.config';
+import ContractDatabaseConfig from '@libs/dao/config/contract/contract-database.config';
 
 const environment = NODE_ENV || 'test';
 
@@ -17,7 +18,12 @@ const environment = NODE_ENV || 'test';
       envFilePath: `./config/.api.${environment}.env`,
       isGlobal: true,
       cache: true,
-      load: [CommonDatabaseConfig, GameDatabaseConfig, ArenaDatabaseConfig],
+      load: [
+        CommonDatabaseConfig,
+        GameDatabaseConfig,
+        ArenaDatabaseConfig,
+        ContractDatabaseConfig,
+      ],
     }),
   ],
 })

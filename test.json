@@ -1,0 +1,26 @@
+{
+  "id": "?",
+  "name": "?",
+  "description": "?",
+  "shape_id": "?",
+  "external_url": "https://ljh-portfolio.mooo.com",
+  "image": "?",
+  "attributes": [
+    {
+      "trait_type": "tier",
+      "value": "static"
+    },
+    {
+      "trait_type": "level",
+      "value": "?"
+    },
+    {
+      "trait_type": "exp",
+      "value": "?"
+    },
+    {
+      "trait_type": "color",
+      "value": "?"
+    }
+  ]
+}

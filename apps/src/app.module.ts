@@ -36,6 +36,9 @@ import { GetUserIdInterceptor } from '../admin/src/interceptor/get-user-id.inter
 import { AdminElementModule } from './modules/admin-element.module';
 import ArenaDatabaseConfig from '@libs/dao/config/arena/arena-database.config';
 import { ArenaModule } from '@libs/dao/arena/arena.module';
+import { NetworkInterceptor } from '@libs/common/interceptor/network.interceptor';
+import ContractDatabaseConfig from '@libs/dao/config/contract/contract-database.config';
+import { ContractModule } from '@libs/dao/contract/contract.module';
 
 //App
 @Module({
@@ -49,7 +52,7 @@ import { ArenaModule } from '@libs/dao/arena/arena.module';
     }),
 
     ClsModule.forRoot({ global: true, middleware: { mount: true } }),
-    ...[CommonDatabaseConfig, ArenaDatabaseConfig].map((it) => {
+    ...[CommonDatabaseConfig, ArenaDatabaseConfig, ContractDatabaseConfig].map((it) => {
       return TypeOrmExModule.forRootAsync({
         name: it().name,
         inject: [it.KEY],
@@ -72,6 +75,7 @@ import { ArenaModule } from '@libs/dao/arena/arena.module';
     GameDbModule,
     StaticModule,
     ArenaModule,
+    ContractModule,
 
     ApiElementModule,
     GameElementModule,
@@ -99,6 +103,7 @@ import { ArenaModule } from '@libs/dao/arena/arena.module';
     { provide: APP_INTERCEPTOR, useClass: SequenceInterceptor },
     { provide: APP_INTERCEPTOR, useClass: PayloadInterceptor },
     { provide: APP_INTERCEPTOR, useClass: GetUserIdInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: NetworkInterceptor },
     MissionProvider,
 
     AchievementProvider,

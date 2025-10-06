@@ -23,11 +23,18 @@ import { SqlInjectionResultDto } from './dto/sql-injection-result.dto';
 import { Auth } from './decorator/auth.decorator';
 import { ContextProvider } from '@libs/common/provider/context.provider';
 import { Session } from '@libs/dao/redis/session/session.entity';
+import { Web3RequestInDto } from './dto/web3-request-in.dto';
+import { AuthCramOutDto } from './dto/auth-cram-out.dto';
+import { Web3VerifyInDto } from './dto/web3-verify-in.dto';
+import { Web3Service } from '../web3/web3.service';
 
 @ApiTags('auth')
 @Controller('api/auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly web3Service: Web3Service,
+  ) {}
 
   /**
    * 로그인
@@ -42,6 +49,49 @@ export class AuthController {
   ): Promise<ResponseEntity<AuthSignUserOutDto>> {
     const authSignUserOutDto =
       await this.authService.register(authSignUserInDto);
+
+    return ResponseEntity.ok().body(authSignUserOutDto);
+  }
+
+  /**
+   * 지갑 로그인
+   * */
+  @Post('web3-request')
+  @ApiResponseEntity({
+    type: AuthCramOutDto,
+    summary: '회원가입 및 로그인',
+  })
+  async web3Request(
+    @Body() web3RequestInDto: Web3RequestInDto,
+  ): Promise<ResponseEntity<AuthCramOutDto>> {
+    const challenge = this.authService.signChallenge(web3RequestInDto.address);
+
+    return ResponseEntity.ok().body(
+      AuthCramOutDto.of().setChallenge(challenge),
+    );
+  }
+
+  @Post('web3-verify')
+  @ApiResponseEntity({
+    type: AuthSignUserOutDto,
+    summary: 'wallet 로그인',
+  })
+  async web3Verify(
+    @Body() web3VerifyInDto: Web3VerifyInDto,
+  ): Promise<ResponseEntity<AuthSignUserOutDto>> {
+    const { challenge, address, signature } = web3VerifyInDto;
+
+    // 1. challenge 확인
+    this.authService.verifyChallenge(address, challenge);
+    // 2. wallet 서명 확인
+    await this.web3Service.web3Service.verifySignature(
+      address,
+      signature,
+      challenge,
+    );
+
+    // 3.계정 생성
+    const authSignUserOutDto = await this.authService.web3Register(address);
 
     return ResponseEntity.ok().body(authSignUserOutDto);
   }

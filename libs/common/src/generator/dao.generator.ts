@@ -248,6 +248,7 @@ const irregularPlurals: Record<string, string> = {
   series: 'series',
   aircraft: 'aircraft',
   news: 'news',
+  shapes: 'shapes',
 };
 
 function parseArgs(): void {

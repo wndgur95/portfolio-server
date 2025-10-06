@@ -35,3 +35,27 @@ export interface JwtPayload {
   gameDbId?: number;
   database?: string;
 }
+
+
+export interface ImmutableJwtPayload {
+  passport?: ImmutablePassport;
+  given_name: string;
+  family_name: string;
+  nickname: string;
+  picture: string;
+  locale: string;
+  updated_at: Date;
+  email: string;
+  email_verified: string;
+  iss: string;
+  aud: string;
+  iat: number;
+  exp: number;
+  sub: string;
+  sid: string;
+}
+
+export interface ImmutablePassport {
+  zkevm_eth_address: string;
+  zkevm_user_admin_address: string;
+}
