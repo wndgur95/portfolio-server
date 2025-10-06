@@ -22,6 +22,9 @@ export class UserDto extends ExcludeBaseTimeDto<UserDto> {
   platformId?: string;
 
   @ApiProperty()
+  address?: string;
+
+  @ApiProperty()
   roles: UserRoles;
 
   @ApiProperty()

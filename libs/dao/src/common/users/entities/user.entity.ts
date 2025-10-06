@@ -27,6 +27,10 @@ export class UserEntity extends AbstractEntity implements User {
   @Column({ nullable: true })
   platformId?: string;
 
+  @Index()
+  @Column({ nullable: true })
+  address?: string;
+
   @Column({
     default: USER_ROLES.GUEST,
   })
@@ -46,7 +50,7 @@ export class UserEntity extends AbstractEntity implements User {
   @BeforeUpdate()
   async hashPassword(): Promise<void> {
     try {
-      if (this.platformId == null) {
+      if (this.platformId == null && this.address == null) {
         this.password = await bcrypt.hash(this.password, 10);
       } else if (this.password != null) {
         throw new InternalServerErrorException();

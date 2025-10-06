@@ -7,6 +7,7 @@ import { INTERNAL_ERROR_CODE } from '@libs/common/constants/internal-error-code.
 import { Session } from '@libs/dao/redis/session/session.entity';
 import { MongoLogs } from '@libs/dao/mongo/mongo-log/dto/mongo-log.dto';
 import { CommonUserInfoDto } from '@libs/common/dto/common-user-info.dto';
+import { NETWORK } from '@libs/common/constants/web3.constants';
 
 // test debugging 용
 export const context = {};
@@ -167,5 +168,17 @@ export class ContextProvider {
 
   static setReason(reason: string): void {
     this.set('mongo-log-reason', reason);
+  }
+
+  static getNetwork(): string {
+    return this.get('network');
+  }
+
+  static setNetwork(network: string): void {
+    this.set('network', network ?? NETWORK.PORTFOLIO);
+  }
+
+  static releaseNetwork(): void {
+    this.set('network', undefined);
   }
 }

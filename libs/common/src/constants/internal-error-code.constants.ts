@@ -9,6 +9,12 @@ export const INTERNAL_ERROR_CODE = {
   API_KEY_NOT_VALID: 10, // 유효하지않은 api key
   API_SECURITY_NF_TOKEN_INVALIDATE: 12, // nfToken 유효 하지 않음
 
+  AUTH_FAILED_VERIFY_CHALLENGE: 20, // 챌린지 인증 실페
+  AUTH_CHALLENGE_TIME_EXPIRED: 21, // 챌린지 유효시간 만료
+  AUTH_UNVERIFIED_SIGNATURE: 22, // 메인넷 서명 실패
+  AUTH_MISMATCH_WALLET_ADDRESS: 23, // 자갑 주소 미 일치
+  AUTH_UNVERIFIED_SIGNATURE_MISMATCH_ADDRESS: 24, // address mismatch 메인넷 서명 실패
+
   AUTH_SERVER_NETWORK_ERROR: 31,
 
   // USER DETAIL : 51 ~ 100

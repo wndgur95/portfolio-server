@@ -1,4 +1,8 @@
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import {
   JWT_OPTIONS,
   JWT_REFRESH_OPTIONS,
@@ -37,6 +41,12 @@ import { SessionRepository } from '@libs/dao/redis/session/session.repository';
 import { TimeUtil } from '@libs/common/utils/time.util';
 import { TestTablesDbRepository } from '@libs/dao/common/test-tables/repositories/test-tables-db.repository';
 import { TestTablesRepository } from '@libs/dao/common/test-tables/interfaces/test-tables-repository.interface';
+import {
+  decodeChallenge,
+  encodeChallenge,
+} from '@libs/common/utils/hashcode.util';
+import { CHALLENGE_OPTIONS } from '@libs/common/constants/cram.constants';
+import { add } from 'winston';
 
 @Injectable()
 export class AuthService {
@@ -142,6 +152,59 @@ export class AuthService {
 
     if (!user) {
       user = await this.userService.signup(email, password);
+    }
+
+    return await this._handleLogin(user);
+  }
+
+  signChallenge(address: string): string {
+    return encodeChallenge(
+      {
+        address: address,
+        ttl: new Date(),
+      },
+      this.config.get<string>('CHALLENGE_PRIVATE_KEY'),
+    );
+  }
+
+  verifyChallenge(confirmAddress: string, challenge: string): void {
+    const decoded = decodeChallenge(
+      challenge,
+      this.config.get<string>('CHALLENGE_PRIVATE_KEY'),
+    );
+    if (!decoded) {
+      throw new InternalServerErrorException(
+        INTERNAL_ERROR_CODE.AUTH_FAILED_VERIFY_CHALLENGE,
+        'AUTH_FAILED_VERIFY_CHALLENGE',
+      );
+    }
+
+    const { address, ttl } = JSON.parse(decoded);
+    if (!address || !ttl) {
+      throw new InternalServerErrorException(
+        INTERNAL_ERROR_CODE.AUTH_FAILED_VERIFY_CHALLENGE,
+        'AUTH_FAILED_VERIFY_CHALLENGE',
+      );
+    } else if (Date.now() - Date.parse(ttl) > CHALLENGE_OPTIONS.expiresIn) {
+      throw new InternalServerErrorException(
+        INTERNAL_ERROR_CODE.AUTH_CHALLENGE_TIME_EXPIRED,
+        'AUTH_CHALLENGE_TIME_EXPIRED',
+      );
+    }
+    if (address.toUpperCase() !== confirmAddress.toUpperCase()) {
+      throw new InternalServerErrorException(
+        INTERNAL_ERROR_CODE.AUTH_UNVERIFIED_SIGNATURE_MISMATCH_ADDRESS,
+        'AUTH_UNVERIFIED_SIGNATURE_MISMATCH_ADDRESS',
+      );
+    }
+  }
+
+  @TransactionalEx(DB_NAME.COMMON)
+  async web3Register(address: string): Promise<AuthSignUserOutDto> {
+    let user = await this.userService.web3Login(address);
+
+    if (!user) {
+      user = await this.userService.web3Signup(address);
     }
 
     return await this._handleLogin(user);
@@ -260,7 +323,7 @@ export class AuthService {
       email: user.email ?? '',
       roles: user.roles,
       gameDbId: user.gameDbId || 0,
-      database: user.gameDbId ? getDatabaseByGameDbId(user.gameDbId) : '',
+      database: user.gameDbId ? getDatabaseByGameDbId(user.gameDbId) : null,
     };
 
     if (!user.gameDbId) {

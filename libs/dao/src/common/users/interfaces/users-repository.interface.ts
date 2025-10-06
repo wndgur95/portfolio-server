@@ -22,6 +22,8 @@ export interface UsersRepository
     orderBy: 'ASC' | 'DESC',
     filter?: any,
   ): Promise<[User[], number]>;
+
+  findByAddress(address: string): Promise<User>;
 }
 
 export const UsersRepository = Symbol('UsersRepository');

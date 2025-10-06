@@ -37,6 +37,12 @@ import { AchievementProvider } from '@libs/common/provider/achievement/achieveme
 import { MissionAchievementProvider } from '@libs/common/provider/achievement/mission-achievement.provider';
 import { MissionProvider } from '@libs/common/provider/contents/mission.provider';
 import { DataMissionProvider } from '@libs/common/provider/static-data/data-mission.provider';
+import { Web3Service } from '../../api/src/web3/web3.service';
+import { PortfolioService } from '../../api/src/web3/portfolio/portfolio.service';
+import { PolygonService } from '../../api/src/web3/polygon/polygon.service';
+import { ImmutableService } from '../../api/src/web3/immutable/immutable.service';
+import ContractDatabaseConfig from '@libs/dao/config/contract/contract-database.config';
+import { ContractModule } from '@libs/dao/contract/contract.module';
 
 @Module({
   imports: [
@@ -58,7 +64,7 @@ import { DataMissionProvider } from '@libs/common/provider/static-data/data-miss
     }),
 
     ClsModule.forRoot({ global: true, middleware: { mount: true } }),
-    ...[CommonDatabaseConfig].map((it) => {
+    ...[CommonDatabaseConfig, ContractDatabaseConfig].map((it) => {
       return TypeOrmExModule.forRootAsync({
         name: it().name,
         inject: [it.KEY],
@@ -81,6 +87,7 @@ import { DataMissionProvider } from '@libs/common/provider/static-data/data-miss
     CommonModule,
     GameDbModule,
     StaticModule,
+    ContractModule,
   ],
   controllers: [
     //App
@@ -113,6 +120,11 @@ import { DataMissionProvider } from '@libs/common/provider/static-data/data-miss
     MissionAchievementProvider,
     MissionProvider,
     DataMissionProvider,
+
+    Web3Service,
+    PortfolioService,
+    PolygonService,
+    ImmutableService,
   ],
 })
 export class ApiElementModule {}

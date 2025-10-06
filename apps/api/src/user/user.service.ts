@@ -80,6 +80,29 @@ export class UserService {
   }
 
   /**
+   * 지갑 로그인
+   */
+  async web3Login(address: string): Promise<User> {
+    const user = await this.usersRepository.findByAddress(address);
+
+    if (!user) return null;
+
+    return user;
+  }
+
+  /**
+   * 지갑 회원가입
+   */
+  async web3Signup(address: string): Promise<User> {
+    const userEntity = UserEntity.create({
+      address,
+      nid: randomUUID(),
+    });
+
+    return await this.usersRepository.save(userEntity);
+  }
+
+  /**
    * 회원가입
    */
   async signup(email: string, password: string): Promise<User> {

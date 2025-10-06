@@ -43,6 +43,13 @@ import { StaticService } from './static/static.service';
 import { ErrorController } from './error/error.controller';
 import { ErrorService } from './error/error.service';
 import { CharacterProvider } from '@libs/common/provider/contents/character.provider';
+import { NetworkInterceptor } from '@libs/common/interceptor/network.interceptor';
+import { Web3Service } from './web3/web3.service';
+import { PortfolioService } from './web3/portfolio/portfolio.service';
+import { PolygonService } from './web3/polygon/polygon.service';
+import { ImmutableService } from './web3/immutable/immutable.service';
+import ArenaDatabaseConfig from '@libs/dao/config/arena/arena-database.config';
+import ContractDatabaseConfig from '@libs/dao/config/contract/contract-database.config';
 
 @Module({
   imports: [
@@ -64,13 +71,15 @@ import { CharacterProvider } from '@libs/common/provider/contents/character.prov
     }),
 
     ClsModule.forRoot({ global: true, middleware: { mount: true } }),
-    ...[CommonDatabaseConfig].map((it) => {
-      return TypeOrmExModule.forRootAsync({
-        name: it().name,
-        inject: [it.KEY],
-        useFactory: async (config: DataSourceOptions) => config,
-      });
-    }),
+    ...[CommonDatabaseConfig, ArenaDatabaseConfig, ContractDatabaseConfig].map(
+      (it) => {
+        return TypeOrmExModule.forRootAsync({
+          name: it().name,
+          inject: [it.KEY],
+          useFactory: async (config: DataSourceOptions) => config,
+        });
+      },
+    ),
 
     ...getGameServerTypeOrmOptions().map((options) =>
       TypeOrmExModule.forRootAsync({
@@ -112,6 +121,7 @@ import { CharacterProvider } from '@libs/common/provider/contents/character.prov
     { provide: APP_INTERCEPTOR, useClass: UserLevelLockInterceptor },
     { provide: APP_INTERCEPTOR, useClass: TransactionInterceptor },
     { provide: APP_INTERCEPTOR, useClass: PayloadInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: NetworkInterceptor },
     ApiService,
     UserService,
     DatabaseService,
@@ -134,6 +144,11 @@ import { CharacterProvider } from '@libs/common/provider/contents/character.prov
     MissionAchievementProvider,
     MissionProvider,
     DataMissionProvider,
+
+    Web3Service,
+    PortfolioService,
+    PolygonService,
+    ImmutableService,
   ],
 })
 export class ApiModule {}

@@ -13,6 +13,12 @@ export const INTERNAL_ERROR_CODE_DESC = {
   [e.AUTH_SERVER_NETWORK_ERROR]:'%P',
   [e.API_SECURITY_NF_TOKEN_INVALIDATE]: '유효하지 않은 nf token',
 
+  [e.AUTH_FAILED_VERIFY_CHALLENGE]: '챌린지 인증 실페',
+  [e.AUTH_CHALLENGE_TIME_EXPIRED]: '챌린지 유효시간 만료',
+  [e.AUTH_UNVERIFIED_SIGNATURE]: '메인넷 서명 실패',
+  [e.AUTH_MISMATCH_WALLET_ADDRESS]: '지갑 주소 미 일치',
+  [e.AUTH_UNVERIFIED_SIGNATURE_MISMATCH_ADDRESS]: 'address mismatch 메인넷 서명 실패',
+
   // USER DETAIL
   [e.USER_DETAIL_NOT_FOUND]: '유저 상세 정보를 찾을 수 없음',
   [e.USER_DETAIL_UNKNOWN_CURRENCY_TYPE]: '확인 되지 않은 통화',

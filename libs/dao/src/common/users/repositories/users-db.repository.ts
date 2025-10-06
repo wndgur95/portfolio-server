@@ -53,4 +53,10 @@ export class UsersDbRepository
       .orderBy(`${qb.alias}.id`, orderBy)
       .getManyAndCount();
   }
+
+  async findByAddress(address: string): Promise<UserEntity> {
+    return await this.queryBuilder
+      .where(`${this.alias}.address = :address`, { address })
+      .getOne();
+  }
 }

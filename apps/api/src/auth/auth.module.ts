@@ -27,6 +27,10 @@ import { JwtStrategy } from './strategy/jwt.strategy';
 import { JwtRefreshStrategy } from './strategy/jwt-refresh.strategy';
 import { ApiKeyStrategy } from './strategy/api-key.strategy';
 import { CharacterProvider } from '@libs/common/provider/contents/character.provider';
+import { Web3Service } from '../web3/web3.service';
+import { PortfolioService } from '../web3/portfolio/portfolio.service';
+import { PolygonService } from '../web3/polygon/polygon.service';
+import { ImmutableService } from '../web3/immutable/immutable.service';
 
 @Module({
   imports: [
@@ -67,6 +71,11 @@ import { CharacterProvider } from '@libs/common/provider/contents/character.prov
     UserDetailProvider,
     DataCharacterProvider,
     CharacterProvider,
+
+    Web3Service,
+    PortfolioService,
+    PolygonService,
+    ImmutableService,
   ],
 })
 export class AuthModule {}

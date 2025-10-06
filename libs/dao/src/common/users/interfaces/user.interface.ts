@@ -6,6 +6,7 @@ export interface User extends Domain {
   email?: string;
   password?: string;
   platformId?: string;
+  address?: string;
   roles: UserRoles;
   gameDbId: number;
   provider?: string;
