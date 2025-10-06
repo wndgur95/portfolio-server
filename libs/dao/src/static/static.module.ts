@@ -6,9 +6,12 @@ import { DataCharacterRepository } from '@libs/dao/static/data-character/data-ch
 import { DataCostRepository } from '@libs/dao/static/data-cost/data-cost.repository';
 import { DataCurrencyRepository } from '@libs/dao/static/data-currency/data-currency.repository';
 import { DataGachaRepository } from '@libs/dao/static/data-gacha/data-gacha.repository';
+import { DataGachaTokenRepository } from '@libs/dao/static/data-gacha-token/data-gacha-token.repository';
 import { DataLocalization_korRepository } from '@libs/dao/static/data-localization_kor/data-localization_kor.repository';
 import { DataMissionRepository } from '@libs/dao/static/data-mission/data-mission.repository';
+import { DataNumberTokenRepository } from '@libs/dao/static/data-number-token/data-number-token.repository';
 import { DataRewardRepository } from '@libs/dao/static/data-reward/data-reward.repository';
+import { DataShapeTokenRepository } from '@libs/dao/static/data-shape-token/data-shape-token.repository';
 
 @Module({
   providers: [
@@ -19,9 +22,12 @@ import { DataRewardRepository } from '@libs/dao/static/data-reward/data-reward.r
     DataCostRepository,
     DataCurrencyRepository,
     DataGachaRepository,
+    DataGachaTokenRepository,
     DataLocalization_korRepository,
     DataMissionRepository,
+    DataNumberTokenRepository,
     DataRewardRepository,
+    DataShapeTokenRepository,
   ],
   exports: [
     StaticRepository,
@@ -31,9 +37,12 @@ import { DataRewardRepository } from '@libs/dao/static/data-reward/data-reward.r
     DataCostRepository,
     DataCurrencyRepository,
     DataGachaRepository,
+    DataGachaTokenRepository,
     DataLocalization_korRepository,
     DataMissionRepository,
+    DataNumberTokenRepository,
     DataRewardRepository,
+    DataShapeTokenRepository,
   ],
 })
 export class StaticModule {}
