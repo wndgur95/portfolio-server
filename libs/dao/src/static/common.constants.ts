@@ -108,3 +108,28 @@ export const PLAY_STATUS = {
   GIVE_UP: 3,
 } as const;
 export type PlayStatus = (typeof PLAY_STATUS)[keyof typeof PLAY_STATUS];
+
+export const GACHA_TYPE = {
+  NONE: 0,
+  SHAPE: 1,
+  NUMBER: 2,
+} as const;
+export type GachaType = (typeof GACHA_TYPE)[keyof typeof GACHA_TYPE];
+
+export const TOKEN_GACHA_TYPE = {
+  NONE: 0,
+  SHAPE: 1,
+  NUMBER: 2,
+} as const;
+export type TokenGachaType =
+  (typeof TOKEN_GACHA_TYPE)[keyof typeof TOKEN_GACHA_TYPE];
+
+export const TOKEN_TIER_TYPE = {
+  NONE: 0,
+  N: 1,
+  R: 2,
+  S_R: 3,
+  S_S_R: 4,
+} as const;
+export type TokenTierType =
+  (typeof TOKEN_TIER_TYPE)[keyof typeof TOKEN_TIER_TYPE];
