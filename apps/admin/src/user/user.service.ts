@@ -81,9 +81,11 @@ export class UserService {
 
     if (!user) return null;
 
-    if (!(await user.checkPassword(password))) {
+    if (user.platformId == null && user.address == null) {
+      await user.checkPassword(password);
+    } else if (user.platformId != null || user.address != null) {
       throw new ServerErrorException(
-        INTERNAL_ERROR_CODE.USER_MISMATCHED_PASSWORD,
+        INTERNAL_ERROR_CODE.LOGIN_METHOD_NOT_VALID,
       );
     }
 

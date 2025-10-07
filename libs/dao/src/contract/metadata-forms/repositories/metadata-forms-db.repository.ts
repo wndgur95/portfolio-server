@@ -11,7 +11,7 @@ export class MetadataFormsDbRepository
 {
   async findByName(name: string): Promise<MetadataForm> {
     return await this.queryBuilder
-      .where('${this.alias}.name=:name', { name: name })
+      .where(`${this.alias}.name=:name`, { name: name })
       .getOne();
   }
 }

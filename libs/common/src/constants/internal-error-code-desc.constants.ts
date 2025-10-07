@@ -9,15 +9,18 @@ export const INTERNAL_ERROR_CODE_DESC = {
   [e.SESSION_DECODE_FAIL]: '세션 복호화 실패',
   [e.SESSION_SEQUENCE_NOT_FOUND]: '유효하지 않은 시퀀스',
 
+  [e.SUPER_ROLES_CHANGE_IMPOSSIBILITY]: '슈퍼 유저는 변경이 불가능합니다.',
+
   [e.API_KEY_NOT_VALID]: '유효하지 않은 api key',
-  [e.AUTH_SERVER_NETWORK_ERROR]:'%P',
+  [e.AUTH_SERVER_NETWORK_ERROR]: '%P',
   [e.API_SECURITY_NF_TOKEN_INVALIDATE]: '유효하지 않은 nf token',
 
   [e.AUTH_FAILED_VERIFY_CHALLENGE]: '챌린지 인증 실페',
   [e.AUTH_CHALLENGE_TIME_EXPIRED]: '챌린지 유효시간 만료',
   [e.AUTH_UNVERIFIED_SIGNATURE]: '메인넷 서명 실패',
   [e.AUTH_MISMATCH_WALLET_ADDRESS]: '지갑 주소 미 일치',
-  [e.AUTH_UNVERIFIED_SIGNATURE_MISMATCH_ADDRESS]: 'address mismatch 메인넷 서명 실패',
+  [e.AUTH_UNVERIFIED_SIGNATURE_MISMATCH_ADDRESS]:
+    'address mismatch 메인넷 서명 실패',
 
   // USER DETAIL
   [e.USER_DETAIL_NOT_FOUND]: '유저 상세 정보를 찾을 수 없음',
@@ -55,6 +58,7 @@ export const INTERNAL_ERROR_CODE_DESC = {
   [e.USER_UPDATE_FAILED]: '업데이트에 실패했습니다.',
   [e.USER_NOT_FOUND]: '유저가 없습니다.',
   [e.USER_BLOCK]: '블록 유저',
+  [e.LOGIN_METHOD_NOT_VALID]: '계정의 로그인 방식이 잘못됬습니다.',
 
   // Group
   [e.GROUP_MEMBER_ROLE_INVALID]: '해당 기능은 %P만 가능한 기능입니다.',

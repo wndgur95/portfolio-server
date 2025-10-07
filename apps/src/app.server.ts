@@ -80,6 +80,15 @@ export class AppServer {
         'jwt',
       )
       .addBearerAuth({ type: 'http' }, 'kakao-token')
+      .addApiKey(
+        {
+          type: 'apiKey',
+          name: 'web3-network',
+          in: 'header',
+          description: 'web3 network',
+        },
+        'network',
+      )
       .build();
 
     const document = SwaggerModule.createDocument(this.app, config, {
@@ -272,6 +281,15 @@ export class AppServer {
           description: 'selected user id',
         },
         'selected-user-id',
+      )
+      .addApiKey(
+        {
+          type: 'apiKey',
+          name: 'web3-network',
+          in: 'header',
+          description: 'web3 network',
+        },
+        'network',
       )
       .build();
 

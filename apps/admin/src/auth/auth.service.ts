@@ -37,6 +37,7 @@ import { SessionRepository } from '@libs/dao/redis/session/session.repository';
 import { TimeUtil } from '@libs/common/utils/time.util';
 import { TestTablesDbRepository } from '@libs/dao/common/test-tables/repositories/test-tables-db.repository';
 import { TestTablesRepository } from '@libs/dao/common/test-tables/interfaces/test-tables-repository.interface';
+import { USER_ROLES } from '@libs/common/constants/role.constants';
 
 @Injectable()
 export class AuthService {
@@ -227,7 +228,7 @@ export class AuthService {
       email: user.email ?? '',
       roles: user.roles,
       gameDbId: user.gameDbId || 0,
-      database: user.gameDbId ? getDatabaseByGameDbId(user.gameDbId) : '',
+      database: user.gameDbId ? getDatabaseByGameDbId(user.gameDbId) : null,
     };
 
     if (!user.gameDbId) {
@@ -266,6 +267,12 @@ export class AuthService {
     updateRoleUserDto: UpdateRoleUserDto,
   ): Promise<AuthSignUserOutDto> {
     const { roles } = updateRoleUserDto;
+
+    if (roles == USER_ROLES.SUPER) {
+      throw new ServerErrorException(
+        INTERNAL_ERROR_CODE.SUPER_ROLES_CHANGE_IMPOSSIBILITY,
+      );
+    }
 
     const { userId } = ContextProvider.getJwt();
 

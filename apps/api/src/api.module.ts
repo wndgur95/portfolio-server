@@ -50,6 +50,13 @@ import { PolygonService } from './web3/polygon/polygon.service';
 import { ImmutableService } from './web3/immutable/immutable.service';
 import ArenaDatabaseConfig from '@libs/dao/config/arena/arena-database.config';
 import ContractDatabaseConfig from '@libs/dao/config/contract/contract-database.config';
+import { TokenController } from './token/token.controller';
+import { TokenService } from './token/token.service';
+import { ContractModule } from '@libs/dao/contract/contract.module';
+import { Web3Provider } from '@libs/common/provider/web3/web3.provider';
+import { ImmutableProvider } from '@libs/common/provider/web3/immutable/immutable.provider';
+import { PolygonProvider } from '@libs/common/provider/web3/polygon/polygon.provider';
+import { PortfolioProvider } from '@libs/common/provider/web3/portfolio/portfolio.provider';
 
 @Module({
   imports: [
@@ -96,6 +103,7 @@ import ContractDatabaseConfig from '@libs/dao/config/contract/contract-database.
     CommonModule,
     GameModule,
     StaticModule,
+    ContractModule,
   ],
   controllers: [
     ApiController,
@@ -103,6 +111,7 @@ import ContractDatabaseConfig from '@libs/dao/config/contract/contract-database.
     DatabaseController,
     StaticController,
     ErrorController,
+    TokenController,
   ],
   providers: [
     {
@@ -127,6 +136,7 @@ import ContractDatabaseConfig from '@libs/dao/config/contract/contract-database.
     DatabaseService,
     StaticService,
     ErrorService,
+    TokenService,
 
     ValidateProvider,
 
@@ -149,6 +159,10 @@ import ContractDatabaseConfig from '@libs/dao/config/contract/contract-database.
     PortfolioService,
     PolygonService,
     ImmutableService,
+    Web3Provider,
+    ImmutableProvider,
+    PolygonProvider,
+    PortfolioProvider,
   ],
 })
 export class ApiModule {}

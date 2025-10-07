@@ -47,6 +47,10 @@ import { MongoLogController } from './mongo-log/mongo-log.controller';
 import { MongoLogService } from './mongo-log/mongo-log.service';
 import { LogServerProvider } from '@libs/common/http/log-server.provider';
 import { HttpModule } from '@nestjs/axios';
+import { NetworkInterceptor } from '@libs/common/interceptor/network.interceptor';
+import { TokenController } from './token/token.controller';
+import { TokenService } from './token/token.service';
+import { ContractModule } from '@libs/dao/contract/contract.module';
 
 @Module({
   imports: [
@@ -77,6 +81,7 @@ import { HttpModule } from '@nestjs/axios';
     GameModule,
     StaticModule,
     ArenaModule,
+    ContractModule,
   ],
   controllers: [
     AdminController,
@@ -86,6 +91,7 @@ import { HttpModule } from '@nestjs/axios';
     MissionController,
     ArenaController,
     MongoLogController,
+    TokenController,
   ],
   providers: [
     {
@@ -104,6 +110,7 @@ import { HttpModule } from '@nestjs/axios';
     { provide: APP_INTERCEPTOR, useClass: TransactionInterceptor },
     { provide: APP_INTERCEPTOR, useClass: PayloadInterceptor },
     { provide: APP_INTERCEPTOR, useClass: GetUserIdInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: NetworkInterceptor },
     AdminService,
     UserService,
     UserDetailService,
@@ -128,6 +135,8 @@ import { HttpModule } from '@nestjs/axios';
     MissionAchievementProvider,
     MissionProvider,
     DataMissionProvider,
+
+    TokenService,
   ],
 })
 export class AdminModule {}

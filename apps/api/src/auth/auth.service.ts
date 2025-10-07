@@ -47,6 +47,7 @@ import {
 } from '@libs/common/utils/hashcode.util';
 import { CHALLENGE_OPTIONS } from '@libs/common/constants/cram.constants';
 import { add } from 'winston';
+import { USER_ROLES } from '@libs/common/constants/role.constants';
 
 @Injectable()
 export class AuthService {
@@ -325,7 +326,7 @@ export class AuthService {
       gameDbId: user.gameDbId || 0,
       database: user.gameDbId ? getDatabaseByGameDbId(user.gameDbId) : null,
     };
-
+    console.log(payload);
     if (!user.gameDbId) {
       const gameDbId = 100 + (user.id % getGameShardDatabases.length);
 
@@ -362,6 +363,12 @@ export class AuthService {
     updateRoleUserDto: UpdateRoleUserDto,
   ): Promise<AuthSignUserOutDto> {
     const { roles } = updateRoleUserDto;
+
+    if (roles == USER_ROLES.SUPER) {
+      throw new ServerErrorException(
+        INTERNAL_ERROR_CODE.SUPER_ROLES_CHANGE_IMPOSSIBILITY,
+      );
+    }
 
     const { userId } = ContextProvider.getJwt();
 

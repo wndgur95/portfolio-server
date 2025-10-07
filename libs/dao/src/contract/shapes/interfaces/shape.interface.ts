@@ -7,6 +7,6 @@ export interface Shape extends Domain {
   exp: number;
   level: number;
   color: string;
-  tokenId?: number;
+  tokenId: number;
   status: string;
 }
