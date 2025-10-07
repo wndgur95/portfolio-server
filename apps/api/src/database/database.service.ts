@@ -23,6 +23,7 @@ import { Reward } from '@libs/common/interface/goods.interface';
 import { GOODS_TYPE } from '@libs/dao/static/common.constants';
 import { DataCurrency } from '@libs/dao/static/data-currency/data-currency.entity';
 import { GoodsOutDto } from '@libs/common/dto/goods-out.dto';
+import { USER_ROLES } from '@libs/common/constants/role.constants';
 
 @Injectable()
 export class DatabaseService {
@@ -43,6 +44,12 @@ export class DatabaseService {
     const { role, gold, errorPoint } = transactionInDto;
     const session = ContextProvider.getSession();
     const { userId } = session;
+
+    if (role == USER_ROLES.SUPER) {
+      throw new ServerErrorException(
+        INTERNAL_ERROR_CODE.SUPER_ROLES_CHANGE_IMPOSSIBILITY,
+      );
+    }
 
     await this.usersRepository.updateById(userId, { roles: role });
 

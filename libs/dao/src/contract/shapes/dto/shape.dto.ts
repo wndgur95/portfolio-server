@@ -23,7 +23,7 @@ export class ShapeDto extends ExcludeBaseTimeDto<ShapeDto> {
   color: string;
 
   @ApiProperty()
-  tokenId?: number;
+  tokenId: number;
 
   @ApiProperty()
   status: string;

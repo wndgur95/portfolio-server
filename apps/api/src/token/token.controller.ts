@@ -1,32 +1,44 @@
-import { Controller, Get, Head, Param } from '@nestjs/common';
+import { Controller, Get, Head, Param, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ApiResponseEntity } from '@libs/common/decorator/api-response-entity';
 import { TokenService } from './token.service';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 
 @ApiTags('token')
-@Controller('token')
+@Controller('api/token')
 export class TokenController {
-  constructor(
-    private readonly tokenService: TokenService,
-  ) {}
+  constructor(private readonly tokenService: TokenService) {}
 
-  @Head('dsp/character/:token_id')
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  headShapesMetadata(@Param('token_id') tokenId: number): void {}
+  @Head('shape/:tokenId')
+  headShapeMetadata(): void {}
 
-  @Get('dsp/character/:token_id')
+  @Get('shape/:tokenId')
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 2, ttl: 1000 } }) // 1초에 2번 허용
   @ApiResponseEntity({ summary: 'shapes metadata-form json' })
-  async getShapesMetadata(@Param('token_id') tokenId: number) {
-
+  async getShapeMetadata(@Param('tokenId') tokenId: number): Promise<unknown> {
+    return await this.tokenService.getShapeMetadata(Number(tokenId));
   }
 
-  // @Head('dsp/gacha-ticket/:token_id')
-  // // eslint-disable-next-line @typescript-eslint/no-empty-function
-  // headDspGachaTicketMetadata(@Param('token_id') tokenId: number): void {}
-  //
-  // @Get('dsp/gacha-ticket/:token_id')
-  // @ApiResponseEntity({ summary: 'dsp gacha-ticket metadata-form json' })
-  // async getDspGachaTicketMetadata(@Param('token_id') tokenId: number) {
-  //   return await this.externalService.getDspGachaTicketMetadata(tokenId);
-  // }
+  @Head('number/:tokenId')
+  headNumberMetadata(): void {}
+
+  @Get('number/:tokenId')
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 2, ttl: 1000 } }) // 1초에 2번 허용
+  @ApiResponseEntity({ summary: 'number metadata-form json' })
+  async getNumberMetadata(@Param('tokenId') tokenId: number): Promise<unknown> {
+    return await this.tokenService.getNumberMetadata(Number(tokenId));
+  }
+
+  @Head('gacha/:tokenId')
+  headGachaMetadata(): void {}
+
+  @Get('gacha/:tokenId')
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 2, ttl: 1000 } }) // 1초에 2번 허용
+  @ApiResponseEntity({ summary: 'gacha metadata-form json' })
+  async getGachaMetadata(@Param('tokenId') tokenId: number): Promise<unknown> {
+    return await this.tokenService.getGachaMetadata(Number(tokenId));
+  }
 }

@@ -43,6 +43,12 @@ import { PolygonService } from '../../api/src/web3/polygon/polygon.service';
 import { ImmutableService } from '../../api/src/web3/immutable/immutable.service';
 import ContractDatabaseConfig from '@libs/dao/config/contract/contract-database.config';
 import { ContractModule } from '@libs/dao/contract/contract.module';
+import { TokenController } from '../../api/src/token/token.controller';
+import { TokenService } from '../../api/src/token/token.service';
+import { Web3Provider } from '@libs/common/provider/web3/web3.provider';
+import { ImmutableProvider } from '@libs/common/provider/web3/immutable/immutable.provider';
+import { PolygonProvider } from '@libs/common/provider/web3/polygon/polygon.provider';
+import { PortfolioProvider } from '@libs/common/provider/web3/portfolio/portfolio.provider';
 
 @Module({
   imports: [
@@ -96,6 +102,7 @@ import { ContractModule } from '@libs/dao/contract/contract.module';
     DatabaseController,
     StaticController,
     ErrorController,
+    TokenController,
   ],
   providers: [
     ApiService,
@@ -125,6 +132,13 @@ import { ContractModule } from '@libs/dao/contract/contract.module';
     PortfolioService,
     PolygonService,
     ImmutableService,
+
+    TokenService,
+
+    Web3Provider,
+    ImmutableProvider,
+    PolygonProvider,
+    PortfolioProvider,
   ],
 })
 export class ApiElementModule {}

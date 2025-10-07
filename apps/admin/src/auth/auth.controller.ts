@@ -10,19 +10,9 @@ import { CurrentUser } from '@libs/common/decorator/current-user.decorator';
 import { User } from '@libs/dao/common/users/interfaces/user.interface';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { UserDto } from '@libs/dao/common/users/dto/user.dto';
-import { JwtPayload } from '@libs/common/constants/jwt.constants';
-import { GetApiKeyOutDto } from './dto/get-api-key-out.dto';
-import { ApiKeyAuthGuard } from './guard/api-key-auth.guard';
 import { GoogleFirebaseLoginInDto } from './dto/google-firebase-login-in.dto';
 import { GoogleOauthLoginInDto } from './dto/google-oauth-login-in.dto';
 import { UpdateRoleUserDto } from './dto/update-role-user.dto';
-import { SkipThrottle, Throttle, ThrottlerGuard } from '@nestjs/throttler';
-import { ValidationInDto } from './dto/validation-in.dto';
-import { SqlInjectionInDto } from './dto/sql-injection-in.dto';
-import { SqlInjectionResultDto } from './dto/sql-injection-result.dto';
-import { Auth } from './decorator/auth.decorator';
-import { ContextProvider } from '@libs/common/provider/context.provider';
-import { Session } from '@libs/dao/redis/session/session.entity';
 
 @ApiTags('auth')
 @Controller('admin/auth')

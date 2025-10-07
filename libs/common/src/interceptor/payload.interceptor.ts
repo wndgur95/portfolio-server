@@ -15,7 +15,7 @@ export class PayloadInterceptor implements NestInterceptor {
     return next.handle().pipe(
       // execute
       mergeMap(async (res) => {
-        if (typeof res !== 'object') {
+        if (typeof res !== 'object' || res?.code === undefined) {
           return res;
         }
 

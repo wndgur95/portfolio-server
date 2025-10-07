@@ -7,6 +7,8 @@ import { USER_ROLES, UserRoles } from '@libs/common/constants/role.constants';
 import { InternalServerErrorException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { User } from '@libs/dao/common/users/interfaces/user.interface';
+import { ServerErrorException } from '@libs/common/exception/server-error.exception';
+import { INTERNAL_ERROR_CODE } from '@libs/common/constants/internal-error-code.constants';
 
 @Entity('user')
 @BaseTimeEntity()
@@ -64,7 +66,9 @@ export class UserEntity extends AbstractEntity implements User {
     try {
       return await bcrypt.compare(password, this.password);
     } catch (e) {
-      throw new InternalServerErrorException(e);
+      throw new ServerErrorException(
+        INTERNAL_ERROR_CODE.USER_MISMATCHED_PASSWORD,
+      );
     }
   }
 }

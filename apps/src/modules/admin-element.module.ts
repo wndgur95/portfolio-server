@@ -40,19 +40,29 @@ import { LogServerProvider } from '@libs/common/http/log-server.provider';
 import { HttpModule } from '@nestjs/axios';
 import { MongoLogController } from '../../admin/src/mongo-log/mongo-log.controller';
 import { MongoLogService } from '../../admin/src/mongo-log/mongo-log.service';
+import { TokenService } from '../../admin/src/token/token.service';
+import { TokenController } from '../../admin/src/token/token.controller';
+import { Web3Provider } from '@libs/common/provider/web3/web3.provider';
+import { ImmutableProvider } from '@libs/common/provider/web3/immutable/immutable.provider';
+import { PolygonProvider } from '@libs/common/provider/web3/polygon/polygon.provider';
+import { PortfolioProvider } from '@libs/common/provider/web3/portfolio/portfolio.provider';
+import ContractDatabaseConfig from '@libs/dao/config/contract/contract-database.config';
+import { ContractModule } from '@libs/dao/contract/contract.module';
 
 @Module({
   imports: [
     AdminServerConfig,
     HttpModule.register({ timeout: 5000, maxRedirects: 5 }),
     ClsModule.forRoot({ global: true, middleware: { mount: true } }),
-    ...[CommonDatabaseConfig, ArenaDatabaseConfig].map((it) => {
-      return TypeOrmExModule.forRootAsync({
-        name: it().name,
-        inject: [it.KEY],
-        useFactory: async (config: DataSourceOptions) => config,
-      });
-    }),
+    ...[CommonDatabaseConfig, ArenaDatabaseConfig, ContractDatabaseConfig].map(
+      (it) => {
+        return TypeOrmExModule.forRootAsync({
+          name: it().name,
+          inject: [it.KEY],
+          useFactory: async (config: DataSourceOptions) => config,
+        });
+      },
+    ),
 
     ...getGameServerTypeOrmOptions().map((options) =>
       TypeOrmExModule.forRootAsync({
@@ -70,6 +80,7 @@ import { MongoLogService } from '../../admin/src/mongo-log/mongo-log.service';
     GameModule,
     StaticModule,
     ArenaModule,
+    ContractModule,
   ],
   controllers: [
     AdminController,
@@ -79,6 +90,7 @@ import { MongoLogService } from '../../admin/src/mongo-log/mongo-log.service';
     MissionController,
     ArenaController,
     MongoLogController,
+    TokenController,
   ],
   providers: [
     AdminService,
@@ -88,6 +100,7 @@ import { MongoLogService } from '../../admin/src/mongo-log/mongo-log.service';
     MissionService,
     ArenaService,
     MongoLogService,
+    TokenService,
 
     ConsumptionProvider,
     GoodsProvider,
@@ -105,6 +118,11 @@ import { MongoLogService } from '../../admin/src/mongo-log/mongo-log.service';
     MissionAchievementProvider,
     MissionProvider,
     DataMissionProvider,
+
+    Web3Provider,
+    ImmutableProvider,
+    PolygonProvider,
+    PortfolioProvider,
   ],
 })
 export class AdminElementModule {}
