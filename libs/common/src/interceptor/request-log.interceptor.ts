@@ -15,7 +15,7 @@ export class RequestLogInterceptor implements NestInterceptor {
     const now = Date.now();
 
     const url = context.getArgs()[0].url;
-    if (!url.endsWith('health')) {
+    if (!url.startsWith('/batch') && !url.endsWith('health')) {
       Logger.log(url);
     }
 

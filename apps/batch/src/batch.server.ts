@@ -16,7 +16,7 @@ export class BatchServer {
    * execute server
    */
   async run(): Promise<void> {
-    Logger.log('Game Server is running on port ' + process.env.SERVER_PORT);
+    Logger.log('Batch Server is running on port ' + process.env.SERVER_PORT);
     await this.app.listen(process.env.SERVER_PORT, '0.0.0.0');
   }
 
@@ -26,33 +26,33 @@ export class BatchServer {
   private _initializeSwagger(): void {
     if (!['prod'].includes(process.env.NODE_ENV)) {
       const config = new DocumentBuilder()
-        .setTitle('Dino Batch Server')
-        .setDescription('The Game API description')
+        .setTitle('Batch Server')
+        .setDescription('The Batch API description')
         .setVersion('1.0')
         .addApiKey(
           {
             type: 'apiKey',
             name: 'X-API-KEY',
             in: 'header',
-            description: 'eh internal api',
+            description: 'batch',
           },
-          'apiKey',
+          'batch-api-key',
         )
-        .addBasicAuth(
+        .addApiKey(
           {
-            type: 'http',
-            name: 'Authorization',
+            type: 'apiKey',
+            name: 'web3-network',
             in: 'header',
-            description: 'Username: accountKey & Password: sessionKey',
+            description: 'web3 network',
           },
-          'basic',
+          'network',
         )
         .build();
 
       const document = SwaggerModule.createDocument(this.app, config);
 
       SwaggerModule.setup(
-        'api-docs',
+        'batch/api-docs',
         this.app,
         document,
         SWAGGER_CUSTOM_OPTIONS,

@@ -398,7 +398,7 @@ export class ChattingService {
     const { roomId, messageData } = event;
 
     if (!this.server) {
-      this.logger.error('Server instance not available for message broadcasting');
+      this.logger.error('Server instance not available for batch-message broadcasting');
       return;
     }
 

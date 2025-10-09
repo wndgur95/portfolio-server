@@ -21,9 +21,9 @@ export class AdminService {
   //  * 데이터 구독
   //  */
   // subscriber(): void {
-  //   this.redis.on('message', (channel, message) => {
+  //   this.redis.on('batch-message', (channel, batch-message) => {
   //     if (channel === 'data') {
-  //       this._handleDataMessage(message);
+  //       this._handleDataMessage(batch-message);
   //     }
   //   });
   // }
@@ -31,9 +31,9 @@ export class AdminService {
   // /**
   //  * data 채널 메세지 관리
   //  */
-  // private _handleDataMessage(message: string): void {
+  // private _handleDataMessage(batch-message: string): void {
   //   try {
-  //     const names = JSON.parse(message);
+  //     const names = JSON.parse(batch-message);
   //     if (names === 'all') {
   //       this.staticRepository.reloadAll();
   //     } else if (Array.isArray(names)) {

@@ -157,6 +157,7 @@ export class AuthService {
       roles: user.roles,
       gameDbId: user.gameDbId || 0,
       database: user.gameDbId ? getDatabaseByGameDbId(user.gameDbId) : '',
+      address: user.address,
     };
 
     const newAccessToken = this._getAuthToken(newPayload);
@@ -229,6 +230,7 @@ export class AuthService {
       roles: user.roles,
       gameDbId: user.gameDbId || 0,
       database: user.gameDbId ? getDatabaseByGameDbId(user.gameDbId) : null,
+      address: user.address,
     };
 
     if (!user.gameDbId) {

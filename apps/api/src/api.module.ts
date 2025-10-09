@@ -57,6 +57,10 @@ import { Web3Provider } from '@libs/common/provider/web3/web3.provider';
 import { ImmutableProvider } from '@libs/common/provider/web3/immutable/immutable.provider';
 import { PolygonProvider } from '@libs/common/provider/web3/polygon/polygon.provider';
 import { PortfolioProvider } from '@libs/common/provider/web3/portfolio/portfolio.provider';
+import BatchDatabaseConfig from '@libs/dao/config/batch/batch-database.config';
+import { BatchCommonModule } from '@libs/dao/batch/common/batch-common.module';
+import { AirdropController } from './airdrop/airdrop.controller';
+import { AirdropService } from './airdrop/airdrop.service';
 
 @Module({
   imports: [
@@ -78,15 +82,18 @@ import { PortfolioProvider } from '@libs/common/provider/web3/portfolio/portfoli
     }),
 
     ClsModule.forRoot({ global: true, middleware: { mount: true } }),
-    ...[CommonDatabaseConfig, ArenaDatabaseConfig, ContractDatabaseConfig].map(
-      (it) => {
-        return TypeOrmExModule.forRootAsync({
-          name: it().name,
-          inject: [it.KEY],
-          useFactory: async (config: DataSourceOptions) => config,
-        });
-      },
-    ),
+    ...[
+      CommonDatabaseConfig,
+      ArenaDatabaseConfig,
+      ContractDatabaseConfig,
+      BatchDatabaseConfig,
+    ].map((it) => {
+      return TypeOrmExModule.forRootAsync({
+        name: it().name,
+        inject: [it.KEY],
+        useFactory: async (config: DataSourceOptions) => config,
+      });
+    }),
 
     ...getGameServerTypeOrmOptions().map((options) =>
       TypeOrmExModule.forRootAsync({
@@ -104,6 +111,7 @@ import { PortfolioProvider } from '@libs/common/provider/web3/portfolio/portfoli
     GameModule,
     StaticModule,
     ContractModule,
+    BatchCommonModule,
   ],
   controllers: [
     ApiController,
@@ -112,6 +120,7 @@ import { PortfolioProvider } from '@libs/common/provider/web3/portfolio/portfoli
     StaticController,
     ErrorController,
     TokenController,
+    AirdropController,
   ],
   providers: [
     {
@@ -137,6 +146,7 @@ import { PortfolioProvider } from '@libs/common/provider/web3/portfolio/portfoli
     StaticService,
     ErrorService,
     TokenService,
+    AirdropService,
 
     ValidateProvider,
 

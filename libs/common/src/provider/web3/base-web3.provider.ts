@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import {
   Account,
   TransactionConfig,
@@ -27,6 +27,10 @@ export abstract class BaseWeb3Provider {
 
   getAccount(privateKey: string): Account {
     return this._web3.eth.accounts.privateKeyToAccount(privateKey);
+  }
+
+  getToWei(amount: number): any {
+    return this._web3.utils.toWei(amount.toString(), 'ether');
   }
 
   async createContract(contractName: string): Promise<Web3ContractDto> {
@@ -65,12 +69,15 @@ export abstract class BaseWeb3Provider {
     contract: Web3ContractDto,
     account: Account,
     tx: ContractSendMethod,
+    value?: number | string,
   ): Promise<TransactionConfig> {
     const data = tx.encodeABI();
-    const gas = await tx.estimateGas({ from: account.address });
+    const gas = await tx.estimateGas({
+      from: account.address,
+      value: value ?? 0, // ← 추가!
+    });
     const gasPrice = await this._web3.eth.getGasPrice();
     const nonce = await this._web3.eth.getTransactionCount(account.address);
-
     return {
       to: contract.web3.options.address,
       data: data,
@@ -78,6 +85,7 @@ export abstract class BaseWeb3Provider {
       gasPrice: gasPrice,
       nonce: nonce,
       chainId: await this._web3.eth.getChainId(),
+      value: value ?? 0,
     };
   }
 
@@ -94,22 +102,32 @@ export abstract class BaseWeb3Provider {
   async sendSignedTransaction(
     signedTransactionData: string,
   ): Promise<PromiEvent<TransactionReceipt>> {
-    return await this._web3.eth.sendSignedTransaction(signedTransactionData);
+    const transactionReceipt = await this._web3.eth.sendSignedTransaction(
+      signedTransactionData,
+    );
+    Logger.warn(
+      `${this.network} end transactionHash ${transactionReceipt.transactionHash}`,
+    );
+
+    return transactionReceipt;
   }
 
   async signAndSendTransaction(
     contract: Web3ContractDto,
     tx: ContractSendMethod,
+    amount?: number | string,
     type?: number,
   ): Promise<TransactionReceipt> {
     const privateKey = this.getPrivateKey(contract.contractName, type);
     const account: Account = this.getAccount(privateKey);
-    // eslint-disable-next-line no-console
-    console.log(this.network, 'send address', account.address);
+    Logger.warn(
+      `${this.network} send address ${account.address}`,
+    );
     const transactionConfig = await this.getTransactionConfig(
       contract,
       account,
       tx,
+      amount,
     );
     const signedTx = await this.getSignTransaction(
       transactionConfig,

@@ -39,6 +39,9 @@ import { ArenaModule } from '@libs/dao/arena/arena.module';
 import { NetworkInterceptor } from '@libs/common/interceptor/network.interceptor';
 import ContractDatabaseConfig from '@libs/dao/config/contract/contract-database.config';
 import { ContractModule } from '@libs/dao/contract/contract.module';
+import { BatchElementModule } from './modules/batch-element.module';
+import { BatchCommonModule } from '@libs/dao/batch/common/batch-common.module';
+import BatchDatabaseConfig from '@libs/dao/config/batch/batch-database.config';
 
 //App
 @Module({
@@ -52,13 +55,15 @@ import { ContractModule } from '@libs/dao/contract/contract.module';
     }),
 
     ClsModule.forRoot({ global: true, middleware: { mount: true } }),
-    ...[CommonDatabaseConfig, ArenaDatabaseConfig, ContractDatabaseConfig].map((it) => {
-      return TypeOrmExModule.forRootAsync({
-        name: it().name,
-        inject: [it.KEY],
-        useFactory: async (config: DataSourceOptions) => config,
-      });
-    }),
+    ...[CommonDatabaseConfig, ArenaDatabaseConfig, ContractDatabaseConfig, BatchDatabaseConfig].map(
+      (it) => {
+        return TypeOrmExModule.forRootAsync({
+          name: it().name,
+          inject: [it.KEY],
+          useFactory: async (config: DataSourceOptions) => config,
+        });
+      },
+    ),
 
     ...getGameServerTypeOrmOptions().map((options) =>
       TypeOrmExModule.forRootAsync({
@@ -76,12 +81,14 @@ import { ContractModule } from '@libs/dao/contract/contract.module';
     StaticModule,
     ArenaModule,
     ContractModule,
+    BatchCommonModule,
 
     ApiElementModule,
     GameElementModule,
     SocketElementModule,
     LogElementModule,
     AdminElementModule,
+    BatchElementModule,
   ],
   controllers: [],
   providers: [

@@ -66,6 +66,15 @@ export class ApiServer {
           type: 'http',
           name: 'Authorization',
           in: 'header',
+          description: 'web3 token',
+        },
+        'jwt-web3',
+      )
+      .addBearerAuth(
+        {
+          type: 'http',
+          name: 'Authorization',
+          in: 'header',
           description: 'jwt auth',
         },
         'jwt',

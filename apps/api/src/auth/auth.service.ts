@@ -46,7 +46,6 @@ import {
   encodeChallenge,
 } from '@libs/common/utils/hashcode.util';
 import { CHALLENGE_OPTIONS } from '@libs/common/constants/cram.constants';
-import { add } from 'winston';
 import { USER_ROLES } from '@libs/common/constants/role.constants';
 
 @Injectable()
@@ -140,6 +139,18 @@ export class AuthService {
     return !!payload;
   }
 
+  validateWeb3User(payload: JwtPayload): boolean {
+    if (!payload.address) {
+      throw new ServerErrorException(
+        INTERNAL_ERROR_CODE.LOGIN_METHOD_NOT_VALID,
+      );
+    }
+
+    ContextProvider.setJwt(payload);
+    if (payload.gameDbId) ContextProvider.setUserInfo(payload);
+    return !!payload;
+  }
+
   /**
    * 회원 가입 및 로그인
    */
@@ -223,6 +234,7 @@ export class AuthService {
       roles: user.roles,
       gameDbId: user.gameDbId || 0,
       database: user.gameDbId ? getDatabaseByGameDbId(user.gameDbId) : '',
+      address: user.address,
     };
 
     const newAccessToken = this._getAuthToken(newPayload);
@@ -325,8 +337,9 @@ export class AuthService {
       roles: user.roles,
       gameDbId: user.gameDbId || 0,
       database: user.gameDbId ? getDatabaseByGameDbId(user.gameDbId) : null,
+      address: user.address,
     };
-    console.log(payload);
+
     if (!user.gameDbId) {
       const gameDbId = 100 + (user.id % getGameShardDatabases.length);
 

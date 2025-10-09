@@ -6,6 +6,7 @@ import { GameElementModule } from './modules/game-element.module';
 import { SocketElementModule } from './modules/socker-element.module';
 import { LogElementModule } from './modules/log-element.module';
 import { AdminElementModule } from './modules/admin-element.module';
+import { BatchElementModule } from './modules/batch-element.module';
 
 export class AppServer {
   constructor(private readonly app: INestApplication) {}
@@ -25,6 +26,7 @@ export class AppServer {
     this._initializeSocketSwagger();
     this._initializeLogSwagger();
     this._initializeAdminSwagger();
+    this._initializeBatchSwagger();
   }
 
   /**
@@ -300,6 +302,44 @@ export class AppServer {
 
     SwaggerModule.setup(
       'admin/api-docs',
+      this.app,
+      document,
+      SWAGGER_CUSTOM_OPTIONS,
+    );
+  }
+
+  private _initializeBatchSwagger(): void {
+    const config = new DocumentBuilder()
+      .setTitle('Batch Server')
+      .setDescription('The Batch API description')
+      .setVersion('1.0')
+      .addApiKey(
+        {
+          type: 'apiKey',
+          name: 'X-API-KEY',
+          in: 'header',
+          description: 'batch',
+        },
+        'batch-api-key',
+      )
+      .addApiKey(
+        {
+          type: 'apiKey',
+          name: 'web3-network',
+          in: 'header',
+          description: 'web3 network',
+        },
+        'network',
+      )
+      .build();
+
+    const document = SwaggerModule.createDocument(this.app, config, {
+      include: [BatchElementModule],
+      deepScanRoutes: true,
+    });
+
+    SwaggerModule.setup(
+      'batch/api-docs',
       this.app,
       document,
       SWAGGER_CUSTOM_OPTIONS,

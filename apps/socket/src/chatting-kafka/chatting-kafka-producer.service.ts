@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ChattingKafkaService } from './chatting-kafka.service';
 import {
+  CHAT_EVENT_TYPE,
   ChatEvent,
   ChatEventType,
 } from './interfaces/chatting-kafka-event.interface';
@@ -19,7 +20,7 @@ export class ChattingKafkaProducerService {
     username: string,
   ): Promise<ChatEvent> {
     const event: ChatEvent = {
-      type: 'room-join' as ChatEventType,
+      type: CHAT_EVENT_TYPE.ROOM_JOIN,
       socketId,
       roomId,
       userId,
@@ -37,7 +38,7 @@ export class ChattingKafkaProducerService {
     username: string,
   ): Promise<ChatEvent> {
     const event: ChatEvent = {
-      type: 'room-leave' as ChatEventType,
+      type: CHAT_EVENT_TYPE.ROOM_LEAVE,
       roomId,
       userId,
       username,
@@ -50,7 +51,7 @@ export class ChattingKafkaProducerService {
 
   async publishMessage(roomId: string, messageData: any): Promise<ChatEvent> {
     const event: ChatEvent = {
-      type: 'message-send' as ChatEventType,
+      type: CHAT_EVENT_TYPE.MESSAGE_SEND,
       roomId,
       userId: messageData.userId,
       messageData,
@@ -63,7 +64,7 @@ export class ChattingKafkaProducerService {
 
   async publishUserDisconnect(socketId: string): Promise<ChatEvent> {
     const event: ChatEvent = {
-      type: 'user-disconnect' as ChatEventType,
+      type: CHAT_EVENT_TYPE.USER_DISCONNECT,
       socketId,
       timestamp: new Date().toISOString(),
       serverId: process.env.SERVER_ID,

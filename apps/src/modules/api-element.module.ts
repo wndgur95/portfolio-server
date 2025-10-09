@@ -49,6 +49,10 @@ import { Web3Provider } from '@libs/common/provider/web3/web3.provider';
 import { ImmutableProvider } from '@libs/common/provider/web3/immutable/immutable.provider';
 import { PolygonProvider } from '@libs/common/provider/web3/polygon/polygon.provider';
 import { PortfolioProvider } from '@libs/common/provider/web3/portfolio/portfolio.provider';
+import BatchDatabaseConfig from '@libs/dao/config/batch/batch-database.config';
+import { BatchCommonModule } from '@libs/dao/batch/common/batch-common.module';
+import { AirdropController } from '../../api/src/airdrop/airdrop.controller';
+import { AirdropService } from '../../api/src/airdrop/airdrop.service';
 
 @Module({
   imports: [
@@ -70,13 +74,15 @@ import { PortfolioProvider } from '@libs/common/provider/web3/portfolio/portfoli
     }),
 
     ClsModule.forRoot({ global: true, middleware: { mount: true } }),
-    ...[CommonDatabaseConfig, ContractDatabaseConfig].map((it) => {
-      return TypeOrmExModule.forRootAsync({
-        name: it().name,
-        inject: [it.KEY],
-        useFactory: async (config: DataSourceOptions) => config,
-      });
-    }),
+    ...[CommonDatabaseConfig, ContractDatabaseConfig, BatchDatabaseConfig].map(
+      (it) => {
+        return TypeOrmExModule.forRootAsync({
+          name: it().name,
+          inject: [it.KEY],
+          useFactory: async (config: DataSourceOptions) => config,
+        });
+      },
+    ),
 
     ...getGameServerTypeOrmOptions().map((options) =>
       TypeOrmExModule.forRootAsync({
@@ -94,6 +100,7 @@ import { PortfolioProvider } from '@libs/common/provider/web3/portfolio/portfoli
     GameDbModule,
     StaticModule,
     ContractModule,
+    BatchCommonModule,
   ],
   controllers: [
     //App
@@ -103,6 +110,7 @@ import { PortfolioProvider } from '@libs/common/provider/web3/portfolio/portfoli
     StaticController,
     ErrorController,
     TokenController,
+    AirdropController,
   ],
   providers: [
     ApiService,
@@ -110,6 +118,7 @@ import { PortfolioProvider } from '@libs/common/provider/web3/portfolio/portfoli
     DatabaseService,
     StaticService,
     ErrorService,
+    AirdropService,
 
     ValidateProvider,
 
