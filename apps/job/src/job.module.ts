@@ -1,5 +1,5 @@
 import { Module, ValidationPipe } from '@nestjs/common';
-import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_PIPE } from '@nestjs/core';
 import { JobServerConfig } from './config/job.server.config';
 import { JobController } from './default/job.controller';
 import { JobService } from './default/job.service';
@@ -12,18 +12,18 @@ import { PortfolioImportLogService } from './portfolio/import-log/portfolio-impo
 import { ProcessProvider } from './process/process.provider';
 import { PortfolioBatchHttpProvider } from './http/portfolio-batch-http.provider';
 import { ProcessController } from './process/process.controller';
-import { NetworkInterceptor } from '@libs/common/interceptor/network.interceptor';
 import { PortfolioAirdropService } from './portfolio/airdrop/portfolio-airdrop.service';
 import BatchDatabaseConfig from '@libs/dao/config/batch/batch-database.config';
 import { TypeOrmExModule } from '@libs/common/databases/typeorm/typeorm-ex.module';
 import { DataSourceOptions } from 'typeorm';
 import { BatchCommonModule } from '@libs/dao/batch/common/batch-common.module';
+import { ClsModule } from 'nestjs-cls';
 
 @Module({
   imports: [
     // config module
     JobServerConfig,
-
+    ClsModule.forRoot({ global: true, middleware: { mount: true } }),
     ...[BatchDatabaseConfig].map((it) => {
       return TypeOrmExModule.forRootAsync({
         name: it().name,
@@ -43,7 +43,6 @@ import { BatchCommonModule } from '@libs/dao/batch/common/batch-common.module';
   providers: [
     { provide: APP_PIPE, useClass: ValidationPipe },
     { provide: APP_FILTER, useClass: AllExceptionFilter },
-    { provide: APP_INTERCEPTOR, useClass: NetworkInterceptor },
     JobService,
     AuthService,
     ProcessProvider,
