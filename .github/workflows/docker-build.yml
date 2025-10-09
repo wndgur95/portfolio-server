@@ -20,15 +20,99 @@ on:
 env:
   REGISTRY: harbor.ljh-project.mooo.com
   PROJECT: portfolio-backend
-  IMAGE_NAME: master
+  IMAGE_BASE: master
   CD_REPOSITORY: k8s-enterprise
   K8S_BRANCH: main
 
 jobs:
-  build-and-push:
+  check-changes:
+    name: Check File Changes
     runs-on: [self-hosted, kubernetes, portfolio-backend]
     outputs:
+      should_build_app: ${{ steps.check.outputs.should_build_app }}
+      should_build_job: ${{ steps.check.outputs.should_build_job }}
       deployment_tag: ${{ steps.set-tag.outputs.deployment_tag }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Set deployment tag
+      id: set-tag
+      run: |
+        # GitHub SHA의 짧은 버전 사용 (7자리)
+        SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+        BRANCH_NAME="${{ github.ref_name }}"
+        DEPLOYMENT_TAG="${BRANCH_NAME}-${SHORT_SHA}"
+        echo "deployment_tag=${DEPLOYMENT_TAG}" >> $GITHUB_OUTPUT
+        echo "DEPLOYMENT_TAG=${DEPLOYMENT_TAG}" >> $GITHUB_ENV
+    
+    - name: Check changed files
+      id: check
+      run: |
+        # 수동 실행이나 pull_request가 아닌 경우 이전 커밋과 비교
+        if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+          echo "Manual trigger - building both"
+          echo "should_build_app=true" >> $GITHUB_OUTPUT
+          echo "should_build_job=true" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+        
+        # 변경된 파일 목록 가져오기
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})
+        else
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
+        fi
+        
+        echo "Changed files:"
+        echo "$CHANGED_FILES"
+        
+        # libs 경로 변경 체크
+        LIBS_CHANGED=$(echo "$CHANGED_FILES" | grep -E '^libs/' || true)
+        
+        # apps/job 경로 변경 체크
+        JOB_CHANGED=$(echo "$CHANGED_FILES" | grep -E '^apps/job/' || true)
+        
+        # apps/job 외의 경로 변경 체크
+        OTHER_CHANGED=$(echo "$CHANGED_FILES" | grep -vE '^apps/job/' || true)
+        
+        # 빌드 여부 결정
+        SHOULD_BUILD_APP="false"
+        SHOULD_BUILD_JOB="false"
+        
+        if [ -n "$LIBS_CHANGED" ]; then
+          echo "📦 libs/ changed - building both app and job"
+          SHOULD_BUILD_APP="true"
+          SHOULD_BUILD_JOB="true"
+        else
+          if [ -n "$JOB_CHANGED" ]; then
+            echo "📦 apps/job/ changed - building job only"
+            SHOULD_BUILD_JOB="true"
+          fi
+          
+          if [ -n "$OTHER_CHANGED" ]; then
+            echo "📦 Other files changed - building app only"
+            SHOULD_BUILD_APP="true"
+          fi
+        fi
+        
+        echo "should_build_app=$SHOULD_BUILD_APP" >> $GITHUB_OUTPUT
+        echo "should_build_job=$SHOULD_BUILD_JOB" >> $GITHUB_OUTPUT
+        
+        echo "Build decisions:"
+        echo "  - App: $SHOULD_BUILD_APP"
+        echo "  - Job: $SHOULD_BUILD_JOB"
+
+  build-app:
+    name: Build and Push App Image
+    runs-on: [self-hosted, kubernetes, portfolio-backend]
+    needs: check-changes
+    if: needs.check-changes.outputs.should_build_app == 'true'
+    outputs:
+      deployment_tag: ${{ needs.check-changes.outputs.deployment_tag }}
     
     steps:
     - name: Checkout code
@@ -44,25 +128,15 @@ jobs:
         username: ${{ secrets.HARBOR_USERNAME }}
         password: ${{ secrets.HARBOR_PASSWORD }}
         
-    - name: Extract metadata
-      id: meta
+    - name: Extract metadata for App
+      id: meta-app
       uses: docker/metadata-action@v5
       with:
-        images: harbor.ljh-project.mooo.com/portfolio-backend/master
+        images: harbor.ljh-project.mooo.com/portfolio-backend/master/app
         tags: |
           type=ref,event=branch
           type=sha,prefix=master-
           type=raw,value=${{ github.event.inputs.tag }},enable=${{ github.event.inputs.tag != '' }}
-    
-    - name: Set deployment tag
-      id: set-tag
-      run: |
-        # GitHub SHA의 짧은 버전 사용 (7자리)
-        SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-        BRANCH_NAME="${{ github.ref_name }}"
-        DEPLOYMENT_TAG="${BRANCH_NAME}-${SHORT_SHA}"
-        echo "deployment_tag=${DEPLOYMENT_TAG}" >> $GITHUB_OUTPUT
-        echo "DEPLOYMENT_TAG=${DEPLOYMENT_TAG}" >> $GITHUB_ENV
           
     - name: Clean build cache (if requested)
       if: github.event.inputs.clean_cache == 'true'
@@ -71,25 +145,24 @@ jobs:
         docker builder prune -a -f
         echo "✅ Build cache cleaned!"
         
-    - name: Build and push Docker image
+    - name: Build and push App Docker image
       uses: docker/build-push-action@v5
       with:
         context: .
-#        file: ./api.Dockerfile
         file: ./app.Dockerfile
         push: true
         platforms: linux/arm64
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+        tags: ${{ steps.meta-app.outputs.tags }}
+        labels: ${{ steps.meta-app.outputs.labels }}
+        cache-from: type=gha,scope=app
+        cache-to: type=gha,mode=max,scope=app
         
     - name: Clean up local Docker images
       run: |
-        echo "🧹 Cleaning up local Docker images..."
+        echo "🧹 Cleaning up local App Docker images..."
         
         # 현재 빌드한 이미지 태그들 가져오기
-        TAGS="${{ steps.meta.outputs.tags }}"
+        TAGS="${{ steps.meta-app.outputs.tags }}"
         
         # 각 태그에 대해 로컬 이미지 삭제
         for tag in $TAGS; do
@@ -101,12 +174,98 @@ jobs:
         echo "🧹 Removing unused images..."
         docker image prune -f
         
-        # 사용하지 않는 빌드 캐시 정리
-        echo "🧹 Removing unused build cache..."
-        docker builder prune -f
+        echo "✅ Local cleanup completed!"
+        
+    - name: Build info
+      run: |
+        echo "🎯 App Docker build completed!"
+        echo "=========================================="
+        echo "👤 Triggered by: ${{ github.actor }}"
+        echo "🏷️  Custom tag: ${{ github.event.inputs.tag || 'Not specified' }}"
+        echo "🧹 Cache cleaned: ${{ github.event.inputs.clean_cache }}"
+        echo "📦 App Images built: ${{ steps.meta-app.outputs.tags }}"
+        echo "🚀 Deployment tag: ${{ needs.check-changes.outputs.deployment_tag }}"
+        echo "=========================================="
+
+  build-job:
+    name: Build and Push Job Image
+    runs-on: [self-hosted, kubernetes, portfolio-backend]
+    needs: check-changes
+    if: needs.check-changes.outputs.should_build_job == 'true'
+    outputs:
+      deployment_tag: ${{ needs.check-changes.outputs.deployment_tag }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Log in to Harbor
+      uses: docker/login-action@v3
+      with:
+        registry: harbor.ljh-project.mooo.com
+        username: ${{ secrets.HARBOR_USERNAME }}
+        password: ${{ secrets.HARBOR_PASSWORD }}
+        
+    - name: Extract metadata for Job
+      id: meta-job
+      uses: docker/metadata-action@v5
+      with:
+        images: harbor.ljh-project.mooo.com/portfolio-backend/master/job
+        tags: |
+          type=ref,event=branch
+          type=sha,prefix=master-
+          type=raw,value=${{ github.event.inputs.tag }},enable=${{ github.event.inputs.tag != '' }}
+        
+    - name: Build and push Job Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./job.Dockerfile
+        push: true
+        platforms: linux/arm64
+        tags: ${{ steps.meta-job.outputs.tags }}
+        labels: ${{ steps.meta-job.outputs.labels }}
+        cache-from: type=gha,scope=job
+        cache-to: type=gha,mode=max,scope=job
+        
+    - name: Clean up local Docker images
+      run: |
+        echo "🧹 Cleaning up local Job Docker images..."
+        
+        # 현재 빌드한 이미지 태그들 가져오기
+        TAGS="${{ steps.meta-job.outputs.tags }}"
+        
+        # 각 태그에 대해 로컬 이미지 삭제
+        for tag in $TAGS; do
+          echo "🗑️ Removing local image: $tag"
+          docker rmi $tag || echo "⚠️ Failed to remove $tag (may not exist locally)"
+        done
+        
+        # 사용하지 않는 이미지들 정리
+        echo "🧹 Removing unused images..."
+        docker image prune -f
         
         echo "✅ Local cleanup completed!"
         
+    - name: Build info
+      run: |
+        echo "🎯 Job Docker build completed!"
+        echo "=========================================="
+        echo "👤 Triggered by: ${{ github.actor }}"
+        echo "🏷️  Custom tag: ${{ github.event.inputs.tag || 'Not specified' }}"
+        echo "📦 Job Images built: ${{ steps.meta-job.outputs.tags }}"
+        echo "🚀 Deployment tag: ${{ needs.check-changes.outputs.deployment_tag }}"
+        echo "=========================================="
+  
+  show-disk-usage:
+    name: Show Disk Usage
+    runs-on: [self-hosted, kubernetes, portfolio-backend]
+    needs: [check-changes, build-app, build-job]
+    if: always() && needs.check-changes.result == 'success'
+    steps:
     - name: Show disk usage
       run: |
         echo "📊 Disk usage after cleanup:"
@@ -115,22 +274,20 @@ jobs:
         echo "📊 Docker system info:"
         docker system df
         
-    - name: Build info
-      run: |
-        echo "🎯 Docker build completed!"
-        echo "=========================================="
-        echo "👤 Triggered by: ${{ github.actor }}"
-        echo "🏷️  Custom tag: ${{ github.event.inputs.tag || 'Not specified' }}"
-        echo "🧹 Cache cleaned: ${{ github.event.inputs.clean_cache }}"
-        echo "📦 Images built: ${{ steps.meta.outputs.tags }}"
-        echo "🚀 Deployment tag: ${{ steps.set-tag.outputs.deployment_tag }}"
-        echo "=========================================="
+        # 사용하지 않는 빌드 캐시 정리
+        echo "🧹 Removing unused build cache..."
+        docker builder prune -f
+        
+        echo "✅ Final cleanup completed!"
 
   deploy:
     name: Update Helm Chart and Deploy
     runs-on: self-hosted
-    needs: build-and-push
-    if: github.event_name != 'pull_request'
+    needs: [check-changes, build-app, build-job]
+    if: |
+      github.event_name != 'pull_request' && 
+      needs.check-changes.result == 'success' &&
+      (needs.build-app.result == 'success' || needs.build-job.result == 'success')
     
     steps:
     - name: Checkout k8s-enterprise
@@ -146,22 +303,49 @@ jobs:
         echo "🔧 Updating Helm chart values..."
         echo "Service: portfolio-backend"
         echo "Environment: production"
-        echo "Tag: ${{ needs.build-and-push.outputs.deployment_tag }}"
-        echo "Repository: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_NAME }}"
         
         cd ${{ env.CD_REPOSITORY }}/charts/portfolio/portfolio-backend
         
         # 백업 생성
         cp values.yaml values.yaml.backup
         
-        # 이미지 태그 업데이트
-        sed -i 's/tag:.*/tag: "${{ needs.build-and-push.outputs.deployment_tag }}"/g' values.yaml
+        DEPLOYMENT_TAG="${{ needs.check-changes.outputs.deployment_tag }}"
         
-        # 이미지 repository 업데이트
-        sed -i 's|repository:.*|repository: "${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_NAME }}"|g' values.yaml
+        # App 이미지가 빌드된 경우에만 업데이트
+        if [ "${{ needs.check-changes.outputs.should_build_app }}" == "true" ] && [ "${{ needs.build-app.result }}" == "success" ]; then
+          echo "📦 Updating App image..."
+          echo "Tag: $DEPLOYMENT_TAG"
+          echo "Repository: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/app"
+          
+          # App 이미지 태그 업데이트 (app.image.tag)
+          sed -i '/^app:/,/^[^ ]/ s/tag:.*/tag: "'"$DEPLOYMENT_TAG"'"/' values.yaml
+          
+          # App 이미지 repository 업데이트 (app.image.repository)
+          sed -i '/^app:/,/^[^ ]/ s|repository:.*|repository: "${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/app"|' values.yaml
+          
+          echo "✅ Updated App image tag to: $DEPLOYMENT_TAG"
+          echo "✅ Updated App repository to: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/app"
+        else
+          echo "⏭️  Skipping App image update (not built)"
+        fi
         
-        echo "✅ Updated image tag to: ${{ needs.build-and-push.outputs.deployment_tag }}"
-        echo "✅ Updated repository to: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_NAME }}"
+        # Job 이미지가 빌드된 경우에만 업데이트
+        if [ "${{ needs.check-changes.outputs.should_build_job }}" == "true" ] && [ "${{ needs.build-job.result }}" == "success" ]; then
+          echo "📦 Updating Job image..."
+          echo "Tag: $DEPLOYMENT_TAG"
+          echo "Repository: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/job"
+          
+          # Job 이미지 태그 업데이트 (job.image.tag)
+          sed -i '/^job:/,/^[^ ]/ s/tag:.*/tag: "'"$DEPLOYMENT_TAG"'"/' values.yaml
+          
+          # Job 이미지 repository 업데이트 (job.image.repository)
+          sed -i '/^job:/,/^[^ ]/ s|repository:.*|repository: "${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/job"|' values.yaml
+          
+          echo "✅ Updated Job image tag to: $DEPLOYMENT_TAG"
+          echo "✅ Updated Job repository to: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/job"
+        else
+          echo "⏭️  Skipping Job image update (not built)"
+        fi
         
         # 변경사항 확인
         echo "📋 Changes made:"
@@ -177,11 +361,33 @@ jobs:
         git status
         git diff charts/portfolio/portfolio-backend/values.yaml
         
+        DEPLOYMENT_TAG="${{ needs.check-changes.outputs.deployment_tag }}"
+        COMMIT_MSG="feat: Update portfolio-backend"
+        COMMIT_DETAILS=""
+        
+        # App이 빌드된 경우
+        if [ "${{ needs.check-changes.outputs.should_build_app }}" == "true" ] && [ "${{ needs.build-app.result }}" == "success" ]; then
+          COMMIT_MSG="$COMMIT_MSG app"
+          COMMIT_DETAILS="${COMMIT_DETAILS}
+        - App Image: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/app:${DEPLOYMENT_TAG}"
+        fi
+        
+        # Job이 빌드된 경우
+        if [ "${{ needs.check-changes.outputs.should_build_job }}" == "true" ] && [ "${{ needs.build-job.result }}" == "success" ]; then
+          if [[ "$COMMIT_MSG" == *"app"* ]]; then
+            COMMIT_MSG="$COMMIT_MSG and job"
+          else
+            COMMIT_MSG="$COMMIT_MSG job"
+          fi
+          COMMIT_DETAILS="${COMMIT_DETAILS}
+        - Job Image: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/job:${DEPLOYMENT_TAG}"
+        fi
+        
+        COMMIT_MSG="$COMMIT_MSG image to ${DEPLOYMENT_TAG}"
+        
         # 커밋 및 푸시
         git add charts/portfolio/portfolio-backend/values.yaml
-        git commit -m "feat: Update portfolio-backend image tag to ${{ needs.build-and-push.outputs.deployment_tag }}
-
-        - Image: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_NAME }}:${{ needs.build-and-push.outputs.deployment_tag }}
+        git commit -m "${COMMIT_MSG}${COMMIT_DETAILS}
         - Commit: ${{ github.sha }}
         - Branch: ${{ github.ref_name }}
         - Triggered by: ${{ github.actor }}"
@@ -192,18 +398,38 @@ jobs:
         
     - name: Trigger ArgoCD sync
       run: |
-        echo "🚀 ArgoCD will automatically detect the new image tag and deploy it"
-        echo "Image: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_NAME }}:${{ needs.build-and-push.outputs.deployment_tag }}"
+        echo "🚀 ArgoCD will automatically detect the new image tags and deploy them"
+        
+        DEPLOYMENT_TAG="${{ needs.check-changes.outputs.deployment_tag }}"
+        
+        if [ "${{ needs.check-changes.outputs.should_build_app }}" == "true" ] && [ "${{ needs.build-app.result }}" == "success" ]; then
+          echo "📦 App Image: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/app:${DEPLOYMENT_TAG}"
+        fi
+        
+        if [ "${{ needs.check-changes.outputs.should_build_job }}" == "true" ] && [ "${{ needs.build-job.result }}" == "success" ]; then
+          echo "📦 Job Image: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/job:${DEPLOYMENT_TAG}"
+        fi
+        
         echo "ArgoCD Application: portfolio-backend"
         
     - name: Deployment notification
       run: |
         echo "🎉 Portfolio Backend deployment triggered!"
         echo "=========================================="
-        echo "📦 Image: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_NAME }}:${{ needs.build-and-push.outputs.deployment_tag }}"
-        echo "🏷️  Tag: ${{ needs.build-and-push.outputs.deployment_tag }}"
+        
+        DEPLOYMENT_TAG="${{ needs.check-changes.outputs.deployment_tag }}"
+        
+        if [ "${{ needs.check-changes.outputs.should_build_app }}" == "true" ] && [ "${{ needs.build-app.result }}" == "success" ]; then
+          echo "📦 App Image: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/app:${DEPLOYMENT_TAG}"
+        fi
+        
+        if [ "${{ needs.check-changes.outputs.should_build_job }}" == "true" ] && [ "${{ needs.build-job.result }}" == "success" ]; then
+          echo "📦 Job Image: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/job:${DEPLOYMENT_TAG}"
+        fi
+        
+        echo "🏷️  Tag: ${DEPLOYMENT_TAG}"
         echo "🌿 Branch: ${{ github.ref_name }}"
         echo "👤 Author: ${{ github.actor }}"
         echo "📝 Commit: ${{ github.sha }}"
-        echo "🔄 ArgoCD will automatically sync and deploy the new image"
+        echo "🔄 ArgoCD will automatically sync and deploy the new images"
         echo "=========================================="
