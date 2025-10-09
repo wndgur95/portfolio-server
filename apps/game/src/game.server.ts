@@ -52,7 +52,7 @@ export class GameServer {
       const document = SwaggerModule.createDocument(this.app, config);
 
       SwaggerModule.setup(
-        'api-docs',
+        'game/api-docs',
         this.app,
         document,
         SWAGGER_CUSTOM_OPTIONS,

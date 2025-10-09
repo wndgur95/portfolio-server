@@ -57,8 +57,6 @@ export class UserService {
     const userDetail =
       await this.userDetailsRepositories[database].findByUserId(userId);
 
-    console.log(await userDetail.characters);
-
     await this._initializeUser(userDetail);
 
     return GetUserOutDto.of({

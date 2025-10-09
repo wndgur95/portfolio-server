@@ -31,6 +31,7 @@ import { Web3Service } from '../web3/web3.service';
 import { PortfolioService } from '../web3/portfolio/portfolio.service';
 import { PolygonService } from '../web3/polygon/polygon.service';
 import { ImmutableService } from '../web3/immutable/immutable.service';
+import { JwtWeb3Strategy } from './strategy/jwt-web3.strategy';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { ImmutableService } from '../web3/immutable/immutable.service';
   providers: [
     JwtStrategy,
     JwtRefreshStrategy,
+    JwtWeb3Strategy,
     ApiKeyStrategy,
     BasicStrategy,
     AuthService,

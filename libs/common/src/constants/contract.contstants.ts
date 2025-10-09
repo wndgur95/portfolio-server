@@ -58,6 +58,12 @@ export const TOKEN_LIST = {
 
 export const CONTRACT = {
   DEPLOYER: 'Deployer',
+  SHAPE_MINTER: 'ShapeMinter',
+  NUMBER_MINTER: 'NumberMinter',
+  GACHA_MINTER: 'GachaMinter',
+  AIRDROP_COIN_MANAGER: 'AirdropCoinManager',
+  AIRDROP_ERC1155_MANAGER: 'AirdropErc1155Manager',
+
   DATA_ADDRESS: 'DataAddress',
   SHAPE_DATA: 'ShapeData',
   NUMBER_DATA: 'NumberData',
@@ -65,9 +71,12 @@ export const CONTRACT = {
   SHAPE: 'Shape',
   NUMBER: 'Number',
   GACHA: 'Gacha',
-  SHAPE_MINTER: 'ShapeMinter',
-  NUMBER_MINTER: 'NumberMinter',
-  GACHA_MINTER: 'GachaMinter',
+
+  ADMIN_AIRDROP_COIN: 'AdminAirdropCoin',
+  ADMIN_AIRDROP_ERC1155: 'AdminAirdropErc1155',
+
+  GACHA_MACHINE: 'GachaMachine',
+  SHAPE_GACHA_MACHINE: 'ShapeGachaMachine',
 };
 
 export const CONTRACT_BY_NETWORK = {
@@ -79,3 +88,27 @@ export const CONTRACT_BY_NETWORK = {
     CENTER: 'PortfolioCenter',
   },
 };
+
+export const TOPIC_TYPE = {
+  MINT: 0,
+  OWNER: 1,
+  SHAPE: 2,
+  REAL_OWNER: 3,
+};
+export type TopicType =
+  (typeof TOPIC_TYPE)[keyof typeof TOPIC_TYPE];
+
+export const DEFAULT_ADDRESS = {
+  BURN_ADDRESS: '0x000000000000000000000000000000000000dead',
+  NULL_ADDRESS: '0x0000000000000000000000000000000000000000',
+};
+
+export const LOG_STATUS = {
+  REGISTERED: 0,
+  PROCESSED: 1,
+  PROCESS: 2,
+};
+export type LogStatus =
+  (typeof LOG_STATUS)[keyof typeof LOG_STATUS];
+
+export const AIRDROP_COIN_VALUE = 3;

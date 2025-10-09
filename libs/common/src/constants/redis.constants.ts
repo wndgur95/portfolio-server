@@ -12,6 +12,7 @@ export const RedisDbNumber = {
   SOLO_RANKING: 2,
 
   CHATTING: 5,
+  BATCH_MESSAGE: 6,
 
   SOLO_BATTLE_SOCKET: 10,
 };

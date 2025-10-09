@@ -1,6 +1,6 @@
 import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { ChattingKafkaService } from './chatting-kafka.service';
-import { ChatEvent } from './interfaces/chatting-kafka-event.interface';
+import { CHAT_EVENT_TYPE, ChatEvent } from './interfaces/chatting-kafka-event.interface';
 import { ChattingService } from '../chatting/chatting.service';
 import { EnvProvider } from '@libs/common/provider/env.provider';
 
@@ -48,16 +48,16 @@ export class ChattingKafkaConsumerService implements OnModuleInit {
       // }
 
       switch (event.type) {
-        case 'room-join':
+        case CHAT_EVENT_TYPE.ROOM_JOIN:
           await this.chattingService.consumerJoinRoom(event);
           break;
-        case 'room-leave':
+        case CHAT_EVENT_TYPE.ROOM_LEAVE:
           await this.chattingService.consumerLeaveRoom(event);
           break;
-        case 'message-send':
+        case CHAT_EVENT_TYPE.MESSAGE_SEND:
           await this.chattingService.consumerChatMessage(event);
           break;
-        case 'user-disconnect':
+        case CHAT_EVENT_TYPE.USER_DISCONNECT:
           await this.chattingService.consumerDisconnectUser(event);
           break;
         default:

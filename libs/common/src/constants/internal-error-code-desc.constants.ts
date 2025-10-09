@@ -12,7 +12,8 @@ export const INTERNAL_ERROR_CODE_DESC = {
   [e.SUPER_ROLES_CHANGE_IMPOSSIBILITY]: '슈퍼 유저는 변경이 불가능합니다.',
 
   [e.API_KEY_NOT_VALID]: '유효하지 않은 api key',
-  [e.AUTH_SERVER_NETWORK_ERROR]: '%P',
+  [e.LOG_SERVER_NETWORK_ERROR]: '%P',
+  [e.BATCH_SERVER_NETWORK_ERROR]: '%P',
   [e.API_SECURITY_NF_TOKEN_INVALIDATE]: '유효하지 않은 nf token',
 
   [e.AUTH_FAILED_VERIFY_CHALLENGE]: '챌린지 인증 실페',
@@ -59,6 +60,8 @@ export const INTERNAL_ERROR_CODE_DESC = {
   [e.USER_NOT_FOUND]: '유저가 없습니다.',
   [e.USER_BLOCK]: '블록 유저',
   [e.LOGIN_METHOD_NOT_VALID]: '계정의 로그인 방식이 잘못됬습니다.',
+
+  [e.TODAY_ALREADY_RECEIVED_AIRDROP]: '오늘은 이미 에어드랍을 받았습니다.',
 
   // Group
   [e.GROUP_MEMBER_ROLE_INVALID]: '해당 기능은 %P만 가능한 기능입니다.',

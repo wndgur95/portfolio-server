@@ -2,7 +2,13 @@ FROM node:20-slim AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
-RUN corepack prepare pnpm@9.7.0 --activate
+RUN corepack prepare pnpm@9.10.0 --activate
+# 네이티브 바이너리 빌드를 위한 빌드 도구 설치
+RUN apt-get update && apt-get install -y \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 FROM base AS deps
@@ -13,8 +19,8 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
 FROM base AS builder
 WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY package.json pnpm-lock.yaml ./
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm run build api
 

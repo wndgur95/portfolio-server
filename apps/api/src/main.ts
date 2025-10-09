@@ -3,7 +3,7 @@ import { ApiModule } from './api.module';
 import { ApiServer } from './api.server';
 import { SystemLogger } from '@libs/common/logger/system.logger';
 
-async function apiServer(): Promise<void> {
+async function api(): Promise<void> {
   const app = await NestFactory.create(ApiModule, {
     logger: new SystemLogger().logger,
   });
@@ -14,4 +14,4 @@ async function apiServer(): Promise<void> {
   await apiServer.run();
 }
 
-void apiServer();
+void api();

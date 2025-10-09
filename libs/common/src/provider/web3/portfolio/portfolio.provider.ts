@@ -4,6 +4,7 @@ import { BaseWeb3Provider } from '@libs/common/provider/web3/base-web3.provider'
 import { PortfolioContractsDbRepository } from '@libs/dao/contract/portfolio-contracts/repositories/portfolio-contracts-db.repository';
 import { PortfolioContractsRepository } from '@libs/dao/contract/portfolio-contracts/interfaces/portfolio-contracts-repository.interface';
 import { NETWORK } from '@libs/common/constants/web3.constants';
+import { CONTRACT } from '@libs/common/constants/contract.contstants';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const Web3 = require('web3');
 
@@ -29,6 +30,9 @@ export class PortfolioProvider extends BaseWeb3Provider {
 
   protected getPrivateKey(contractName: string, type?: number): string {
     switch (contractName) {
+      case CONTRACT.ADMIN_AIRDROP_COIN: {
+        return this.config.get<string>('AIRDROP_COIN_PRIVATE_KEY');
+      }
       default: {
         return this.config.get<string>('CONTRACT_DEPLOYER_PRIVATE_KEY');
       }

@@ -9,6 +9,7 @@ import GameDatabaseConfig from '@libs/dao/config/game/game-database.config';
 import ArenaDatabaseConfig from '@libs/dao/config/arena/arena-database.config';
 import MongoLogDocumentConfig from '@libs/dao/config/mongo/mongo-log-document.config';
 import ContractDatabaseConfig from '@libs/dao/config/contract/contract-database.config';
+import BatchDatabaseConfig from '@libs/dao/config/batch/batch-database.config';
 
 const environment = NODE_ENV || 'test';
 
@@ -24,6 +25,7 @@ const environment = NODE_ENV || 'test';
         ArenaDatabaseConfig,
         MongoLogDocumentConfig,
         ContractDatabaseConfig,
+        BatchDatabaseConfig,
       ],
     }),
   ],

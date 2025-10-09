@@ -146,6 +146,7 @@ export class AuthService {
       roles: user.roles,
       gameDbId: user.gameDbId || 0,
       database: user.gameDbId ? getDatabaseByGameDbId(user.gameDbId) : null,
+      address: user.address,
     };
 
     if (!user.gameDbId) {

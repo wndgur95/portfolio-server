@@ -56,8 +56,8 @@ export class LogServerProvider extends BaseHttpService {
   private static checkCode(code: number, message?: string): void {
     if (code !== 0) {
       throw new InternalServerErrorException(
-        INTERNAL_ERROR_CODE.AUTH_SERVER_NETWORK_ERROR,
-        `AUTH_SERVER_NETWORK_ERROR : code(${code}), message(${message})`,
+        INTERNAL_ERROR_CODE.LOG_SERVER_NETWORK_ERROR,
+        `LOG_SERVER_NETWORK_ERROR : code(${code}), message(${message})`,
       );
     }
   }
