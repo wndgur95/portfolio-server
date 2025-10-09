@@ -21,7 +21,7 @@ export abstract class CoinAirdropQueueEntity
   @Column()
   address: string;
 
-  @Index({ unique: true })
+  @Index()
   @Column({ type: 'tinyint', default: LOG_STATUS.REGISTERED })
   status: LogStatus;
 
