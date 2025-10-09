@@ -304,11 +304,6 @@ jobs:
         echo "Service: portfolio-backend"
         echo "Environment: production"
         
-        cd ${{ env.CD_REPOSITORY }}/charts/portfolio/portfolio-backend
-        
-        # 백업 생성
-        cp values.yaml values.yaml.backup
-        
         DEPLOYMENT_TAG="${{ needs.check-changes.outputs.deployment_tag }}"
         
         # App 이미지가 빌드된 경우에만 업데이트
@@ -317,14 +312,25 @@ jobs:
           echo "Tag: $DEPLOYMENT_TAG"
           echo "Repository: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/app"
           
-          # App 이미지 태그 업데이트 (app.image.tag)
-          sed -i '/^app:/,/^[^ ]/ s/tag:.*/tag: "'"$DEPLOYMENT_TAG"'"/' values.yaml
+          cd ${{ env.CD_REPOSITORY }}/charts/portfolio/portfolio-backend/app
           
-          # App 이미지 repository 업데이트 (app.image.repository)
-          sed -i '/^app:/,/^[^ ]/ s|repository:.*|repository: "${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/app"|' values.yaml
+          # App values.yaml 백업 생성
+          cp values.yaml values.yaml.backup
+          
+          # App 이미지 태그 업데이트 (image.tag)
+          sed -i 's/tag: ".*"/tag: "'"$DEPLOYMENT_TAG"'"/' values.yaml
+          
+          # App 이미지 repository 업데이트 (image.repository)
+          sed -i 's|repository: ".*"|repository: "${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/app"|' values.yaml
           
           echo "✅ Updated App image tag to: $DEPLOYMENT_TAG"
           echo "✅ Updated App repository to: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/app"
+          
+          # 변경사항 확인
+          echo "📋 App changes:"
+          diff values.yaml.backup values.yaml || echo "No differences found"
+          
+          cd -
         else
           echo "⏭️  Skipping App image update (not built)"
         fi
@@ -335,21 +341,28 @@ jobs:
           echo "Tag: $DEPLOYMENT_TAG"
           echo "Repository: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/job"
           
-          # Job 이미지 태그 업데이트 (job.image.tag)
-          sed -i '/^job:/,/^[^ ]/ s/tag:.*/tag: "'"$DEPLOYMENT_TAG"'"/' values.yaml
+          cd ${{ env.CD_REPOSITORY }}/charts/portfolio/portfolio-backend/job
           
-          # Job 이미지 repository 업데이트 (job.image.repository)
-          sed -i '/^job:/,/^[^ ]/ s|repository:.*|repository: "${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/job"|' values.yaml
+          # Job values.yaml 백업 생성
+          cp values.yaml values.yaml.backup
+          
+          # Job 이미지 태그 업데이트 (image.tag)
+          sed -i 's/tag: ".*"/tag: "'"$DEPLOYMENT_TAG"'"/' values.yaml
+          
+          # Job 이미지 repository 업데이트 (image.repository)
+          sed -i 's|repository: ".*"|repository: "${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/job"|' values.yaml
           
           echo "✅ Updated Job image tag to: $DEPLOYMENT_TAG"
           echo "✅ Updated Job repository to: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/job"
+          
+          # 변경사항 확인
+          echo "📋 Job changes:"
+          diff values.yaml.backup values.yaml || echo "No differences found"
+          
+          cd -
         else
           echo "⏭️  Skipping Job image update (not built)"
         fi
-        
-        # 변경사항 확인
-        echo "📋 Changes made:"
-        diff values.yaml.backup values.yaml || echo "No differences found"
         
     - name: Commit and push changes
       run: |
@@ -359,17 +372,19 @@ jobs:
         
         # 변경사항 확인
         git status
-        git diff charts/portfolio/portfolio-backend/values.yaml
         
         DEPLOYMENT_TAG="${{ needs.check-changes.outputs.deployment_tag }}"
         COMMIT_MSG="feat: Update portfolio-backend"
         COMMIT_DETAILS=""
+        FILES_TO_ADD=""
         
         # App이 빌드된 경우
         if [ "${{ needs.check-changes.outputs.should_build_app }}" == "true" ] && [ "${{ needs.build-app.result }}" == "success" ]; then
           COMMIT_MSG="$COMMIT_MSG app"
           COMMIT_DETAILS="${COMMIT_DETAILS}
         - App Image: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/app:${DEPLOYMENT_TAG}"
+          FILES_TO_ADD="$FILES_TO_ADD charts/portfolio/portfolio-backend/app/values.yaml"
+          git diff charts/portfolio/portfolio-backend/app/values.yaml
         fi
         
         # Job이 빌드된 경우
@@ -381,12 +396,14 @@ jobs:
           fi
           COMMIT_DETAILS="${COMMIT_DETAILS}
         - Job Image: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/job:${DEPLOYMENT_TAG}"
+          FILES_TO_ADD="$FILES_TO_ADD charts/portfolio/portfolio-backend/job/values.yaml"
+          git diff charts/portfolio/portfolio-backend/job/values.yaml
         fi
         
         COMMIT_MSG="$COMMIT_MSG image to ${DEPLOYMENT_TAG}"
         
         # 커밋 및 푸시
-        git add charts/portfolio/portfolio-backend/values.yaml
+        git add $FILES_TO_ADD
         git commit -m "${COMMIT_MSG}${COMMIT_DETAILS}
         - Commit: ${{ github.sha }}
         - Branch: ${{ github.ref_name }}
