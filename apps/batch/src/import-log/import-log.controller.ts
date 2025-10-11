@@ -7,7 +7,7 @@ import { ImportLogTypeInDto } from './dto/import-log-type-in.dto';
 import { ImportLogService } from './import-log.service';
 
 @ApiTags('import log')
-@Controller('batch/import-log/')
+@Controller('batch/import-log')
 @ApiSecurity('apiKey')
 @UseGuards(ApiKeyAuthGuard)
 @ApiBearerAuth('network')

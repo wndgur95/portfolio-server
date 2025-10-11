@@ -27,6 +27,8 @@ import { MessageKafkaService } from './message-kafka/message-kafka.service';
 import { MessageKafkaConsumerService } from './message-kafka/message-kafka-consumer.service';
 import { MessageKafkaProducerService } from './message-kafka/message-kafka-producer.service';
 import { MessageProvider } from './message/message.provider';
+import { Erc1155Controller } from './erc1155/erc1155.controller';
+import { Erc1155Service } from './erc1155/erc1155.service';
 
 @Module({
   imports: [
@@ -44,7 +46,12 @@ import { MessageProvider } from './message/message.provider';
     ContractModule,
     BatchCommonModule,
   ],
-  controllers: [BatchController, ImportLogController, AirdropController],
+  controllers: [
+    BatchController,
+    ImportLogController,
+    AirdropController,
+    Erc1155Controller,
+  ],
   providers: [
     {
       provide: APP_PIPE,
@@ -60,6 +67,7 @@ import { MessageProvider } from './message/message.provider';
     BatchService,
     ImportLogService,
     AirdropService,
+    Erc1155Service,
 
     Web3Provider,
     ImmutableProvider,
