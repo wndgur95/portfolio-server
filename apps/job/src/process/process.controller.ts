@@ -11,6 +11,7 @@ import { NETWORK } from '@libs/common/constants/web3.constants';
 import { JobProcessInfoDto } from '../dto/job-process-info.dto';
 import { PortfolioImportLogService } from '../portfolio/import-log/portfolio-import-log.service';
 import { PortfolioAirdropService } from '../portfolio/airdrop/portfolio-airdrop.service';
+import { PortfolioErc1155Service } from '../portfolio/erc1155/portfolio-erc1155.service';
 
 @ApiTags('process info')
 @Controller('process')
@@ -21,6 +22,7 @@ export class ProcessController {
     private readonly processProvider: ProcessProvider,
     private readonly portfolioImportLogService: PortfolioImportLogService,
     private readonly portfolioAirdropService: PortfolioAirdropService,
+    private readonly portfolioErc1155Service: PortfolioErc1155Service,
   ) {}
 
   @Get('/:network')
@@ -70,6 +72,7 @@ export class ProcessController {
     return [
       ...this.portfolioImportLogService.getProcess(),
       ...this.portfolioAirdropService.getProcess(),
+      ...this.portfolioErc1155Service.getProcess(),
     ];
   }
 

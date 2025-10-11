@@ -33,6 +33,9 @@ export class PortfolioProvider extends BaseWeb3Provider {
       case CONTRACT.ADMIN_AIRDROP_COIN: {
         return this.config.get<string>('AIRDROP_COIN_PRIVATE_KEY');
       }
+      case CONTRACT.ERC1155_CLAIM_PROOF: {
+        return this.config.get<string>('ERC115_MANAGER_PRIVATE_KEY');
+      }
       default: {
         return this.config.get<string>('CONTRACT_DEPLOYER_PRIVATE_KEY');
       }

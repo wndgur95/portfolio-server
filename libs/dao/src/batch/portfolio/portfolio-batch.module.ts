@@ -5,6 +5,8 @@ import { PortfolioShapeMintLogsModule } from '@libs/dao/batch/portfolio/shape-mi
 import { PortfolioShapeEventLogsModule } from '@libs/dao/batch/portfolio/shape-event-logs/portfolio-shape-event-logs.module';
 import { PortfolioShapeOwnerLogsModule } from '@libs/dao/batch/portfolio/shape-owner-logs/portfolio-shape-owner-logs.module';
 import { PortfolioCoinAirdropQueuesModule } from '@libs/dao/batch/portfolio/coin-airdrop-queues/portfolio-coin-airdrop-queues.module';
+import { PortfolioErc1155ClaimMerkleTreeModule } from '@libs/dao/batch/portfolio/erc1155-claim-merkle-tree/portfolio-erc1155-claim-merkle-tree.module';
+import { PortfolioErc1155ClaimsModule } from '@libs/dao/batch/portfolio/erc1155-claims/portfolio-erc1155-claims.module';
 
 @Module({
   imports: [
@@ -14,6 +16,8 @@ import { PortfolioCoinAirdropQueuesModule } from '@libs/dao/batch/portfolio/coin
     PortfolioShapeEventLogsModule,
     PortfolioShapeOwnerLogsModule,
     PortfolioCoinAirdropQueuesModule,
+    PortfolioErc1155ClaimMerkleTreeModule,
+    PortfolioErc1155ClaimsModule,
   ],
   exports: [
     PortfolioBlockNumbersModule,
@@ -22,6 +26,8 @@ import { PortfolioCoinAirdropQueuesModule } from '@libs/dao/batch/portfolio/coin
     PortfolioShapeEventLogsModule,
     PortfolioShapeOwnerLogsModule,
     PortfolioCoinAirdropQueuesModule,
+    PortfolioErc1155ClaimMerkleTreeModule,
+    PortfolioErc1155ClaimsModule,
   ],
 })
 export class PortfolioBatchModule {}

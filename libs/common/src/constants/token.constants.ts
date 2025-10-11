@@ -8,3 +8,11 @@ export interface AuthToken {
 
 export const NF_TOKEN_SECRET_KEY =
   process.env.NODE_ENV + 'log nf token secret key';
+
+export const CLAIM_TYPE = {
+  None: 0,
+  Number: 1,
+  Gacha: 2,
+}
+
+export type ClaimType = (typeof CLAIM_TYPE)[keyof typeof CLAIM_TYPE];

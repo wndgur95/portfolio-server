@@ -37,6 +37,26 @@ export abstract class BaseBatchHttpService extends BaseHttpService {
     return response.data;
   }
 
+  async erc1155MakeMerkleTree(): Promise<void> {
+    const response: BaseBatchResponse = await this.post({
+      method: 'batch/erc1155/merkle-tree/make',
+      data: {},
+    });
+
+    BaseBatchHttpService.checkCode(response.code, response?.message);
+    return response.data;
+  }
+
+  async erc1155SetMerkleTree(): Promise<void> {
+    const response: BaseBatchResponse = await this.post({
+      method: 'batch/erc1155/merkle-tree/set',
+      data: {},
+    });
+
+    BaseBatchHttpService.checkCode(response.code, response?.message);
+    return response.data;
+  }
+
   protected static checkCode(code: number, message?: string): void {
     if (code !== 0) {
       throw new InternalServerErrorException(

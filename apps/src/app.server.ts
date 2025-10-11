@@ -54,6 +54,15 @@ export class AppServer {
         },
         'apiKey',
       )
+      .addBearerAuth(
+        {
+          type: 'http',
+          name: 'Authorization',
+          in: 'header',
+          description: 'web3 token',
+        },
+        'jwt-web3',
+      )
       .addBasicAuth(
         {
           type: 'http',

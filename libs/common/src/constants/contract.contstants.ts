@@ -77,6 +77,9 @@ export const CONTRACT = {
 
   GACHA_MACHINE: 'GachaMachine',
   SHAPE_GACHA_MACHINE: 'ShapeGachaMachine',
+
+  ERC1155_CLAIM_PROOF: 'Erc1155ClaimProof',
+  ERC1155_CLAIM: 'Erc1155Claim',
 };
 
 export const CONTRACT_BY_NETWORK = {
@@ -105,10 +108,18 @@ export const DEFAULT_ADDRESS = {
 
 export const LOG_STATUS = {
   REGISTERED: 0,
-  PROCESSED: 1,
-  PROCESS: 2,
+  PROCESS: 1,
+  PROCESSED: 2,
 };
 export type LogStatus =
   (typeof LOG_STATUS)[keyof typeof LOG_STATUS];
 
 export const AIRDROP_COIN_VALUE = 3;
+
+export const CLAIM_STATUS = {
+  REGISTERED: 0,
+  MAKE_MERKLE_TREE: 1,
+  SET_MERKLE_TREE: 2,
+  PROCESSED: 3,
+};
+export type ClaimStatus = (typeof CLAIM_STATUS)[keyof typeof CLAIM_STATUS];

@@ -27,6 +27,8 @@ import { MessageKafkaProducerService } from '../../batch/src/message-kafka/messa
 import { BatchMessageRepository } from '@libs/dao/redis/batch-message/batch-message.repository';
 import { JwtModule } from '@nestjs/jwt';
 import { JWT_OPTIONS } from '@libs/common/constants/jwt.constants';
+import { Erc1155Service } from '../../batch/src/erc1155/erc1155.service';
+import { Erc1155Controller } from '../../batch/src/erc1155/erc1155.controller';
 
 @Module({
   imports: [
@@ -47,11 +49,17 @@ import { JWT_OPTIONS } from '@libs/common/constants/jwt.constants';
     ContractModule,
     BatchCommonModule,
   ],
-  controllers: [BatchController, ImportLogController, AirdropController],
+  controllers: [
+    BatchController,
+    ImportLogController,
+    AirdropController,
+    Erc1155Controller,
+  ],
   providers: [
     BatchService,
     ImportLogService,
     AirdropService,
+    Erc1155Service,
 
     Web3Provider,
     ImmutableProvider,

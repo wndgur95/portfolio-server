@@ -18,6 +18,7 @@ import { TypeOrmExModule } from '@libs/common/databases/typeorm/typeorm-ex.modul
 import { DataSourceOptions } from 'typeorm';
 import { BatchCommonModule } from '@libs/dao/batch/common/batch-common.module';
 import { ClsModule } from 'nestjs-cls';
+import { PortfolioErc1155Service } from './portfolio/erc1155/portfolio-erc1155.service';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { ClsModule } from 'nestjs-cls';
 
     PortfolioImportLogService,
     PortfolioAirdropService,
+    PortfolioErc1155Service,
   ],
 })
 export class JobModule {}
