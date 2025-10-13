@@ -29,6 +29,8 @@ import { MessageKafkaProducerService } from './message-kafka/message-kafka-produ
 import { MessageProvider } from './message/message.provider';
 import { Erc1155Controller } from './erc1155/erc1155.controller';
 import { Erc1155Service } from './erc1155/erc1155.service';
+import { Erc721Service } from './erc721/erc721.service';
+import { Erc721Controller } from './erc721/erc721.controller';
 
 @Module({
   imports: [
@@ -51,6 +53,7 @@ import { Erc1155Service } from './erc1155/erc1155.service';
     ImportLogController,
     AirdropController,
     Erc1155Controller,
+    Erc721Controller,
   ],
   providers: [
     {
@@ -68,6 +71,7 @@ import { Erc1155Service } from './erc1155/erc1155.service';
     ImportLogService,
     AirdropService,
     Erc1155Service,
+    Erc721Service,
 
     Web3Provider,
     ImmutableProvider,
