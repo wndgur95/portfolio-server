@@ -29,6 +29,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { JWT_OPTIONS } from '@libs/common/constants/jwt.constants';
 import { Erc1155Service } from '../../batch/src/erc1155/erc1155.service';
 import { Erc1155Controller } from '../../batch/src/erc1155/erc1155.controller';
+import { Erc721Controller } from '../../batch/src/erc721/erc721.controller';
+import { Erc721Service } from '../../batch/src/erc721/erc721.service';
 
 @Module({
   imports: [
@@ -54,12 +56,14 @@ import { Erc1155Controller } from '../../batch/src/erc1155/erc1155.controller';
     ImportLogController,
     AirdropController,
     Erc1155Controller,
+    Erc721Controller,
   ],
   providers: [
     BatchService,
     ImportLogService,
     AirdropService,
     Erc1155Service,
+    Erc721Service,
 
     Web3Provider,
     ImmutableProvider,

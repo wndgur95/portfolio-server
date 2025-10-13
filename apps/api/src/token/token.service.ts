@@ -57,7 +57,7 @@ export class TokenService {
     }
   }
 
-  getShapeMetadata(shape: Shape, form: any): object {
+  getShapeMetadata(shape: Shape, form: any): ShapeMetadataDto {
     const shapeData = this.dataShapeTokenRepository.findById(shape.shapeId);
 
     const attributesDto = form.attributes.map((it) => {
@@ -70,7 +70,7 @@ export class TokenService {
     return ShapeMetadataDto.of(form, shape, shapeData, attributesDto);
   }
 
-  getNumberMetadata(tokenId: number, form: any): object {
+  getNumberMetadata(tokenId: number, form: any): NumberMetadataDto {
     const numberData = this.dataNumberTokenRepository.findById(tokenId);
 
     const attributesDto = form.attributes.map((it) => {
@@ -83,7 +83,7 @@ export class TokenService {
     return NumberMetadataDto.of(form, numberData, attributesDto);
   }
 
-  getGachaMetadata(tokenId: number, form: any): object {
+  getGachaMetadata(tokenId: number, form: any): GachaMetadataDto {
     const gachaData = this.dataGachaTokenRepository.findById(tokenId);
     const tierRatioSum = gachaData.TIER_RATIO.sum();
 

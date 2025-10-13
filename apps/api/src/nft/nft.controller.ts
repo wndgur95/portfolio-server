@@ -4,6 +4,8 @@ import { JwtWeb3Guard } from '../auth/guard/jwt-web3.guard';
 import { ApiResponseEntity } from '@libs/common/decorator/api-response-entity';
 import { ResponseEntity } from '@libs/common/network/response-entity';
 import { NftService } from './nft.service';
+import { GetGachaTokenOutDto } from './dto/get-gacha-token-out.dto';
+import { GetNumberTokenOutDto } from './dto/get-number-token-out.dto';
 
 @ApiTags('nft')
 @Controller('api/nft')
@@ -26,19 +28,19 @@ export class NftController {
   @ApiResponseEntity({
     summary: '가챠 토큰 정보 받기',
   })
-  async getGachaToken(): Promise<ResponseEntity<object[]>> {
-    const gachaTokenInfo = await this.nftService.getGachaTokens();
+  async getGachaToken(): Promise<ResponseEntity<GetGachaTokenOutDto>> {
+    const getGachaTokenOutDto = await this.nftService.getGachaTokens();
 
-    return ResponseEntity.ok().body(gachaTokenInfo);
+    return ResponseEntity.ok().body(getGachaTokenOutDto);
   }
 
   @Get('number')
   @ApiResponseEntity({
     summary: '숫자 토큰 정보 받기',
   })
-  async getNumberToken(): Promise<ResponseEntity<object[]>> {
-    const numberTokenInfo = await this.nftService.getNumberTokens();
+  async getNumberToken(): Promise<ResponseEntity<GetNumberTokenOutDto>> {
+    const getNumberTokenOutDto = await this.nftService.getNumberTokens();
 
-    return ResponseEntity.ok().body(numberTokenInfo);
+    return ResponseEntity.ok().body(getNumberTokenOutDto);
   }
 }

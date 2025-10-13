@@ -8,6 +8,9 @@ import { DataNumberTokenRepository } from '@libs/dao/static/data-number-token/da
 import { ShapesRepository } from '@libs/dao/contract/shapes/interfaces/shapes-repository.interface';
 import { ShapesDbRepository } from '@libs/dao/contract/shapes/repositories/shapes-db.repository';
 import { ContextProvider } from '@libs/common/provider/context.provider';
+import { Web3Provider } from '@libs/common/provider/web3/web3.provider';
+import { GetGachaTokenOutDto } from './dto/get-gacha-token-out.dto';
+import { GetNumberTokenOutDto } from './dto/get-number-token-out.dto';
 
 @Injectable()
 export class NftService {
@@ -20,6 +23,7 @@ export class NftService {
     private readonly dataGachaTokenRepository: DataGachaTokenRepository,
     private readonly dataNumberTokenRepository: DataNumberTokenRepository,
     private readonly tokenService: TokenService,
+    private readonly web3: Web3Provider,
   ) {}
 
   async getShapeTokens(): Promise<object[]> {
@@ -36,7 +40,9 @@ export class NftService {
     });
   }
 
-  async getGachaTokens(): Promise<object[]> {
+  async getGachaTokens(): Promise<GetGachaTokenOutDto> {
+    const contract = await this.web3.repository.findByName(TOKEN_NAME.GACHA);
+
     const metadataForm = await this.metadataFormsRepository.findByName(
       TOKEN_NAME.GACHA,
     );
@@ -44,12 +50,17 @@ export class NftService {
 
     const tokenIds = this.dataGachaTokenRepository.values().map((it) => it.ID);
 
-    return tokenIds.map((tokenId) => {
-      return this.tokenService.getGachaMetadata(tokenId, form);
+    return GetGachaTokenOutDto.of({
+      address: contract.address,
+      gachaTokens: tokenIds.map((tokenId) => {
+        return this.tokenService.getGachaMetadata(tokenId, form);
+      }),
     });
   }
 
-  async getNumberTokens(): Promise<object[]> {
+  async getNumberTokens(): Promise<GetNumberTokenOutDto> {
+    const contract = await this.web3.repository.findByName(TOKEN_NAME.NUMBER);
+
     const metadataForm = await this.metadataFormsRepository.findByName(
       TOKEN_NAME.NUMBER,
     );
@@ -57,8 +68,11 @@ export class NftService {
 
     const tokenIds = this.dataNumberTokenRepository.values().map((it) => it.ID);
 
-    return tokenIds.map((tokenId) => {
-      return this.tokenService.getNumberMetadata(tokenId, form);
+    return GetNumberTokenOutDto.of({
+      address: contract.address,
+      numberTokens: tokenIds.map((tokenId) => {
+        return this.tokenService.getNumberMetadata(tokenId, form);
+      }),
     });
   }
 }
