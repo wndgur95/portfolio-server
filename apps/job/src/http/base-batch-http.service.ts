@@ -27,6 +27,22 @@ export abstract class BaseBatchHttpService extends BaseHttpService {
       'web3-network': _network,
     } as unknown as AxiosRequestHeaders;
   }
+  async eventLogImport(
+    toBlockNumber: number,
+    topicType: number,
+  ): Promise<void> {
+    const response: BaseBatchResponse = await this.post({
+      method: 'batch/import-log/topic-type',
+      data: {
+        toBlockNumber: toBlockNumber,
+        topicType: topicType,
+      },
+    });
+
+    BaseBatchHttpService.checkCode(response.code, response?.message);
+    return response.data;
+  }
+
   async airdropCoin(): Promise<void> {
     const response: BaseBatchResponse = await this.post({
       method: 'batch/airdrop/coin',
@@ -50,6 +66,16 @@ export abstract class BaseBatchHttpService extends BaseHttpService {
   async erc1155SetMerkleTree(): Promise<void> {
     const response: BaseBatchResponse = await this.post({
       method: 'batch/erc1155/merkle-tree/set',
+      data: {},
+    });
+
+    BaseBatchHttpService.checkCode(response.code, response?.message);
+    return response.data;
+  }
+
+  async claimErc1155(): Promise<void> {
+    const response: BaseBatchResponse = await this.post({
+      method: 'batch/erc1155/claim',
       data: {},
     });
 

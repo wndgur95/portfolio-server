@@ -13,6 +13,8 @@ import { CoinAirdropQueueProvider } from '@libs/dao/batch/common/coin-airdrop-qu
 import { Erc1155ClaimProvider } from '@libs/dao/batch/common/erc1155-claim/erc1155-claim.provider';
 import { Erc1155ProofInDto } from './dto/erc1155-proof-in.dto';
 import { Erc1155ClaimOutDto } from './dto/erc1155-claim-out.dto';
+import { keccak256 } from 'ethers/lib/utils';
+import { MerkleTree } from 'merkletreejs';
 
 @Injectable()
 export class AirdropService {
@@ -73,15 +75,34 @@ export class AirdropService {
         CLAIM_STATUS.SET_MERKLE_TREE,
       );
 
-    return claims.map((claim) => {
-      return Erc1155ClaimOutDto.of({
-        id: claim.id,
-        claimType: claim.claimType,
-        tokenId: claim.tokenId,
-        amount: claim.amount,
-        round: claim.treeRound,
-        proof: JSON.parse(claim.treeProof),
-      });
-    });
+    return Promise.all(
+      claims.map(async (claim) => {
+        return Erc1155ClaimOutDto.of({
+          id: claim.id,
+          claimType: claim.claimType,
+          tokenId: claim.tokenId,
+          amount: claim.amount,
+          round: claim.treeRound,
+          proof: await this._getProof(claim.treeRound, claim.treeProof),
+        });
+      }),
+    );
+  }
+
+  private async _getProof(
+    treeRound: number,
+    treeProof: string,
+  ): Promise<string[]> {
+    const missionProofs =
+      await this.erc1155ClaimProvider.repository.findByTreeRound(treeRound);
+    const hashFn = (data: string): string => keccak256(data).slice(2);
+    const treeLeaves = new MerkleTree(
+      missionProofs.map((it) => {
+        return it.treeProof;
+      }),
+      hashFn,
+      { sort: true },
+    );
+    return treeLeaves.getHexProof(treeProof);
   }
 }

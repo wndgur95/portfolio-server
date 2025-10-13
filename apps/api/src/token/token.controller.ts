@@ -3,6 +3,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { ApiResponseEntity } from '@libs/common/decorator/api-response-entity';
 import { TokenService } from './token.service';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+import { TOKEN_NAME } from '@libs/common/constants/contract.contstants';
 
 @ApiTags('token')
 @Controller('api/token')
@@ -17,7 +18,10 @@ export class TokenController {
   @Throttle({ default: { limit: 2, ttl: 1000 } }) // 1초에 2번 허용
   @ApiResponseEntity({ summary: 'shapes metadata-form json' })
   async getShapeMetadata(@Param('tokenId') tokenId: number): Promise<unknown> {
-    return await this.tokenService.getShapeMetadata(Number(tokenId));
+    return await this.tokenService.getMetadataByToken(
+      TOKEN_NAME.SHAPE,
+      Number(tokenId),
+    );
   }
 
   @Head('number/:tokenId')
@@ -28,7 +32,10 @@ export class TokenController {
   @Throttle({ default: { limit: 2, ttl: 1000 } }) // 1초에 2번 허용
   @ApiResponseEntity({ summary: 'number metadata-form json' })
   async getNumberMetadata(@Param('tokenId') tokenId: number): Promise<unknown> {
-    return await this.tokenService.getNumberMetadata(Number(tokenId));
+    return await this.tokenService.getMetadataByToken(
+      TOKEN_NAME.NUMBER,
+      Number(tokenId),
+    );
   }
 
   @Head('gacha/:tokenId')
@@ -39,6 +46,9 @@ export class TokenController {
   @Throttle({ default: { limit: 2, ttl: 1000 } }) // 1초에 2번 허용
   @ApiResponseEntity({ summary: 'gacha metadata-form json' })
   async getGachaMetadata(@Param('tokenId') tokenId: number): Promise<unknown> {
-    return await this.tokenService.getGachaMetadata(Number(tokenId));
+    return await this.tokenService.getMetadataByToken(
+      TOKEN_NAME.GACHA,
+      Number(tokenId),
+    );
   }
 }

@@ -45,12 +45,13 @@ export class GachaMetadataDto {
     gachaData: DataGachaToken,
     attributes: GachaAttributeDto[],
   ): GachaMetadataDto {
+    const tokenId = Number(gachaData.ID);
     return new GachaMetadataDto({
-      id: Number(gachaData.ID),
+      id: tokenId,
       name: gachaData.NAME,
       description: `${gachaData.NAME} 로 뽑기를 해보세요.`,
       gachaType: S_TOKEN_GACHA_TYPE[gachaData.GACHA_TYPE],
-      image: '',
+      image: `${process.env.TOKEN_IMAGE_UTL}/gacha/${tokenId}`,
       attributes: attributes,
       external_url: form.external_url,
     });

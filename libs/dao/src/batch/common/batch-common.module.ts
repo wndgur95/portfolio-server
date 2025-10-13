@@ -8,6 +8,7 @@ import { ShapeOwnerLogProvider } from '@libs/dao/batch/common/shape-owner-log/sh
 import { CoinAirdropQueueProvider } from '@libs/dao/batch/common/coin-airdrop-queue/coin-airdrop-queue.provider';
 import { Erc1155ClaimMerkleTreeProvider } from '@libs/dao/batch/common/erc1155-claim-merkle-tree/erc1155-claim-merkle-tree.provider';
 import { Erc1155ClaimProvider } from '@libs/dao/batch/common/erc1155-claim/erc1155-claim.provider';
+import { ClaimErc1155LogProvider } from '@libs/dao/batch/common/claim-erc1155-log/claim-erc1155-log.provider';
 
 @Module({
   imports: [PortfolioBatchModule],
@@ -20,6 +21,7 @@ import { Erc1155ClaimProvider } from '@libs/dao/batch/common/erc1155-claim/erc11
     CoinAirdropQueueProvider,
     Erc1155ClaimMerkleTreeProvider,
     Erc1155ClaimProvider,
+    ClaimErc1155LogProvider,
   ],
   exports: [
     PortfolioBatchModule,
@@ -31,6 +33,7 @@ import { Erc1155ClaimProvider } from '@libs/dao/batch/common/erc1155-claim/erc11
     CoinAirdropQueueProvider,
     Erc1155ClaimMerkleTreeProvider,
     Erc1155ClaimProvider,
+    ClaimErc1155LogProvider,
   ],
 })
 export class BatchCommonModule {}

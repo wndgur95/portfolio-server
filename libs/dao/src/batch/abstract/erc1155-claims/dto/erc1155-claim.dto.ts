@@ -22,7 +22,7 @@ export abstract class Erc1155ClaimDto<T> extends ExcludeBaseTimeDto<T> {
   treeRound: number;
 
   @ApiProperty()
-  treeProof: string[];
+  treeProof: string;
 
   @ApiProperty()
   status: ClaimStatus;

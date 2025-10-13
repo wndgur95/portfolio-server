@@ -4,6 +4,10 @@ export interface AirdropCoinEvent {
   message: string;
 }
 
+export interface Erc1155Claim {
+  message: string;
+}
+
 export interface JoinRoomDto {
   roomId: string;
   username?: string;

@@ -53,6 +53,10 @@ import BatchDatabaseConfig from '@libs/dao/config/batch/batch-database.config';
 import { BatchCommonModule } from '@libs/dao/batch/common/batch-common.module';
 import { AirdropController } from '../../api/src/airdrop/airdrop.controller';
 import { AirdropService } from '../../api/src/airdrop/airdrop.service';
+import { ContractController } from '../../api/src/contract/contract.controller';
+import { ContractService } from '../../api/src/contract/contract.service';
+import { NftService } from '../../api/src/nft/nft.service';
+import { NftController } from '../../api/src/nft/nft.controller';
 
 @Module({
   imports: [
@@ -111,6 +115,8 @@ import { AirdropService } from '../../api/src/airdrop/airdrop.service';
     ErrorController,
     TokenController,
     AirdropController,
+    ContractController,
+    NftController,
   ],
   providers: [
     ApiService,
@@ -119,6 +125,8 @@ import { AirdropService } from '../../api/src/airdrop/airdrop.service';
     StaticService,
     ErrorService,
     AirdropService,
+    ContractService,
+    NftService,
 
     ValidateProvider,
 

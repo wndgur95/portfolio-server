@@ -14,9 +14,9 @@ import { ImportLogService } from './import-log.service';
 export class ImportLogController {
   constructor(private readonly importLogService: ImportLogService) {}
 
-  @Post('/topic-type')
+  @Post('topic-type')
   @ApiResponseEntity({ summary: 'import log' })
-  async dspImportEventLog(
+  async importEventLog(
     @Body() importLogTypeInDto: ImportLogTypeInDto,
   ): Promise<ResponseEntity<unknown>> {
     await this.importLogService.importLog(

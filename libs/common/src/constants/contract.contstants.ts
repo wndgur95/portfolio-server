@@ -97,6 +97,7 @@ export const TOPIC_TYPE = {
   OWNER: 1,
   SHAPE: 2,
   REAL_OWNER: 3,
+  CLAIM_ERC1155: 4,
 };
 export type TopicType =
   (typeof TOPIC_TYPE)[keyof typeof TOPIC_TYPE];

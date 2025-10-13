@@ -35,19 +35,7 @@ export abstract class Erc1155ClaimEntity
   @Index('IDX_TREE_ROUND')
   treeRound: number;
 
-  @Column({
-    comment: '트리 경로',
-    type: 'text',
-    transformer: {
-      to(value: string[]): string {
-        return JSON.stringify(value);
-      },
-      from(value: string): string[] {
-        return JSON.parse(value);
-      },
-    },
-    nullable: true,
-  })
+  @Column({ comment: '트리 경로', nullable: true, })
   treeProof: string;
 
   @Column({ default: CLAIM_STATUS.REGISTERED })
