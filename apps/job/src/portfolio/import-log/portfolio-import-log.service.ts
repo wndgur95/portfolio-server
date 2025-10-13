@@ -49,6 +49,13 @@ export class PortfolioImportLogService extends ImportLogService {
       () => this.importShapeLog(),
     );
 
+    /** topic 에 해당하는 이벤트 로그 적재 TOPIC_TYPE.CLAIM_ERC1155 job 생성*/
+    this.createJob(
+      `ImportClaimErc1155`,
+      process.env.NODE_ENV == 'prod' ? '*/3 * * * * *' : '*/3 * * * * *',
+      () => this.importClaimErc1155(),
+    );
+
     /** topic 에 해당하는 이벤트 로그 적재 TOPIC_TYPE.REAL_OWNER job 생성*/
     // this.createJob(
     //   `ImportShapeRealOwnerLog`,
@@ -63,6 +70,7 @@ export class PortfolioImportLogService extends ImportLogService {
       this.getImportMintLogProcess(),
       this.getImportTransferOwnerLogProcess(),
       this.getImportShapeLogProcess(),
+      this.getImportClaimErc1155LogProcess(),
       // this.getImportShapeRealOwnerLogProcess(),
     ];
   }

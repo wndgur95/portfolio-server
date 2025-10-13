@@ -35,13 +35,29 @@ export class TokenService {
     private readonly dataGachaTokenRepository: DataGachaTokenRepository,
   ) {}
 
-  async getShapeMetadata(tokenId: number): Promise<unknown> {
-    const metadataForm = await this.metadataFormsRepository.findByName(
-      TOKEN_NAME.SHAPE,
-    );
+  async getMetadataByToken(
+    tokenName: string,
+    tokenId: number,
+  ): Promise<unknown> {
+    const metadataForm =
+      await this.metadataFormsRepository.findByName(tokenName);
     const form = JSON.parse(metadataForm.metadataForm);
+    switch (tokenName) {
+      case TOKEN_NAME.SHAPE: {
+        const shape = await this.shapesRepository.findByTokenId(tokenId);
 
-    const shape = await this.shapesRepository.findByTokenId(tokenId);
+        return this.getShapeMetadata(shape, form);
+      }
+      case TOKEN_NAME.GACHA: {
+        return this.getGachaMetadata(tokenId, form);
+      }
+      case TOKEN_NAME.NUMBER: {
+        return this.getNumberMetadata(tokenId, form);
+      }
+    }
+  }
+
+  getShapeMetadata(shape: Shape, form: any): object {
     const shapeData = this.dataShapeTokenRepository.findById(shape.shapeId);
 
     const attributesDto = form.attributes.map((it) => {
@@ -54,12 +70,7 @@ export class TokenService {
     return ShapeMetadataDto.of(form, shape, shapeData, attributesDto);
   }
 
-  async getNumberMetadata(tokenId: number): Promise<unknown> {
-    const metadataForm = await this.metadataFormsRepository.findByName(
-      TOKEN_NAME.NUMBER,
-    );
-    const form = JSON.parse(metadataForm.metadataForm);
-
+  getNumberMetadata(tokenId: number, form: any): object {
     const numberData = this.dataNumberTokenRepository.findById(tokenId);
 
     const attributesDto = form.attributes.map((it) => {
@@ -72,12 +83,7 @@ export class TokenService {
     return NumberMetadataDto.of(form, numberData, attributesDto);
   }
 
-  async getGachaMetadata(tokenId: number): Promise<unknown> {
-    const metadataForm = await this.metadataFormsRepository.findByName(
-      TOKEN_NAME.GACHA,
-    );
-    const form = JSON.parse(metadataForm.metadataForm);
-
+  getGachaMetadata(tokenId: number, form: any): object {
     const gachaData = this.dataGachaTokenRepository.findById(tokenId);
     const tierRatioSum = gachaData.TIER_RATIO.sum();
 

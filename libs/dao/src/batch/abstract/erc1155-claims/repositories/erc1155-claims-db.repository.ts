@@ -1,6 +1,6 @@
 import { AbstractRepository } from '@libs/common/databases/typeorm/abstract.repository';
 import { Erc1155ClaimsRepository } from '@libs/dao/batch/abstract/erc1155-claims/interfaces/erc1155-claims-repository.interface';
-import { ClaimStatus, LogStatus } from '@libs/common/constants/contract.contstants';
+import { ClaimStatus } from '@libs/common/constants/contract.contstants';
 import { UpdateResult } from 'typeorm/query-builder/result/UpdateResult';
 
 export abstract class Erc1155ClaimsDbRepository<T>
@@ -30,7 +30,7 @@ export abstract class Erc1155ClaimsDbRepository<T>
   }
 
   async updateStatus(
-    treeRounds: number[],
+    ids: number[],
     status: ClaimStatus,
   ): Promise<UpdateResult> {
     return await this.queryBuilder
@@ -38,8 +38,8 @@ export abstract class Erc1155ClaimsDbRepository<T>
       .set({
         status: status,
       })
-      .where(`${this.alias}.tree_round IN (:...treeRounds)`, {
-        treeRounds: treeRounds,
+      .where(`${this.alias}.id IN (:...ids)`, {
+        ids: ids,
       })
       .execute();
   }
@@ -48,5 +48,17 @@ export abstract class Erc1155ClaimsDbRepository<T>
     return await this.queryBuilder
       .where(`${this.alias}.status=:status`, { status })
       .getCount();
+  }
+
+  async findByTreeRound(treeRound: number): Promise<T[]> {
+    return await this.queryBuilder
+      .where(`${this.alias}.treeRound=:treeRound`, { treeRound })
+      .getMany();
+  }
+
+  async findByTreeRounds(treeRounds: number[]): Promise<T[]> {
+    return await this.queryBuilder
+      .where(`${this.alias}.treeRound IN (:...treeRounds)`, { treeRounds })
+      .getMany();
   }
 }

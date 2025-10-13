@@ -1,0 +1,44 @@
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { JwtWeb3Guard } from '../auth/guard/jwt-web3.guard';
+import { ApiResponseEntity } from '@libs/common/decorator/api-response-entity';
+import { ResponseEntity } from '@libs/common/network/response-entity';
+import { NftService } from './nft.service';
+
+@ApiTags('nft')
+@Controller('api/nft')
+@ApiBearerAuth('jwt-web3')
+@UseGuards(JwtWeb3Guard)
+export class NftController {
+  constructor(private readonly nftService: NftService) {}
+
+  @Get('shape')
+  @ApiResponseEntity({
+    summary: '가챠 토큰 정보 받기',
+  })
+  async getShapeToken(): Promise<ResponseEntity<object[]>> {
+    const shapeTokenInfo = await this.nftService.getShapeTokens();
+
+    return ResponseEntity.ok().body(shapeTokenInfo);
+  }
+
+  @Get('gacha')
+  @ApiResponseEntity({
+    summary: '가챠 토큰 정보 받기',
+  })
+  async getGachaToken(): Promise<ResponseEntity<object[]>> {
+    const gachaTokenInfo = await this.nftService.getGachaTokens();
+
+    return ResponseEntity.ok().body(gachaTokenInfo);
+  }
+
+  @Get('number')
+  @ApiResponseEntity({
+    summary: '숫자 토큰 정보 받기',
+  })
+  async getNumberToken(): Promise<ResponseEntity<object[]>> {
+    const numberTokenInfo = await this.nftService.getNumberTokens();
+
+    return ResponseEntity.ok().body(numberTokenInfo);
+  }
+}

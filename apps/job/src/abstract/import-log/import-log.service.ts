@@ -13,6 +13,7 @@ export abstract class ImportLogService extends BaseJobService {
   protected importTransferOwnerLogDto = BaseJobDto.of(false, new Date());
   protected importShapeLogDto = BaseJobDto.of(false, new Date());
   protected importShapeRealOwnerLogDto = BaseJobDto.of(false, new Date());
+  protected importClaimErc1155LogDto = BaseJobDto.of(false, new Date());
 
   protected _web3;
 
@@ -96,6 +97,14 @@ export abstract class ImportLogService extends BaseJobService {
     );
   }
 
+  async importClaimErc1155(): Promise<void> {
+    if (!this.syncing) return;
+    await this.startJob(
+      this.importClaimErc1155LogDto,
+      this.eventLogImport(TOPIC_TYPE.CLAIM_ERC1155),
+    );
+  }
+
   async importShapeRealOwnerLog(): Promise<void> {
     if (!this.syncing) return;
     await this.startJob(
@@ -119,9 +128,15 @@ export abstract class ImportLogService extends BaseJobService {
       this.importTransferOwnerLogDto,
     );
   }
+
   getImportShapeLogProcess(): JobProcessInfoDto {
     return this.getJob('도형 컨텐츠 로그 수집', this.importShapeLogDto);
   }
+
+  getImportClaimErc1155LogProcess(): JobProcessInfoDto {
+    return this.getJob('erc1155 에어드랍 완료 로그 수집', this.importClaimErc1155LogDto);
+  }
+
   getImportShapeRealOwnerLogProcess(): JobProcessInfoDto {
     return this.getJob(
       '도형 진짜 주인 변경 로그 수집',

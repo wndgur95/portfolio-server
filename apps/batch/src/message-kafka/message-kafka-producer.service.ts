@@ -5,6 +5,7 @@ import {
   AirdropMessageEvent,
   BATCH_MESSAGE_TYPE,
   BatchMessageEvent,
+  Erc1155ClaimMessageEvent,
   MessageEventType,
 } from './interfaces/message-kafka-event.interface';
 
@@ -30,6 +31,25 @@ export class MessageKafkaProducerService {
       'batch-message-events',
       event,
       BATCH_MESSAGE_TYPE.AIRDROP_COIN,
+    );
+  }
+
+  async publishErc1155Claim(
+    socketIds: string[],
+    message: string,
+  ): Promise<Erc1155ClaimMessageEvent> {
+    const event: Erc1155ClaimMessageEvent = {
+      type: BATCH_MESSAGE_TYPE.ERC1155_CLAIM,
+      socketIds,
+      message,
+      timestamp: new Date().toISOString(),
+      serverId: process.env.SERVER_ID,
+    };
+
+    return await this.publishEvent(
+      'batch-message-events',
+      event,
+      BATCH_MESSAGE_TYPE.ERC1155_CLAIM,
     );
   }
 

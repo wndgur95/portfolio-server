@@ -42,4 +42,6 @@ export interface BaseWeb3ContractRepositoryInterface<Entity>
   deleteById(id: number): Promise<DeleteResult>;
 
   deleteByIdIn(ids: number[]): Promise<DeleteResult>;
+
+  findByName(name: string): Promise<Entity>;
 }

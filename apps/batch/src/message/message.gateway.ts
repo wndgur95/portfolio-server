@@ -33,7 +33,7 @@ export class MessageGateway
     try {
       const payload = await this.messageService.validateAndSetupClient(client);
       if (!payload?.address) {
-        client.emit('error', { message: '유효하지 않은 인증 토큰입니다.' });
+        client.emit('logout', { message: '유효하지 않은 인증 토큰입니다.' });
         client.disconnect();
         return;
       }

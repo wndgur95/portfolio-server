@@ -28,4 +28,12 @@ export class Erc1155Controller {
 
     return ResponseEntity.ok().build();
   }
+
+  @Post('claim')
+  @ApiResponseEntity({ summary: '에어드랍 완료' })
+  async claim(): Promise<ResponseEntity<unknown>> {
+    await this.erc1155Service.claimErc1155();
+
+    return ResponseEntity.ok().build();
+  }
 }

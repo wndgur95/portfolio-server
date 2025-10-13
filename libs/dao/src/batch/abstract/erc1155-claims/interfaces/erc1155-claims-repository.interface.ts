@@ -7,8 +7,10 @@ export interface Erc1155ClaimsRepository<T>
   findByAddress(address: string): Promise<T[]>;
   findByAddressAndStatus(address: string, status: ClaimStatus): Promise<T[]>;
   findByStatus(status: ClaimStatus): Promise<T[]>;
-  updateStatus(treeRounds: number[], status: number): Promise<UpdateResult>;
+  updateStatus(ids: number[], status: number): Promise<UpdateResult>;
   countByStatus(status: ClaimStatus): Promise<number>;
+  findByTreeRound(treeRound: number): Promise<T[]>;
+  findByTreeRounds(treeRounds: number[]): Promise<T[]>;
 }
 
 export const Erc1155ClaimsRepository = Symbol('Erc1155ClaimsRepository');

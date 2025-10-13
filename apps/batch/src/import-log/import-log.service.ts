@@ -10,6 +10,7 @@ import { PortfolioTopic } from '@libs/dao/batch/portfolio/topics/interfaces/port
 import {
   getLogData,
   getUserAddress,
+  HEX_STANDARD,
   LOG_USER_ADDRESS_STANDARD,
 } from '@libs/common/utils/web3.utils';
 import {
@@ -20,6 +21,8 @@ import {
 import { ShapeMintLogProvider } from '@libs/dao/batch/common/shape-mint-log/shape-mint-log.provider';
 import { ShapeEventLogProvider } from '@libs/dao/batch/common/shape-event-log/shape-event-log.provider';
 import { ShapeOwnerLogProvider } from '@libs/dao/batch/common/shape-owner-log/shape-owner-log.provider';
+import { ClaimErc1155LogEntity } from '@libs/dao/batch/abstract/claim-erc1155-logs/entities/claim-erc1155-log.entity';
+import { ClaimErc1155LogProvider } from '@libs/dao/batch/common/claim-erc1155-log/claim-erc1155-log.provider';
 
 @Injectable()
 export class ImportLogService {
@@ -31,6 +34,7 @@ export class ImportLogService {
     private readonly shapeMintLogProvider: ShapeMintLogProvider,
     private readonly shapeEventLogProvider: ShapeEventLogProvider,
     private readonly shapeOwnerLogProvider: ShapeOwnerLogProvider,
+    private readonly claimErc1155LogProvider: ClaimErc1155LogProvider,
   ) {}
 
   /**
@@ -47,9 +51,8 @@ export class ImportLogService {
     const contractAddressAndContractEntityMap = {};
     const contractAddressAndTopicEntitiesMap = {};
     const topics = await this.topic.repository.findTopicsByTopicType(topicType);
-    const blockNumber = await this.blockNumber.repository.findByTopicType(
-      topicType,
-    );
+    const blockNumber =
+      await this.blockNumber.repository.findByTopicType(topicType);
     if (
       !topics.length ||
       !blockNumber ||
@@ -93,7 +96,7 @@ export class ImportLogService {
         blockNumberAndEventLogs[topicType] = [];
       }
       blockNumberAndEventLogs[topicType].push(
-        this.getEntity(topicType, {
+        this._getEntity(topicType, {
           address: getUserAddress(log),
           secondTopic:
             log.topics[LOG_USER_ADDRESS_STANDARD.second_topic_index] ?? '',
@@ -144,11 +147,16 @@ export class ImportLogService {
             await this.shapeEventLogProvider.repository.insert(value);
           }
           break;
+        case TOPIC_TYPE.CLAIM_ERC1155:
+        {
+          await this.claimErc1155LogProvider.repository.insert(value);
+        }
+          break;
       }
     }
   }
 
-  private getEntity(topicType: TopicType, eventLog): any {
+  private _getEntity(topicType: TopicType, eventLog: any): any {
     switch (topicType) {
       case TOPIC_TYPE.MINT: {
         return this.shapeMintLogProvider.createEntity(eventLog);
@@ -159,6 +167,21 @@ export class ImportLogService {
       case TOPIC_TYPE.SHAPE: {
         return this.shapeEventLogProvider.createEntity(eventLog);
       }
+      case TOPIC_TYPE.CLAIM_ERC1155: {
+        return this._getClaimErc1155Entity(eventLog);
+      }
     }
+  }
+
+  private _getClaimErc1155Entity(eventLog: any): ClaimErc1155LogEntity {
+    return this.claimErc1155LogProvider.createEntity({
+      address: eventLog.address,
+      claimId: parseInt(eventLog.secondTopic, HEX_STANDARD.hex),
+      tokenId: parseInt(eventLog.thirdTopic, HEX_STANDARD.hex),
+      contractId: eventLog.contractId,
+      topicId: eventLog.topicId,
+      blockNumber: eventLog.blockNumber,
+      data: eventLog.data,
+    });
   }
 }

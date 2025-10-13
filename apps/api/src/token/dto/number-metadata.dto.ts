@@ -41,11 +41,12 @@ export class NumberMetadataDto {
     numberData: DataNumberToken,
     attributes: NumberAttributeDto[],
   ): NumberMetadataDto {
+    const tokenId = Number(numberData.ID);
     return new NumberMetadataDto({
       id: Number(numberData.ID),
       name: numberData.NAME,
       description: `${numberData.NAME} 로 도형을 성장 시켜보세요.`,
-      image: '',
+      image: `${process.env.TOKEN_IMAGE_UTL}/number/${tokenId}`,
       attributes: attributes,
       external_url: form.external_url,
     });

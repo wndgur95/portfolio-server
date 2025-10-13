@@ -5,7 +5,7 @@ import { JwtPayload } from '@libs/common/constants/jwt.constants';
 import { Server, Socket } from 'socket.io';
 import {
   UserSessionData,
-  AirdropCoinEvent,
+  AirdropCoinEvent, Erc1155Claim,
 } from './interfaces/message.interface';
 import { EnvProvider } from '@libs/common/provider/env.provider';
 import { BatchMessageRepository } from '@libs/dao/redis/batch-message/batch-message.repository';
@@ -123,7 +123,6 @@ export class MessageService {
   async producerAirdropCoin(userIds: number[], message: string): Promise<void> {
     const users = await this._getUsers(userIds);
 
-    // Kafka 에 룸 입장 이벤트 발행
     const event = await this.messageKafkaProducerService.publishAirdropCoin(
       users.map((it) => it.socketId),
       message,
@@ -143,7 +142,6 @@ export class MessageService {
       return;
     }
 
-    // 룸의 다른 사용자들에게 입장 알림
     const airdropCoinEvent: AirdropCoinEvent = {
       message: message,
     };
@@ -151,6 +149,41 @@ export class MessageService {
     this.server
       .to(socketIds)
       .emit(BATCH_MESSAGE_TYPE.AIRDROP_COIN, airdropCoinEvent);
+  }
+
+  /**
+   * erc1155 에어드랍
+   */
+  async producerErc1155Claim(userIds: number[], message: string): Promise<void> {
+    const users = await this._getUsers(userIds);
+
+    // Kafka 에 룸 입장 이벤트 발행
+    const event = await this.messageKafkaProducerService.publishErc1155Claim(
+      users.map((it) => it.socketId),
+      message,
+    );
+
+    if (!EnvProvider.isProd()) await this.consumerErc1155Claim(event);
+  }
+
+  /**
+   * erc1155 에어드랍
+   */
+  async consumerErc1155Claim(event: AirdropMessageEvent): Promise<void> {
+    const { socketIds, message } = event;
+
+    if (!this.server) {
+      this.logger.error('Server instance not available for join broadcasting');
+      return;
+    }
+
+    const erc1155Claim: Erc1155Claim = {
+      message: message,
+    };
+
+    this.server
+      .to(socketIds)
+      .emit(BATCH_MESSAGE_TYPE.ERC1155_CLAIM, erc1155Claim);
   }
 
   /**

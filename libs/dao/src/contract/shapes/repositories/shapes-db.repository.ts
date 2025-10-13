@@ -9,6 +9,18 @@ export class ShapesDbRepository
   extends AbstractRepository<ShapeEntity>
   implements ShapesRepository
 {
+  async findByUserId(userId: number): Promise<Shape[]> {
+    return await this.queryBuilder
+      .where(`${this.alias}.userId = :userId`, { userId: userId })
+      .getMany();
+  }
+
+  async findByAddress(address: string): Promise<Shape[]> {
+    return await this.queryBuilder
+      .where(`${this.alias}.owner = :owner`, { owner: address })
+      .getMany();
+  }
+
   async findByTokenId(tokenId: number): Promise<Shape> {
     return await this.queryBuilder
       .where(`${this.alias}.tokenId = :tokenId`, { tokenId: tokenId })
