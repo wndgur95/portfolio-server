@@ -4,6 +4,10 @@ import {
   BaseTimeEntity,
 } from '@libs/common/databases/typeorm/abstract.entity';
 import { Shape } from '@libs/dao/contract/shapes/interfaces/shape.interface';
+import {
+  SHAPE_STATUS,
+  ShapeStatus,
+} from '@libs/common/constants/contract.contstants';
 
 @Entity('shape')
 @BaseTimeEntity()
@@ -13,7 +17,7 @@ export class ShapeEntity extends AbstractEntity implements Shape {
   owner: string;
 
   @Index()
-  @Column()
+  @Column({ default: 0 })
   userId: number;
 
   @Index()
@@ -26,7 +30,7 @@ export class ShapeEntity extends AbstractEntity implements Shape {
   @Column({ comment: '도형 레벨', default: 0, unsigned: true })
   level: number;
 
-  @Column({ comment: '도형 색', default: '', })
+  @Column({ comment: '도형 색', default: '' })
   color: string;
 
   @Index()
@@ -37,6 +41,6 @@ export class ShapeEntity extends AbstractEntity implements Shape {
   })
   tokenId: number;
 
-  @Column({ comment: '상태값' })
-  status: string;
+  @Column({ comment: '상태값', default: SHAPE_STATUS.DECENTRALIZATION })
+  status: ShapeStatus;
 }

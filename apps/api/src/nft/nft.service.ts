@@ -11,6 +11,7 @@ import { ContextProvider } from '@libs/common/provider/context.provider';
 import { Web3Provider } from '@libs/common/provider/web3/web3.provider';
 import { GetGachaTokenOutDto } from './dto/get-gacha-token-out.dto';
 import { GetNumberTokenOutDto } from './dto/get-number-token-out.dto';
+import { GetShapeTokenOutDto } from './dto/get-shape-token-out.dto';
 
 @Injectable()
 export class NftService {
@@ -26,17 +27,21 @@ export class NftService {
     private readonly web3: Web3Provider,
   ) {}
 
-  async getShapeTokens(): Promise<object[]> {
-    const { userId } = ContextProvider.getJwt();
+  async getShapeTokens(): Promise<GetShapeTokenOutDto> {
+    const { address } = ContextProvider.getJwt();
+    const contract = await this.web3.repository.findByName(TOKEN_NAME.SHAPE);
     const metadataForm = await this.metadataFormsRepository.findByName(
       TOKEN_NAME.SHAPE,
     );
     const form = JSON.parse(metadataForm.metadataForm);
 
-    const shapes = await this.shapesRepository.findByUserId(userId);
+    const shapes = await this.shapesRepository.findByAddress(address);
 
-    return shapes.map((shape) => {
-      return this.tokenService.getShapeMetadata(shape, form);
+    return GetShapeTokenOutDto.of({
+      address: contract.address,
+      shapeTokens: shapes.map((shape) => {
+        return this.tokenService.getShapeMetadata(shape, form);
+      }),
     });
   }
 

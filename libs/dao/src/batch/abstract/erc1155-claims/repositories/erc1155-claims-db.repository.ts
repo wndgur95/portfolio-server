@@ -30,7 +30,7 @@ export abstract class Erc1155ClaimsDbRepository<T>
   }
 
   async updateStatus(
-    ids: number[],
+    treeRounds: number[],
     status: ClaimStatus,
   ): Promise<UpdateResult> {
     return await this.queryBuilder
@@ -38,8 +38,8 @@ export abstract class Erc1155ClaimsDbRepository<T>
       .set({
         status: status,
       })
-      .where(`${this.alias}.id IN (:...ids)`, {
-        ids: ids,
+      .where(`${this.alias}.tree_round IN (:...treeRounds)`, {
+        treeRounds: treeRounds,
       })
       .execute();
   }

@@ -80,6 +80,8 @@ export const CONTRACT = {
 
   ERC1155_CLAIM_PROOF: 'Erc1155ClaimProof',
   ERC1155_CLAIM: 'Erc1155Claim',
+
+  RANDOM_SEED: 'RandomSeed',
 };
 
 export const CONTRACT_BY_NETWORK = {

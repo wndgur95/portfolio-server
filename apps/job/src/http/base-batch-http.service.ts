@@ -27,6 +27,7 @@ export abstract class BaseBatchHttpService extends BaseHttpService {
       'web3-network': _network,
     } as unknown as AxiosRequestHeaders;
   }
+
   async eventLogImport(
     toBlockNumber: number,
     topicType: number,
@@ -76,6 +77,36 @@ export abstract class BaseBatchHttpService extends BaseHttpService {
   async claimErc1155(): Promise<void> {
     const response: BaseBatchResponse = await this.post({
       method: 'batch/erc1155/claim',
+      data: {},
+    });
+
+    BaseBatchHttpService.checkCode(response.code, response?.message);
+    return response.data;
+  }
+
+  async transferOwner(): Promise<void> {
+    const response: BaseBatchResponse = await this.post({
+      method: 'batch/erc721/transfer/owner',
+      data: {},
+    });
+
+    BaseBatchHttpService.checkCode(response.code, response?.message);
+    return response.data;
+  }
+
+  async gachaShape(): Promise<void> {
+    const response: BaseBatchResponse = await this.post({
+      method: 'batch/erc721/shape/gacha',
+      data: {},
+    });
+
+    BaseBatchHttpService.checkCode(response.code, response?.message);
+    return response.data;
+  }
+
+  async setShapeId(): Promise<void> {
+    const response: BaseBatchResponse = await this.post({
+      method: 'batch/erc721/shape/set-shape-id',
       data: {},
     });
 

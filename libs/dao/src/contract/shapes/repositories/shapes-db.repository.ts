@@ -26,4 +26,10 @@ export class ShapesDbRepository
       .where(`${this.alias}.tokenId = :tokenId`, { tokenId: tokenId })
       .getOne();
   }
+
+  async findByTokenIds(tokenIds: number[]): Promise<Shape[]> {
+    return await this.queryBuilder
+      .where(`${this.alias}.tokenId IN (:...tokenIds)`, { tokenIds: tokenIds })
+      .getMany();
+  }
 }

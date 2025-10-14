@@ -6,6 +6,7 @@ import { ResponseEntity } from '@libs/common/network/response-entity';
 import { NftService } from './nft.service';
 import { GetGachaTokenOutDto } from './dto/get-gacha-token-out.dto';
 import { GetNumberTokenOutDto } from './dto/get-number-token-out.dto';
+import { GetShapeTokenOutDto } from './dto/get-shape-token-out.dto';
 
 @ApiTags('nft')
 @Controller('api/nft')
@@ -16,12 +17,12 @@ export class NftController {
 
   @Get('shape')
   @ApiResponseEntity({
-    summary: '가챠 토큰 정보 받기',
+    summary: '도형 토큰 정보 받기',
   })
-  async getShapeToken(): Promise<ResponseEntity<object[]>> {
-    const shapeTokenInfo = await this.nftService.getShapeTokens();
+  async getShapeToken(): Promise<ResponseEntity<GetShapeTokenOutDto>> {
+    const getShapeTokenOutDto = await this.nftService.getShapeTokens();
 
-    return ResponseEntity.ok().body(shapeTokenInfo);
+    return ResponseEntity.ok().body(getShapeTokenOutDto);
   }
 
   @Get('gacha')

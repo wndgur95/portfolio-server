@@ -19,6 +19,7 @@ import { DataSourceOptions } from 'typeorm';
 import { BatchCommonModule } from '@libs/dao/batch/common/batch-common.module';
 import { ClsModule } from 'nestjs-cls';
 import { PortfolioErc1155Service } from './portfolio/erc1155/portfolio-erc1155.service';
+import { PortfolioErc721Service } from './portfolio/erc721/portfolio-erc721.service';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { PortfolioErc1155Service } from './portfolio/erc1155/portfolio-erc1155.s
     PortfolioImportLogService,
     PortfolioAirdropService,
     PortfolioErc1155Service,
+    PortfolioErc721Service,
   ],
 })
 export class JobModule {}

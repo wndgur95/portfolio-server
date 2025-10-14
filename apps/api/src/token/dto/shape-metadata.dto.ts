@@ -53,12 +53,13 @@ export class ShapeMetadataDto {
     shapeData: DataShapeToken,
     attributes: ShapeAttributeDto[],
   ): ShapeMetadataDto {
+    const shapeId = Number(shapeData.ID);
     return new ShapeMetadataDto({
       id: Number(shape.tokenId),
       name: shapeData.NAME,
       description: `${shapeData.NAME} 도형을 성장 시켜보세요.`,
       shape_id: shape.shapeId,
-      image: '',
+      image: `${process.env.TOKEN_IMAGE_UTL}/shape/${shapeId}?color=${shape.color}`,
       status: shape.status,
       attributes: attributes,
       external_url: form.external_url,

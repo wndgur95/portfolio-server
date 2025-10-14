@@ -63,6 +63,8 @@ export const INTERNAL_ERROR_CODE_DESC = {
 
   [e.TODAY_ALREADY_RECEIVED_AIRDROP]: '오늘은 이미 에어드랍을 받았습니다.',
 
+  [e.TOPIC_NOT_FOUND]: '토픽이 없습니다 %P',
+
   // Group
   [e.GROUP_MEMBER_ROLE_INVALID]: '해당 기능은 %P만 가능한 기능입니다.',
 

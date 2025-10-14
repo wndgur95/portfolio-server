@@ -55,6 +55,7 @@ export class MessageGateway
       await this.messageService.producerDisconnectUser(client.id);
 
       await this.messageService.disconnectUser(client);
+      this.logger.log(`연결 해제: ${client.id}:`);
     } catch (error) {
       this.logger.error(
         `연결 해제 처리 실패 - 클라이언트 ${client.id}:`,
