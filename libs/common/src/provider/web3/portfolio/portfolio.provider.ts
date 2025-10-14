@@ -36,6 +36,9 @@ export class PortfolioProvider extends BaseWeb3Provider {
       case CONTRACT.ERC1155_CLAIM_PROOF: {
         return this.config.get<string>('ERC115_MANAGER_PRIVATE_KEY');
       }
+      case CONTRACT.SHAPE_GACHA_MACHINE: {
+        return this.config.get<string>('SHAPE_MINTER_PRIVATE_KEY');
+      }
       default: {
         return this.config.get<string>('CONTRACT_DEPLOYER_PRIVATE_KEY');
       }
