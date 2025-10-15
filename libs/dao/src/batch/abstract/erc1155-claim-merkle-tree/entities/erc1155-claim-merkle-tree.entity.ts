@@ -3,7 +3,7 @@ import {
   BaseTimeEntity,
 } from '@libs/common/databases/typeorm/abstract.entity';
 import { Erc1155ClaimMerkleTree } from '@libs/dao/batch/abstract/erc1155-claim-merkle-tree/interfaces/erc1155-claim-merkle-tree.interface';
-import { Column } from 'typeorm';
+import { Column, Index } from 'typeorm';
 import {
   LOG_STATUS,
   LogStatus,
@@ -20,6 +20,7 @@ export abstract class Erc1155ClaimMerkleTreeEntity
   @Column({ nullable: false })
   treeRoot: string;
 
+  @Index()
   @Column({ default: LOG_STATUS.REGISTERED })
   status: LogStatus;
 

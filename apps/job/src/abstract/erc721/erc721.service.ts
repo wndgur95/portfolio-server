@@ -3,6 +3,10 @@ import { SchedulerRegistry } from '@nestjs/schedule';
 import { BaseJobService } from '../../default/base-job.service';
 import { BaseJobDto } from '../../default/base-job.dto';
 import { JobProcessInfoDto } from '../../dto/job-process-info.dto';
+import { LOG_STATUS } from '@libs/common/constants/contract.contstants';
+import { ShapeOwnerLogProvider } from '@libs/dao/batch/common/shape-owner-log/shape-owner-log.provider';
+import { ShapeMintLogProvider } from '@libs/dao/batch/common/shape-mint-log/shape-mint-log.provider';
+import { ShapeEventLogProvider } from '@libs/dao/batch/common/shape-event-log/shape-event-log.provider';
 
 @Injectable()
 export abstract class Erc721Service extends BaseJobService {
@@ -15,19 +19,23 @@ export abstract class Erc721Service extends BaseJobService {
     protected readonly network: string,
     protected readonly processProvider,
     protected readonly batchHttpProvider,
+
+    protected readonly shapeOwnerLogProvider: ShapeOwnerLogProvider,
+    protected readonly shapeMintLogProvider: ShapeMintLogProvider,
+    protected readonly shapeEventLogProvider: ShapeEventLogProvider,
   ) {
     super(schedulerRegistry, network, processProvider);
   }
 
   protected async shapeTransferOwner(): Promise<void> {
     await this.startJob(this.shapeTransferOwnerDto, [
-      (): Promise<void> => this.batchHttpProvider.transferOwner(),
+      (): Promise<void> => this._shapeTransferOwner(),
     ]);
   }
 
   protected async shapeGacha(): Promise<void> {
     await this.startJob(this.shapeGachaDto, [
-      (): Promise<void> => this.batchHttpProvider.gachaShape(),
+      (): Promise<void> => this._shapeGacha(),
     ]);
   }
 
@@ -35,6 +43,33 @@ export abstract class Erc721Service extends BaseJobService {
     await this.startJob(this.setShapeIdDto, [
       (): Promise<void> => this.batchHttpProvider.setShapeId(),
     ]);
+  }
+
+  private async _shapeTransferOwner(): Promise<void> {
+    const logCount =
+      await this.shapeOwnerLogProvider.repository.countByStatus(
+        LOG_STATUS.REGISTERED,
+      );
+    if (!logCount) return;
+    await this.batchHttpProvider.transferOwner();
+  }
+
+  private async _shapeGacha(): Promise<void> {
+    const logCount =
+      await this.shapeMintLogProvider.repository.countByStatus(
+        LOG_STATUS.REGISTERED,
+      );
+    if (!logCount) return;
+    await this.batchHttpProvider.gachaShape();
+  }
+
+  private async _setShapeId(): Promise<void> {
+    const logCount =
+      await this.shapeEventLogProvider.repository.countByStatus(
+        LOG_STATUS.REGISTERED,
+      );
+    if (!logCount) return;
+    await this.batchHttpProvider.setShapeId();
   }
 
   // ---------------------------------------------------------------------
