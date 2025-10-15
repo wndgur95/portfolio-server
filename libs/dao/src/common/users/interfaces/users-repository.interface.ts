@@ -24,6 +24,8 @@ export interface UsersRepository
   ): Promise<[User[], number]>;
 
   findByAddress(address: string): Promise<User>;
+
+  findByAddresses(addresses: string[]): Promise<User[]>;
 }
 
 export const UsersRepository = Symbol('UsersRepository');

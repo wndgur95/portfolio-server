@@ -9,7 +9,11 @@ import {
 export class MessageProvider {
   constructor(private readonly messageService: MessageService) {}
 
-  sendMessage(type: BatchMessageType, userIds: number[], message: string): void {
+  sendMessage(
+    type: BatchMessageType,
+    userIds: number[],
+    message: string,
+  ): void {
     switch (type) {
       case BATCH_MESSAGE_TYPE.AIRDROP_COIN: {
         this.messageService.producerAirdropCoin(userIds, message).then();
@@ -17,6 +21,11 @@ export class MessageProvider {
       }
       case BATCH_MESSAGE_TYPE.ERC1155_CLAIM: {
         this.messageService.producerErc1155Claim(userIds, message).then();
+        break;
+      }
+      case BATCH_MESSAGE_TYPE.GACHA: {
+        this.messageService.producerGacha(userIds, message).then();
+        break;
       }
     }
   }

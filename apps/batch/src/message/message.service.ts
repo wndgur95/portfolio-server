@@ -5,7 +5,9 @@ import { JwtPayload } from '@libs/common/constants/jwt.constants';
 import { Server, Socket } from 'socket.io';
 import {
   UserSessionData,
-  AirdropCoinEvent, Erc1155Claim,
+  AirdropCoinEvent,
+  GachaEvent,
+  Erc1155ClaimEvent,
 } from './interfaces/message.interface';
 import { EnvProvider } from '@libs/common/provider/env.provider';
 import { BatchMessageRepository } from '@libs/dao/redis/batch-message/batch-message.repository';
@@ -14,6 +16,7 @@ import {
   AirdropMessageEvent,
   BATCH_MESSAGE_TYPE,
   BatchMessageEvent,
+  GachaMessageEvent,
 } from '../message-kafka/interfaces/message-kafka-event.interface';
 
 @Injectable()
@@ -154,7 +157,10 @@ export class MessageService {
   /**
    * erc1155 에어드랍
    */
-  async producerErc1155Claim(userIds: number[], message: string): Promise<void> {
+  async producerErc1155Claim(
+    userIds: number[],
+    message: string,
+  ): Promise<void> {
     const users = await this._getUsers(userIds);
 
     // Kafka 에 룸 입장 이벤트 발행
@@ -177,13 +183,45 @@ export class MessageService {
       return;
     }
 
-    const erc1155Claim: Erc1155Claim = {
+    const erc1155ClaimEvent: Erc1155ClaimEvent = {
       message: message,
     };
 
     this.server
       .to(socketIds)
-      .emit(BATCH_MESSAGE_TYPE.ERC1155_CLAIM, erc1155Claim);
+      .emit(BATCH_MESSAGE_TYPE.ERC1155_CLAIM, erc1155ClaimEvent);
+  }
+
+  /**
+   * gacha
+   */
+  async producerGacha(userIds: number[], message: string): Promise<void> {
+    const users = await this._getUsers(userIds);
+
+    const event = await this.messageKafkaProducerService.publishGacha(
+      users.map((it) => it.socketId),
+      message,
+    );
+
+    if (!EnvProvider.isProd()) await this.consumerGacha(event);
+  }
+
+  /**
+   * gacha
+   */
+  async consumerGacha(event: GachaMessageEvent): Promise<void> {
+    const { socketIds, message } = event;
+
+    if (!this.server) {
+      this.logger.error('Server instance not available for join broadcasting');
+      return;
+    }
+
+    const gachaEvent: GachaEvent = {
+      message: message,
+    };
+
+    this.server.to(socketIds).emit(BATCH_MESSAGE_TYPE.GACHA, gachaEvent);
   }
 
   /**

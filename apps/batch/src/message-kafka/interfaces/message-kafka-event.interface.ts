@@ -3,6 +3,7 @@ export const BATCH_MESSAGE_TYPE = {
   USER_DISCONNECT: 'user-disconnect',
   AIRDROP_COIN: 'airdrop-coin',
   ERC1155_CLAIM: 'erc1155-claim',
+  GACHA: 'gacha',
 };
 export type BatchMessageType =
   (typeof BATCH_MESSAGE_TYPE)[keyof typeof BATCH_MESSAGE_TYPE];
@@ -30,6 +31,14 @@ export interface AirdropMessageEvent {
 }
 
 export interface Erc1155ClaimMessageEvent {
+  type: BatchMessageType;
+  socketIds?: string[];
+  message?: string;
+  timestamp: string;
+  serverId: string;
+}
+
+export interface GachaMessageEvent {
   type: BatchMessageType;
   socketIds?: string[];
   message?: string;

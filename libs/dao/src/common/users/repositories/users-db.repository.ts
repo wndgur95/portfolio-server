@@ -3,13 +3,14 @@ import { AbstractRepository } from '@libs/common/databases/typeorm/abstract.repo
 import { UserEntity } from '@libs/dao/common/users/entities/user.entity';
 import { UsersRepository } from '@libs/dao/common/users/interfaces/users-repository.interface';
 import { FilterValue } from '@libs/common/dto/pagination-in.dto';
+import { User } from '@libs/dao/common/users/interfaces/user.interface';
 
 @EntityRepository(UserEntity)
 export class UsersDbRepository
   extends AbstractRepository<UserEntity>
   implements UsersRepository
 {
-  async findByEmail(email: string): Promise<UserEntity> {
+  async findByEmail(email: string): Promise<User> {
     return await this.queryBuilder
       .where(`${this.alias}.email = :email`, { email })
       .getOne();
@@ -31,7 +32,7 @@ export class UsersDbRepository
     take: number,
     skip: number,
     orderBy: 'ASC' | 'DESC',
-  ): Promise<[UserEntity[], number]> {
+  ): Promise<[User[], number]> {
     return await this.queryBuilder
       .take(take)
       .skip(skip)
@@ -44,7 +45,7 @@ export class UsersDbRepository
     skip: number,
     orderBy: 'ASC' | 'DESC',
     filter?: Record<string, FilterValue>,
-  ): Promise<[UserEntity[], number]> {
+  ): Promise<[User[], number]> {
     const qb = this.queryBuilder;
 
     return await this.applyDynamicFilters(qb, filter)
@@ -54,9 +55,15 @@ export class UsersDbRepository
       .getManyAndCount();
   }
 
-  async findByAddress(address: string): Promise<UserEntity> {
+  async findByAddress(address: string): Promise<User> {
     return await this.queryBuilder
       .where(`${this.alias}.address = :address`, { address })
       .getOne();
+  }
+
+  async findByAddresses(addresses: string[]): Promise<User[]> {
+    return await this.queryBuilder
+      .where(`${this.alias}.address IN (:...addresses)`, { addresses })
+      .getMany();
   }
 }

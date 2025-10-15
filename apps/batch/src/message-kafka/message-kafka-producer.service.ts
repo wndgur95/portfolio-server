@@ -5,7 +5,7 @@ import {
   AirdropMessageEvent,
   BATCH_MESSAGE_TYPE,
   BatchMessageEvent,
-  Erc1155ClaimMessageEvent,
+  Erc1155ClaimMessageEvent, GachaMessageEvent,
   MessageEventType,
 } from './interfaces/message-kafka-event.interface';
 
@@ -50,6 +50,25 @@ export class MessageKafkaProducerService {
       'batch-message-events',
       event,
       BATCH_MESSAGE_TYPE.ERC1155_CLAIM,
+    );
+  }
+
+  async publishGacha(
+    socketIds: string[],
+    message: string,
+  ): Promise<GachaMessageEvent> {
+    const event: GachaMessageEvent = {
+      type: BATCH_MESSAGE_TYPE.GACHA,
+      socketIds,
+      message,
+      timestamp: new Date().toISOString(),
+      serverId: process.env.SERVER_ID,
+    };
+
+    return await this.publishEvent(
+      'batch-message-events',
+      event,
+      BATCH_MESSAGE_TYPE.GACHA,
     );
   }
 
