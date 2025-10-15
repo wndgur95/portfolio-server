@@ -1,12 +1,12 @@
-import { Module, ValidationPipe } from '@nestjs/common';
+import { Module, OnModuleDestroy, ValidationPipe } from '@nestjs/common';
 import { GameServerConfig } from './config/game.server.config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { ClsModule } from 'nestjs-cls';
 import CommonDatabaseConfig from '@libs/dao/config/common/common-database.config';
-import { TypeOrmExModule } from '@libs/common/databases/typeorm/typeorm-ex.module';
+import { getDataSource, TypeOrmExModule } from '@libs/common/databases/typeorm/typeorm-ex.module';
 import { DataSourceOptions } from 'typeorm';
-import { getGameServerTypeOrmOptions } from '@libs/dao/config/game/game-database-config.util';
+import { getGameServerTypeOrmOptions, getGameShardDatabases } from '@libs/dao/config/game/game-database-config.util';
 import GameDatabaseConfig from '@libs/dao/config/game/game-database.config';
 import { RedisModule } from '@libs/dao/redis/redis.module';
 import { CommonModule } from '@libs/dao/common/common.module';
@@ -51,6 +51,8 @@ import { CharacterProvider } from '@libs/common/provider/contents/character.prov
 import { LogServerProvider } from '@libs/common/http/log-server.provider';
 import { MongoLogInterceptor } from '@libs/common/interceptor/mongo-log.interceptor';
 import { HttpModule } from '@nestjs/axios';
+import { DB_NAME } from '@libs/common/constants/database.constants';
+import { RedisFactory } from '@libs/common/databases/redis/redis.factory';
 
 @Module({
   imports: [
@@ -62,6 +64,7 @@ import { HttpModule } from '@nestjs/axios';
     }),
 
     ClsModule.forRoot({ global: true, middleware: { mount: true } }),
+
     ...[CommonDatabaseConfig, ArenaDatabaseConfig].map((it) => {
       return TypeOrmExModule.forRootAsync({
         name: it().name,
@@ -147,4 +150,40 @@ import { HttpModule } from '@nestjs/axios';
     //DataProvider----
   ],
 })
-export class GameModule {}
+export class GameModule implements OnModuleDestroy {
+  async onModuleDestroy(): Promise<void> {
+    await Promise.all([this._clearDataSource(), this._clearRedis()]);
+  }
+
+  private async _clearDataSource(): Promise<void> {
+    await Promise.all(
+      [...Object.values(DB_NAME), ...getGameShardDatabases]
+        .filter((database) => getDataSource(database))
+        .map((it) => getDataSource(it)),
+    );
+  }
+
+  private async _clearRedis(): Promise<void> {
+    await Promise.all(
+      RedisFactory.getAllRedisClient().map((it) => it.quit()),
+    );
+  }
+}
+
+
+export const commonDatabaseConfigs = [
+  CommonDatabaseConfig,
+  ArenaDatabaseConfig,
+].reduce((acc, conf) => {
+  // 같은 물리 데이터 베이스이면 entities 를 합친다.(connection 숫자 감소를 위해)
+  const config = conf();
+  const find = acc.find((c) => c.name === config.name);
+
+  if (find && Array.isArray(config.entities)) {
+    find.entities = [...find.entities, ...config.entities];
+  } else {
+    acc.push(config);
+  }
+
+  return acc;
+}, []);

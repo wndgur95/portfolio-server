@@ -1,11 +1,4 @@
-import {
-  Column,
-  Entity,
-  Index,
-  JoinColumn,
-  OneToMany,
-  Relation,
-} from 'typeorm';
+import { Column, Entity, Index, OneToMany, Relation } from 'typeorm';
 import {
   AbstractEntity,
   BaseTimeEntity,

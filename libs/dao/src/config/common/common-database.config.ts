@@ -1,5 +1,5 @@
 import { registerAs } from '@nestjs/config';
-import baseDatabaseConfig from '@libs/dao/config/base-database.config';
+import baseDatabaseConfig, { getEntities } from '@libs/dao/config/base-database.config';
 
 export default registerAs('common-database', () => ({
   ...baseDatabaseConfig(),
@@ -12,6 +12,6 @@ export default registerAs('common-database', () => ({
   synchronize:
     process.env.COMMON_DB_SYNCHRONIZE &&
     JSON.parse(process.env.COMMON_DB_SYNCHRONIZE),
-  entities: ['dist/libs/dao/src/common/**/*.entity.!(js.map){,+(ts,js)}'],
+  entities: getEntities(process.env.COMMON_DB_NAME),
   // logging: ['query']
 }));

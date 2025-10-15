@@ -11,6 +11,8 @@ import { ServerErrorException } from '@libs/common/exception/server-error.except
 import { INTERNAL_ERROR_CODE } from '@libs/common/constants/internal-error-code.constants';
 import { AbstractRepositoryInterface } from '@libs/common/databases/typeorm/abstract-repository.interface';
 import { FilterValue } from '@libs/common/dto/pagination-in.dto';
+import { ClassConstructor } from 'class-transformer';
+import { getCustomRepository } from '@libs/common/databases/typeorm/typeorm-ex.module';
 
 export abstract class AbstractRepository<Entity>
   extends Repository<Entity>
@@ -179,5 +181,9 @@ export abstract class AbstractRepository<Entity>
       });
     }
     return qb;
+  }
+
+  static instance<T>(this: ClassConstructor<T>, database: string): T {
+    return getCustomRepository(this, database);
   }
 }

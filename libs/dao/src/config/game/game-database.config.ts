@@ -1,5 +1,5 @@
 import { registerAs } from '@nestjs/config';
-import baseDatabaseConfig from '@libs/dao/config/base-database.config';
+import baseDatabaseConfig, { getEntities } from '@libs/dao/config/base-database.config';
 
 export default registerAs('game-database', () => ({
   100: {
@@ -13,7 +13,7 @@ export default registerAs('game-database', () => ({
     synchronize:
       process.env.GAME00_DB_SYNCHRONIZE &&
       JSON.parse(process.env.GAME00_DB_SYNCHRONIZE),
-    entities: ['dist/libs/dao/src/game/**/*.entity.!(js.map){,+(ts,js)}'],
+    entities: getEntities('game'),
   },
   101: {
     ...baseDatabaseConfig(),
@@ -26,7 +26,7 @@ export default registerAs('game-database', () => ({
     synchronize:
       process.env.GAME01_DB_SYNCHRONIZE &&
       JSON.parse(process.env.GAME01_DB_SYNCHRONIZE),
-    entities: ['dist/libs/dao/src/game/**/*.entity.!(js.map){,+(ts,js)}'],
+    entities: getEntities('game'),
   },
   // 102: {
   //   ...baseDatabaseConfig(),

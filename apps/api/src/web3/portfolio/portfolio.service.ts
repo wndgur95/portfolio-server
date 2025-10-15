@@ -1,4 +1,4 @@
-import { INTERNAL_ERROR_CODE, InternalErrorCode } from '@libs/common/constants/internal-error-code.constants';
+import { INTERNAL_ERROR_CODE } from '@libs/common/constants/internal-error-code.constants';
 import {
   Injectable,
   InternalServerErrorException,

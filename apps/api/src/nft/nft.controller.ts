@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtWeb3Guard } from '../auth/guard/jwt-web3.guard';
 import { ApiResponseEntity } from '@libs/common/decorator/api-response-entity';

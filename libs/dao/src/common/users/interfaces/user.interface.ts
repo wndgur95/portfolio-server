@@ -13,5 +13,5 @@ export interface User extends Domain {
   refreshToken?: string;
 
   hashPassword(): Promise<void>;
-  checkPassword(password: string): Promise<boolean>;
+  checkPassword(password: string): Promise<void>;
 }

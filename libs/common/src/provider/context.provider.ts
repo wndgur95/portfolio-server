@@ -8,17 +8,22 @@ import { Session } from '@libs/dao/redis/session/session.entity';
 import { MongoLogs } from '@libs/dao/mongo/mongo-log/dto/mongo-log.dto';
 import { CommonUserInfoDto } from '@libs/common/dto/common-user-info.dto';
 import { NETWORK } from '@libs/common/constants/web3.constants';
+import { EnvProvider } from '@libs/common/provider/env.provider';
 
 // test debugging 용
 export const context = {};
 
 export class ContextProvider {
   static get<T>(key: string): T {
-    return ClsServiceManager.getClsService().get(key);
+    return EnvProvider.isTest()
+      ? context[key]
+      : ClsServiceManager.getClsService().get(key);
   }
 
   static set<T>(key: string, value: T): void {
-    ClsServiceManager.getClsService().set(key, value);
+    EnvProvider.isTest()
+      ? (context[key] = value)
+      : ClsServiceManager.getClsService().set(key, value);
   }
 
   static getSession(check = true): Session {
@@ -87,6 +92,11 @@ export class ContextProvider {
   }
 
   static setUserInfo(userInfo: JwtPayload | Session): void {
+    if (!userInfo) {
+      ContextProvider.set('user-info', userInfo);
+      return;
+    }
+
     const commonUserInfo = {
       userId: userInfo.userId,
       gameDbId: userInfo.gameDbId,

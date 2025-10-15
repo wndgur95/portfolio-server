@@ -27,6 +27,7 @@ export class ImmutableProvider extends BaseWeb3Provider {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected getPrivateKey(contractName: string, type?: number): string {
     switch (contractName) {
       default: {

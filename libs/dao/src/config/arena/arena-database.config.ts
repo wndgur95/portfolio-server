@@ -1,5 +1,5 @@
 import { registerAs } from '@nestjs/config';
-import baseDatabaseConfig from '@libs/dao/config/base-database.config';
+import baseDatabaseConfig, { getEntities } from '@libs/dao/config/base-database.config';
 
 export default registerAs('arena-database', () => ({
   ...baseDatabaseConfig(),
@@ -12,6 +12,6 @@ export default registerAs('arena-database', () => ({
   synchronize:
     process.env.ARENA_DB_SYNCHRONIZE &&
     JSON.parse(process.env.ARENA_DB_SYNCHRONIZE),
-  entities: ['dist/libs/dao/src/arena/**/*.entity.!(js.map){,+(ts,js)}'],
+  entities: getEntities(process.env.ARENA_DB_NAME),
   // logging: ['query']
 }));

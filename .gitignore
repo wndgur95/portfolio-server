@@ -41,6 +41,7 @@ lerna-debug.log*
 .env.production.local
 .env.local
 .*.test.env
+.*.jest.env
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache

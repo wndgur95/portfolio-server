@@ -1,5 +1,5 @@
 import { registerAs } from '@nestjs/config';
-import baseDatabaseConfig from '@libs/dao/config/base-database.config';
+import baseDatabaseConfig, { getEntities } from '@libs/dao/config/base-database.config';
 
 export default registerAs('batch-database', () => ({
   ...baseDatabaseConfig(),
@@ -12,6 +12,6 @@ export default registerAs('batch-database', () => ({
   synchronize:
     process.env.BATCH_DB_SYNCHRONIZE &&
     JSON.parse(process.env.BATCH_DB_SYNCHRONIZE),
-  entities: ['dist/libs/dao/src/batch/**/*.entity.!(js.map){,+(ts,js)}'],
+  entities: getEntities(process.env.BATCH_DB_NAME),
   // logging: ['query']
 }));

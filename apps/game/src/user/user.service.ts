@@ -69,7 +69,6 @@ export class UserService {
     const user = await this.usersRepository.findByEmail(email);
 
     if (!user) return null;
-
     if (user.platformId == null && user.address == null) {
       await user.checkPassword(password);
     } else if (user.platformId != null || user.address != null) {
