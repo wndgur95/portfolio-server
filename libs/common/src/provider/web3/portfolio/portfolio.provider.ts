@@ -28,6 +28,7 @@ export class PortfolioProvider extends BaseWeb3Provider {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected getPrivateKey(contractName: string, type?: number): string {
     switch (contractName) {
       case CONTRACT.ADMIN_AIRDROP_COIN: {

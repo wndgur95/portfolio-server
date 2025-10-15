@@ -34,6 +34,7 @@ export class UserEntity extends AbstractEntity implements User {
   address?: string;
 
   @Column({
+    type: 'varchar',
     default: USER_ROLES.GUEST,
   })
   roles: UserRoles;
@@ -62,10 +63,8 @@ export class UserEntity extends AbstractEntity implements User {
     }
   }
 
-  async checkPassword(password: string): Promise<boolean> {
-    try {
-      return await bcrypt.compare(password, this.password);
-    } catch (e) {
+  async checkPassword(password: string): Promise<void> {
+    if (!(await bcrypt.compare(password, this.password))) {
       throw new ServerErrorException(
         INTERNAL_ERROR_CODE.USER_MISMATCHED_PASSWORD,
       );

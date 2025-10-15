@@ -29,6 +29,7 @@ export class ImmutableService {
   async verifySignature(
     address: string,
     jwtToken: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     challenge: string,
   ): Promise<void> {
     // header, payload, signature
@@ -38,10 +39,9 @@ export class ImmutableService {
 
     const publicKey = await this.getSigningKey(header.kid);
     try {
-      const verify: ImmutableJwtPayload = jwt.verify(jwtToken, publicKey, {
+      jwt.verify(jwtToken, publicKey, {
         algorithms: ['RS256'],
-      }) as ImmutableJwtPayload;
-
+      });
     } catch (e) {
       Logger.error(e);
       throw new InternalServerErrorException(

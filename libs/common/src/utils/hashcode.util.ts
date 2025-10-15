@@ -5,7 +5,7 @@ export function generateAuthentication(): string {
   return Math.random().toString().substring(2, 8);
 }
 
-export function generateUsername(length = 8) {
+export function generateUsername(length = 8): string {
   const codes = [];
   for (let i = 0; i < 10; ++i) {
     codes.push(String.fromCharCode('0'.charCodeAt(0) + i));

@@ -1,5 +1,5 @@
 import { Body, Controller, Post, Put, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { AuthSignUserInDto } from './dto/auth-sign-user-in.dto';
 import { ResponseEntity } from '@libs/common/network/response-entity';

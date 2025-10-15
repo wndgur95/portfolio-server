@@ -1,4 +1,4 @@
-import { Column, Entity, Index } from 'typeorm';
+import { Column, Index } from 'typeorm';
 import { AbstractEntity, BaseTimeEntity } from '@libs/common/databases/typeorm/abstract.entity';
 import { Topic } from '@libs/dao/batch/abstract/topics/interfaces/topic.interface';
 

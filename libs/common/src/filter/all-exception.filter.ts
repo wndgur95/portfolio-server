@@ -57,6 +57,7 @@ export class AllExceptionFilter implements ExceptionFilter {
     const errorMessage = {
       request: request,
       session: undefined,
+      ...(exception.errorCode && { errorCode: exception.errorCode }),
       exception: isServerErrorException
         ? exception
         : // unknown error

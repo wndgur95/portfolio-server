@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# 1. ESLint 검사 (타입 체크 포함)
+echo "🔍 Running ESLint..."
+pnpm lint
+
+# 2. Jest 유닛 테스트 실행 (integration 테스트 제외)
+echo "🧪 Running Jest unit tests..."
+pnpm test

@@ -18,6 +18,10 @@ export class EnvProvider {
   }
 
   static isTest(): boolean {
-    return NODE_ENV === ENVIRONMENT.TEST;
+    return [ENVIRONMENT.TEST,  ENVIRONMENT.JEST].includes(NODE_ENV);
+  }
+
+  static isJest(): boolean {
+    return NODE_ENV === ENVIRONMENT.JEST;
   }
 }

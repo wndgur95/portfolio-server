@@ -3,7 +3,6 @@ import { ChattingKafkaService } from './chatting-kafka.service';
 import {
   CHAT_EVENT_TYPE,
   ChatEvent,
-  ChatEventType,
 } from './interfaces/chatting-kafka-event.interface';
 import { EnvProvider } from '@libs/common/provider/env.provider';
 

@@ -68,6 +68,7 @@ export class BattleController {
     summary: '솔로 랭킹',
   })
   async getMultiRanking(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @Body() getSoloRankingInDto: GetSoloRankingInDto,
   ): Promise<ResponseEntity<GetSoloRankingOutDto>> {
     return ResponseEntity.ok().body(GetSoloRankingOutDto.of({
