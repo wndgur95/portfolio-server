@@ -1,6 +1,6 @@
 import { AbstractRepository } from '@libs/common/databases/typeorm/abstract.repository';
 import { ShapeMintLogsRepository } from '@libs/dao/batch/abstract/shape-mint-logs/interfaces/shape-mint-logs-repository.interface';
-import { LOG_STATUS } from '@libs/common/constants/contract.contstants';
+import { LOG_STATUS, LogStatus } from '@libs/common/constants/contract.contstants';
 
 export abstract class ShapeMintLogsDbRepository<T>
   extends AbstractRepository<T>
@@ -133,5 +133,11 @@ export abstract class ShapeMintLogsDbRepository<T>
       .into(this.alias)
       .values(characterEventLog)
       .execute();
+  }
+
+  async countByStatus(status: LogStatus): Promise<number> {
+    return await this.queryBuilder
+      .where(`${this.alias}.status=:status`, { status })
+      .getCount();
   }
 }

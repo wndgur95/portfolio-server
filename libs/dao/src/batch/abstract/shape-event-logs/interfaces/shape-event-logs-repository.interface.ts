@@ -1,5 +1,6 @@
 import { AbstractRepositoryInterface } from '@libs/common/databases/typeorm/abstract-repository.interface';
 import { UpdateResult } from 'typeorm/query-builder/result/UpdateResult';
+import { LogStatus } from '@libs/common/constants/contract.contstants';
 
 export interface ShapeEventLogsRepository<T>
   extends AbstractRepositoryInterface<T> {
@@ -12,6 +13,7 @@ export interface ShapeEventLogsRepository<T>
     address: string,
   ): Promise<number>;
   updateStatus(ids: number[]): Promise<UpdateResult>;
+  countByStatus(status: LogStatus): Promise<number>;
 }
 
 export const ShapeEventLogsRepository = Symbol('ShapeEventLogsRepository');

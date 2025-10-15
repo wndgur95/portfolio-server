@@ -1,6 +1,6 @@
 import { AbstractRepository } from '@libs/common/databases/typeorm/abstract.repository';
 import { ShapeOwnerLogsRepository } from '@libs/dao/batch/abstract/shape-owner-logs/interfaces/shape-owner-logs-repository.interface';
-import { LOG_STATUS } from '@libs/common/constants/contract.contstants';
+import { LOG_STATUS, LogStatus } from '@libs/common/constants/contract.contstants';
 import { UpdateResult } from 'typeorm/query-builder/result/UpdateResult';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
@@ -30,5 +30,11 @@ export abstract class ShapeOwnerLogsDbRepository<T>
         ids: ids,
       })
       .execute();
+  }
+
+  async countByStatus(status: LogStatus): Promise<number> {
+    return await this.queryBuilder
+      .where(`${this.alias}.status=:status`, { status })
+      .getCount();
   }
 }
