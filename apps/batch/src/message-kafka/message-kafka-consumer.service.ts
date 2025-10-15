@@ -58,6 +58,12 @@ export class MessageKafkaConsumerService implements OnModuleInit {
         case BATCH_MESSAGE_TYPE.AIRDROP_COIN:
           await this.messageService.consumerAirdropCoin(event);
           break;
+        case BATCH_MESSAGE_TYPE.ERC1155_CLAIM:
+          await this.messageService.consumerErc1155Claim(event);
+          break;
+        case BATCH_MESSAGE_TYPE.GACHA:
+          await this.messageService.consumerGacha(event);
+          break;
         case BATCH_MESSAGE_TYPE.USER_DISCONNECT:
           await this.messageService.consumerDisconnectUser(event);
           break;
