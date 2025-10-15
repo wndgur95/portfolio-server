@@ -5,6 +5,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import ContractDatabaseConfig from '@libs/dao/config/contract/contract-database.config';
 import BatchDatabaseConfig from '@libs/dao/config/batch/batch-database.config';
+import CommonDatabaseConfig from '@libs/dao/config/common/common-database.config';
 
 const environment = process.env.NODE_ENV || 'test';
 
@@ -14,7 +15,7 @@ const environment = process.env.NODE_ENV || 'test';
       envFilePath: `./config/.batch.${environment}.env`,
       isGlobal: true,
       cache: true,
-      load: [ContractDatabaseConfig, BatchDatabaseConfig],
+      load: [CommonDatabaseConfig, ContractDatabaseConfig, BatchDatabaseConfig],
     }),
   ],
 })

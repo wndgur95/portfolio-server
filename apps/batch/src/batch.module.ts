@@ -31,22 +31,27 @@ import { Erc1155Controller } from './erc1155/erc1155.controller';
 import { Erc1155Service } from './erc1155/erc1155.service';
 import { Erc721Service } from './erc721/erc721.service';
 import { Erc721Controller } from './erc721/erc721.controller';
+import CommonDatabaseConfig from '@libs/dao/config/common/common-database.config';
+import { CommonModule } from '@libs/dao/common/common.module';
 
 @Module({
   imports: [
     BatchServerConfig,
     ClsModule.forRoot({ global: true, middleware: { mount: true } }),
-    ...[ContractDatabaseConfig, BatchDatabaseConfig].map((it) => {
-      return TypeOrmExModule.forRootAsync({
-        name: it().name,
-        inject: [it.KEY],
-        useFactory: async (config: DataSourceOptions) => config,
-      });
-    }),
+    ...[CommonDatabaseConfig, ContractDatabaseConfig, BatchDatabaseConfig].map(
+      (it) => {
+        return TypeOrmExModule.forRootAsync({
+          name: it().name,
+          inject: [it.KEY],
+          useFactory: async (config: DataSourceOptions) => config,
+        });
+      },
+    ),
 
     AuthModule,
     ContractModule,
     BatchCommonModule,
+    CommonModule,
   ],
   controllers: [
     BatchController,

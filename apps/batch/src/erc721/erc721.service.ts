@@ -28,12 +28,19 @@ import {
   ENVIRONMENT,
   NODE_ENV,
 } from '@libs/common/constants/environment.constants';
+import { BATCH_MESSAGE_TYPE } from '../message-kafka/interfaces/message-kafka-event.interface';
+import { MessageProvider } from '../message/message.provider';
+import { UsersDbRepository } from '@libs/dao/common/users/repositories/users-db.repository';
+import { UsersRepository } from '@libs/dao/common/users/interfaces/users-repository.interface';
 
 @Injectable()
 export class Erc721Service {
   constructor(
+    private readonly messageProvider: MessageProvider,
     @Inject(ShapesRepository)
     private readonly shapesRepository: ShapesDbRepository,
+    @Inject(UsersRepository)
+    private readonly usersRepository: UsersDbRepository,
 
     private readonly shapeOwnerLogProvider: ShapeOwnerLogProvider,
     private readonly shapeMintLogProvider: ShapeMintLogProvider,
@@ -241,6 +248,7 @@ export class Erc721Service {
 
     const shapes = [];
     const logIds = [];
+    const addresses = [];
     for (const currentLog of currentLogs) {
       const tokenId = parseInt(currentLog.secondTopic, HEX_STANDARD.hex);
       const shapeId = parseInt(currentLog.thirdTopic, HEX_STANDARD.hex);
@@ -253,10 +261,19 @@ export class Erc721Service {
         }),
       );
       logIds.push(currentLog.id);
+      addresses.push(currentLog.address);
     }
 
     await this.shapeEventLogProvider.repository.updateStatus(logIds);
     await this.shapesRepository.insert(shapes);
+
+    const users = await this.usersRepository.findByAddresses(addresses);
+
+    this.messageProvider.sendMessage(
+      BATCH_MESSAGE_TYPE.ERC1155_CLAIM,
+      [...new Set(users.map((it) => it.id))],
+      'shape 뽑기 완료했습니다.',
+    );
   }
 
   private _isRandomSeed(): boolean {

@@ -4,7 +4,11 @@ export interface AirdropCoinEvent {
   message: string;
 }
 
-export interface Erc1155Claim {
+export interface Erc1155ClaimEvent {
+  message: string;
+}
+
+export interface GachaEvent {
   message: string;
 }
 
