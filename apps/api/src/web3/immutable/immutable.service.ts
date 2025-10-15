@@ -6,7 +6,6 @@ import {
 import JwksClient from 'jwks-rsa';
 import jwt from 'jsonwebtoken';
 import { INTERNAL_ERROR_CODE } from '@libs/common/constants/internal-error-code.constants';
-import { ImmutableJwtPayload } from '@libs/common/constants/jwt.constants';
 
 @Injectable()
 export class ImmutableService {
