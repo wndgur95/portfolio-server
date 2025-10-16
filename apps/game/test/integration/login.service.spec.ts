@@ -37,6 +37,7 @@ describe('LoginService', () => {
         id: userId,
         nid: nid,
         gameDbId: 100,
+        platformId: 'test',
       }),
     );
   });
@@ -54,17 +55,6 @@ describe('LoginService', () => {
   });
 
   describe('login', () => {
-    it('정상 로그인 - 기존 유저', async () => {
-      const loginUser = await authService.register({
-        email: 'test@example.com',
-        password: 'Qwer1234!!',
-      });
-
-      const user = await usersRepository.findById(loginUser.id);
-
-      expect(loginUser.id).toEqual(user.id);
-    });
-
     it('비밀번호 형태가 아닐 때 에러', async () => {
       try {
         await authService.register({
@@ -77,6 +67,17 @@ describe('LoginService', () => {
           INTERNAL_ERROR_CODE.USER_MISMATCHED_PASSWORD,
         );
       }
+    });
+
+    it('정상 로그인 - 기존 유저', async () => {
+      const loginUser = await authService.register({
+        email: 'test@example.com',
+        password: 'Qwer1234!!',
+      });
+
+      const user = await usersRepository.findById(loginUser.id);
+
+      expect(loginUser.id).toEqual(user.id);
     });
   });
 });

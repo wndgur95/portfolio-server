@@ -21,6 +21,8 @@ const config: Config = {
   setupFilesAfterEnv: [
     '<rootDir>/jest.setup.ts', // 전역 폴리필 로드
   ],
+  forceExit: true, // 강제 종료 허용
+  detectOpenHandles: true, // 열린 핸들 감지
 };
 
 export default config;

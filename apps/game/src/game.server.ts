@@ -1,6 +1,10 @@
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { INestApplication, Logger } from '@nestjs/common';
 import { SWAGGER_CUSTOM_OPTIONS } from '@libs/common/constants/swagger.constants';
+import {
+  ENVIRONMENT,
+  NODE_ENV,
+} from '@libs/common/constants/environment.constants';
 
 export class GameServer {
   constructor(private readonly app: INestApplication) {}
@@ -24,17 +28,17 @@ export class GameServer {
    * OPEN API(Swagger) 초기화
    */
   private _initializeSwagger(): void {
-    if (!['prod'].includes(process.env.NODE_ENV)) {
+    if (NODE_ENV != ENVIRONMENT.PRODUCTION) {
       const config = new DocumentBuilder()
-        .setTitle('Survive Game Server')
-        .setDescription('The Game API description')
+        .setTitle('Game Server')
+        .setDescription('API description')
         .setVersion('1.0')
         .addApiKey(
           {
             type: 'apiKey',
             name: 'X-API-KEY',
             in: 'header',
-            description: 'eh internal api',
+            description: 'api',
           },
           'apiKey',
         )
@@ -43,10 +47,29 @@ export class GameServer {
             type: 'http',
             name: 'Authorization',
             in: 'header',
-            description: 'Username: accountKey & Password: sessionKey',
+            description: 'Username: email & Password: password',
           },
           'basic',
         )
+        .addBearerAuth(
+          {
+            type: 'http',
+            name: 'Authorization',
+            in: 'header',
+            description: 'refresh token',
+          },
+          'jwt-refresh',
+        )
+        .addBearerAuth(
+          {
+            type: 'http',
+            name: 'Authorization',
+            in: 'header',
+            description: 'jwt auth',
+          },
+          'jwt',
+        )
+        .addBearerAuth({ type: 'http' }, 'kakao-token')
         .build();
 
       const document = SwaggerModule.createDocument(this.app, config);

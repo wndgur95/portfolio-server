@@ -37,6 +37,7 @@ export class TestUserUtils {
         UserEntity.create({
           id: userId,
           nid: nid,
+          platformId: 'test',
         }),
       );
     } catch (_) {
