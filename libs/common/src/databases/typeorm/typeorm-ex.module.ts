@@ -56,11 +56,18 @@ export class TypeOrmExModule {
 
             const baseRepo = dataSource.getRepository(entity);
 
-            result[database] = new repository(
+            const customRepository = new repository(
               baseRepo.target,
               baseRepo.manager,
               baseRepo.queryRunner,
             );
+
+            if (!customRepositories[database]) {
+              customRepositories[database] = {};
+            }
+            customRepositories[database][repository.name] = customRepository;
+
+            result[database] = customRepository;
           }
 
           const values = Object.values(result);

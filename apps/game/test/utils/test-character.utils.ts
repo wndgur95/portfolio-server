@@ -1,4 +1,4 @@
-import { DataCharacterRepository } from '@libs/dao/static/data-character/data-character.repository';
+ import { DataCharacterRepository } from '@libs/dao/static/data-character/data-character.repository';
 import { GOODS_TYPE } from '@libs/dao/static/common.constants';
 import { GoodsProvider } from '@libs/common/provider/goods/goods.provider';
 import { DataCharacter } from '@libs/dao/static/data-character/data-character.entity';
