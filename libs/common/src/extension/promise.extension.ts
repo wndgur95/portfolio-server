@@ -30,5 +30,3 @@ Promise.allWait = async function <T extends readonly unknown[]>(
     -readonly [P in keyof T]: Awaited<T[P]>;
   };
 };
-
-
