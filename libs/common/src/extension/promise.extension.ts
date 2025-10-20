@@ -31,3 +31,4 @@ Promise.allWait = async function <T extends readonly unknown[]>(
   };
 };
 
+
