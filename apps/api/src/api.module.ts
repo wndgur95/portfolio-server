@@ -67,7 +67,6 @@ import { NftService } from './nft/nft.service';
 @Module({
   imports: [
     ApiServerConfig,
-
     ThrottlerModule.forRoot({
       throttlers: [
         {
