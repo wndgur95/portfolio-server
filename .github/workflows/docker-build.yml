@@ -30,6 +30,18 @@ jobs:
     runs-on: [self-hosted, kubernetes, portfolio-backend]
     outputs:
       deployment_tag: ${{ steps.set-tag.outputs.deployment_tag }}
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.head_commit.modified, 'apps/admin/') ||
+      contains(github.event.head_commit.modified, 'apps/api/') ||
+      contains(github.event.head_commit.modified, 'apps/batch/') ||
+      contains(github.event.head_commit.modified, 'apps/game/') ||
+      contains(github.event.head_commit.modified, 'apps/log/') ||
+      contains(github.event.head_commit.modified, 'apps/socket/') ||
+      contains(github.event.head_commit.modified, 'apps/src/') ||
+      contains(github.event.head_commit.modified, 'libs/') ||
+      contains(github.event.head_commit.modified, 'app.Dockerfile') ||
+      contains(github.event.head_commit.modified, 'package.json')
     
     steps:
     - name: Checkout code
@@ -37,28 +49,6 @@ jobs:
       with:
         fetch-depth: 0
     
-    - name: Check for changes
-      id: changes
-      uses: dorny/paths-filter@v2
-      with:
-        filters: |
-          app:
-            - 'apps/admin/**'
-            - 'apps/api/**'
-            - 'apps/batch/**'
-            - 'apps/game/**'
-            - 'apps/log/**'
-            - 'apps/socket/**'
-            - 'apps/src/**'
-            - 'libs/**'
-            - 'app.Dockerfile'
-            - 'package.json'
-    
-    - name: Skip if no changes
-      if: steps.changes.outputs.app == 'false' && github.event_name != 'workflow_dispatch'
-      run: |
-        echo "No changes detected for app build, skipping..."
-        exit 0
       
     - name: Set deployment tag
       id: set-tag
@@ -144,6 +134,12 @@ jobs:
     runs-on: [self-hosted, kubernetes, portfolio-backend]
     outputs:
       deployment_tag: ${{ steps.set-tag.outputs.deployment_tag }}
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.head_commit.modified, 'apps/job/') ||
+      contains(github.event.head_commit.modified, 'libs/') ||
+      contains(github.event.head_commit.modified, 'job.Dockerfile') ||
+      contains(github.event.head_commit.modified, 'package.json')
     
     steps:
     - name: Checkout code
@@ -151,22 +147,6 @@ jobs:
       with:
         fetch-depth: 0
     
-    - name: Check for changes
-      id: changes
-      uses: dorny/paths-filter@v2
-      with:
-        filters: |
-          job:
-            - 'apps/job/**'
-            - 'libs/**'
-            - 'job.Dockerfile'
-            - 'package.json'
-    
-    - name: Skip if no changes
-      if: steps.changes.outputs.job == 'false' && github.event_name != 'workflow_dispatch'
-      run: |
-        echo "No changes detected for job build, skipping..."
-        exit 0
       
     - name: Set deployment tag
       id: set-tag
@@ -287,7 +267,7 @@ jobs:
         DEPLOYMENT_TAG="${{ needs.build-app.outputs.deployment_tag || needs.build-job.outputs.deployment_tag }}"
         
         # App 이미지가 빌드된 경우에만 업데이트
-        if [ "${{ needs.check-changes.outputs.should_build_app }}" == "true" ] && [ "${{ needs.build-app.result }}" == "success" ]; then
+        if [ "${{ needs.build-app.result }}" == "success" ]; then
           echo "📦 Updating App image..."
           echo "Tag: $DEPLOYMENT_TAG"
           echo "Repository: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/app"
@@ -316,7 +296,7 @@ jobs:
         fi
         
         # Job 이미지가 빌드된 경우에만 업데이트
-        if [ "${{ needs.check-changes.outputs.should_build_job }}" == "true" ] && [ "${{ needs.build-job.result }}" == "success" ]; then
+        if [ "${{ needs.build-job.result }}" == "success" ]; then
           echo "📦 Updating Job image..."
           echo "Tag: $DEPLOYMENT_TAG"
           echo "Repository: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/job"
@@ -359,7 +339,7 @@ jobs:
         FILES_TO_ADD=""
         
         # App이 빌드된 경우
-        if [ "${{ needs.check-changes.outputs.should_build_app }}" == "true" ] && [ "${{ needs.build-app.result }}" == "success" ]; then
+        if [ "${{ needs.build-app.result }}" == "success" ]; then
           COMMIT_MSG="$COMMIT_MSG app"
           COMMIT_DETAILS="${COMMIT_DETAILS}
         - App Image: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/app:${DEPLOYMENT_TAG}"
@@ -368,7 +348,7 @@ jobs:
         fi
         
         # Job이 빌드된 경우
-        if [ "${{ needs.check-changes.outputs.should_build_job }}" == "true" ] && [ "${{ needs.build-job.result }}" == "success" ]; then
+        if [ "${{ needs.build-job.result }}" == "success" ]; then
           if [[ "$COMMIT_MSG" == *"app"* ]]; then
             COMMIT_MSG="$COMMIT_MSG and job"
           else
