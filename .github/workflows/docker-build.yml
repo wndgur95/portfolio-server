@@ -73,6 +73,9 @@ jobs:
         # libs 경로 변경 체크
         LIBS_CHANGED=$(echo "$CHANGED_FILES" | grep -E '^libs/' || true)
         
+        # apps 경로 변경 체크
+        APPS_CHANGED=$(echo "$CHANGED_FILES" | grep -E '^apps/' || true)
+        
         # apps/job 경로 변경 체크
         JOB_CHANGED=$(echo "$CHANGED_FILES" | grep -E '^apps/job/' || true)
         
@@ -87,12 +90,19 @@ jobs:
           echo "📦 libs/ changed - building both app and job"
           SHOULD_BUILD_APP="true"
           SHOULD_BUILD_JOB="true"
-        else
+        elif [ -n "$APPS_CHANGED" ]; then
           if [ -n "$JOB_CHANGED" ]; then
             echo "📦 apps/job/ changed - building job only"
             SHOULD_BUILD_JOB="true"
           fi
           
+          # apps/ 내의 다른 경로 변경 체크 (job 제외)
+          APPS_NON_JOB_CHANGED=$(echo "$CHANGED_FILES" | grep -E '^apps/' | grep -vE '^apps/job/' || true)
+          if [ -n "$APPS_NON_JOB_CHANGED" ]; then
+            echo "📦 apps/ (non-job) changed - building app only"
+            SHOULD_BUILD_APP="true"
+          fi
+        else
           if [ -n "$OTHER_CHANGED" ]; then
             echo "📦 Other files changed - building app only"
             SHOULD_BUILD_APP="true"
