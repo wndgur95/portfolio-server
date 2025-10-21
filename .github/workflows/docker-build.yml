@@ -14,8 +14,6 @@ on:
         type: boolean
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ]
 
 env:
   REGISTRY: harbor.ljh-project.mooo.com
@@ -62,6 +60,7 @@ jobs:
 
     - name: Set deployment tag
       id: set-tag
+      if: steps.changes.outputs.app == 'true' || github.event_name == 'workflow_dispatch'
       run: |
         # GitHub SHA의 짧은 버전 사용 (7자리)
         SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
@@ -71,9 +70,11 @@ jobs:
         echo "DEPLOYMENT_TAG=${DEPLOYMENT_TAG}" >> $GITHUB_ENV
 
     - name: Set up Docker Buildx
+      if: steps.changes.outputs.app == 'true' || github.event_name == 'workflow_dispatch'
       uses: docker/setup-buildx-action@v3
 
     - name: Log in to Harbor
+      if: steps.changes.outputs.app == 'true' || github.event_name == 'workflow_dispatch'
       uses: docker/login-action@v3
       with:
         registry: harbor.ljh-project.mooo.com
@@ -82,6 +83,7 @@ jobs:
 
     - name: Extract metadata for App
       id: meta-app
+      if: steps.changes.outputs.app == 'true' || github.event_name == 'workflow_dispatch'
       uses: docker/metadata-action@v5
       with:
         images: harbor.ljh-project.mooo.com/portfolio-backend/master/app
@@ -91,13 +93,14 @@ jobs:
           type=raw,value=${{ github.event.inputs.tag }},enable=${{ github.event.inputs.tag != '' }}
 
     - name: Clean build cache (if requested)
-      if: github.event.inputs.clean_cache == 'true'
+      if: (steps.changes.outputs.app == 'true' || github.event_name == 'workflow_dispatch') && github.event.inputs.clean_cache == 'true'
       run: |
         echo "🧹 Cleaning build cache as requested..."
         docker builder prune -a -f
         echo "✅ Build cache cleaned!"
 
     - name: Build and push App Docker image
+      if: steps.changes.outputs.app == 'true' || github.event_name == 'workflow_dispatch'
       uses: docker/build-push-action@v5
       with:
         context: .
@@ -110,6 +113,7 @@ jobs:
         cache-to: type=gha,mode=max,scope=app
 
     - name: Clean up local Docker images
+      if: steps.changes.outputs.app == 'true' || github.event_name == 'workflow_dispatch'
       run: |
         echo "🧹 Cleaning up local App Docker images..."
         
@@ -129,6 +133,7 @@ jobs:
         echo "✅ Local cleanup completed!"
 
     - name: Build info
+      if: steps.changes.outputs.app == 'true' || github.event_name == 'workflow_dispatch'
       run: |
         echo "🎯 App Docker build completed!"
         echo "=========================================="
@@ -170,6 +175,7 @@ jobs:
       
     - name: Set deployment tag
       id: set-tag
+      if: steps.changes.outputs.job == 'true' || github.event_name == 'workflow_dispatch'
       run: |
         # GitHub SHA의 짧은 버전 사용 (7자리)
         SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
@@ -177,11 +183,13 @@ jobs:
         DEPLOYMENT_TAG="${BRANCH_NAME}-${SHORT_SHA}"
         echo "deployment_tag=${DEPLOYMENT_TAG}" >> $GITHUB_OUTPUT
         echo "DEPLOYMENT_TAG=${DEPLOYMENT_TAG}" >> $GITHUB_ENV
-      
+
     - name: Set up Docker Buildx
+      if: steps.changes.outputs.job == 'true' || github.event_name == 'workflow_dispatch'
       uses: docker/setup-buildx-action@v3
-      
+
     - name: Log in to Harbor
+      if: steps.changes.outputs.job == 'true' || github.event_name == 'workflow_dispatch'
       uses: docker/login-action@v3
       with:
         registry: harbor.ljh-project.mooo.com
@@ -190,6 +198,7 @@ jobs:
         
     - name: Extract metadata for Job
       id: meta-job
+      if: steps.changes.outputs.job == 'true' || github.event_name == 'workflow_dispatch'
       uses: docker/metadata-action@v5
       with:
         images: harbor.ljh-project.mooo.com/portfolio-backend/master/job
@@ -199,6 +208,7 @@ jobs:
           type=raw,value=${{ github.event.inputs.tag }},enable=${{ github.event.inputs.tag != '' }}
         
     - name: Build and push Job Docker image
+      if: steps.changes.outputs.job == 'true' || github.event_name == 'workflow_dispatch'
       uses: docker/build-push-action@v5
       with:
         context: .
@@ -209,8 +219,9 @@ jobs:
         labels: ${{ steps.meta-job.outputs.labels }}
         cache-from: type=gha,scope=job
         cache-to: type=gha,mode=max,scope=job
-        
+
     - name: Clean up local Docker images
+      if: steps.changes.outputs.job == 'true' || github.event_name == 'workflow_dispatch'
       run: |
         echo "🧹 Cleaning up local Job Docker images..."
         
@@ -228,8 +239,9 @@ jobs:
         docker image prune -f
         
         echo "✅ Local cleanup completed!"
-        
+
     - name: Build info
+      if: steps.changes.outputs.job == 'true' || github.event_name == 'workflow_dispatch'
       run: |
         echo "🎯 Job Docker build completed!"
         echo "=========================================="
@@ -266,7 +278,7 @@ jobs:
     runs-on: self-hosted
     needs: [build-app, build-job]
     if: |
-      github.event_name != 'pull_request' && 
+      github.event_name == 'push' && 
       (needs.build-app.result == 'success' || needs.build-job.result == 'success')
     
     steps:
