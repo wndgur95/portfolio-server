@@ -19,8 +19,6 @@ import { UserLevelLockInterceptor } from '@libs/common/interceptor/user-level-lo
 import { TransactionInterceptor } from '@libs/common/interceptor/transaction.interceptor';
 import GameDatabaseConfig from '@libs/dao/config/game/game-database.config';
 import { GameModule } from '@libs/dao/game/game.module';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
 import { RedisModule } from '@libs/dao/redis/redis.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { RedisThrottlerStorage } from './auth/guard/redis-throttler-storage';
@@ -78,11 +76,6 @@ import { NftService } from './nft/nft.service';
         },
       ],
       storage: new RedisThrottlerStorage(),
-    }),
-
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, 'public'), // dist/apps/api/public
-      serveRoot: '/public', // → http://localhost:3000/public/privacy_policy.html
     }),
 
     ClsModule.forRoot({ global: true, middleware: { mount: true } }),
