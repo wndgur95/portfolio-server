@@ -30,15 +30,14 @@ jobs:
     runs-on: [self-hosted, kubernetes, portfolio-backend]
     if: |
       github.event_name == 'workflow_dispatch' ||
-      contains(github.event.head_commit.modified, 'apps/admin/src/**/*') ||
-      contains(github.event.head_commit.modified, 'apps/api/src/**/*') ||
-      contains(github.event.head_commit.modified, 'apps/batch/src/**/*') ||
-      contains(github.event.head_commit.modified, 'apps/game/src/**/*') ||
-      contains(github.event.head_commit.modified, 'apps/log/src/**/*') ||
-      contains(github.event.head_commit.modified, 'apps/socket/src/**/*') ||
-      contains(github.event.head_commit.modified, 'apps/src/**/*') ||
-      contains(github.event.head_commit.modified, 'libs/common/src/**/*') ||
-      contains(github.event.head_commit.modified, 'libs/dao/src/**/*') ||
+      contains(github.event.head_commit.modified, 'apps/admin/') ||
+      contains(github.event.head_commit.modified, 'apps/api/') ||
+      contains(github.event.head_commit.modified, 'apps/batch/') ||
+      contains(github.event.head_commit.modified, 'apps/game/') ||
+      contains(github.event.head_commit.modified, 'apps/log/') ||
+      contains(github.event.head_commit.modified, 'apps/socket/') ||
+      contains(github.event.head_commit.modified, 'apps/src/') ||
+      contains(github.event.head_commit.modified, 'libs/') ||
       contains(github.event.head_commit.modified, 'app.Dockerfile') ||
       contains(github.event.head_commit.modified, 'package.json')
     outputs:
@@ -132,9 +131,8 @@ jobs:
     runs-on: [self-hosted, kubernetes, portfolio-backend]
     if: |
       github.event_name == 'workflow_dispatch' ||
-      contains(github.event.head_commit.modified, 'apps/job/src/**/*') ||
-      contains(github.event.head_commit.modified, 'libs/common/src/**/*') ||
-      contains(github.event.head_commit.modified, 'libs/dao/src/**/*') ||
+      contains(github.event.head_commit.modified, 'apps/job/') ||
+      contains(github.event.head_commit.modified, 'libs/') ||
       contains(github.event.head_commit.modified, 'job.Dockerfile') ||
       contains(github.event.head_commit.modified, 'package.json')
     outputs:
