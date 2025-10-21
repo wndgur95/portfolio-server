@@ -14,22 +14,8 @@ on:
         type: boolean
   push:
     branches: [ master ]
-    paths:
-      - 'apps/**'
-      - 'libs/**'
-      - 'app.Dockerfile'
-      - 'job.Dockerfile'
-      - 'package.json'
-      - 'tsconfig.json'
   pull_request:
     branches: [ master ]
-    paths:
-      - 'apps/**'
-      - 'libs/**'
-      - 'app.Dockerfile'
-      - 'job.Dockerfile'
-      - 'package.json'
-      - 'tsconfig.json'
 
 env:
   REGISTRY: harbor.ljh-project.mooo.com
@@ -42,24 +28,37 @@ jobs:
   build-app:
     name: Build and Push App Image
     runs-on: [self-hosted, kubernetes, portfolio-backend]
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      contains(github.event.head_commit.modified, 'apps/admin/') ||
-      contains(github.event.head_commit.modified, 'apps/api/') ||
-      contains(github.event.head_commit.modified, 'apps/batch/') ||
-      contains(github.event.head_commit.modified, 'apps/game/') ||
-      contains(github.event.head_commit.modified, 'apps/log/') ||
-      contains(github.event.head_commit.modified, 'apps/socket/') ||
-      contains(github.event.head_commit.modified, 'apps/src/') ||
-      contains(github.event.head_commit.modified, 'libs/') ||
-      contains(github.event.head_commit.modified, 'app.Dockerfile') ||
-      contains(github.event.head_commit.modified, 'package.json')
     outputs:
       deployment_tag: ${{ steps.set-tag.outputs.deployment_tag }}
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Check for changes
+      id: changes
+      uses: dorny/paths-filter@v2
+      with:
+        filters: |
+          app:
+            - 'apps/admin/**'
+            - 'apps/api/**'
+            - 'apps/batch/**'
+            - 'apps/game/**'
+            - 'apps/log/**'
+            - 'apps/socket/**'
+            - 'apps/src/**'
+            - 'libs/**'
+            - 'app.Dockerfile'
+            - 'package.json'
+    
+    - name: Skip if no changes
+      if: steps.changes.outputs.app == 'false' && github.event_name != 'workflow_dispatch'
+      run: |
+        echo "No changes detected for app build, skipping..."
+        exit 0
       
     - name: Set deployment tag
       id: set-tag
@@ -143,18 +142,31 @@ jobs:
   build-job:
     name: Build and Push Job Image
     runs-on: [self-hosted, kubernetes, portfolio-backend]
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      contains(github.event.head_commit.modified, 'apps/job/') ||
-      contains(github.event.head_commit.modified, 'libs/') ||
-      contains(github.event.head_commit.modified, 'job.Dockerfile') ||
-      contains(github.event.head_commit.modified, 'package.json')
     outputs:
       deployment_tag: ${{ steps.set-tag.outputs.deployment_tag }}
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Check for changes
+      id: changes
+      uses: dorny/paths-filter@v2
+      with:
+        filters: |
+          job:
+            - 'apps/job/**'
+            - 'libs/**'
+            - 'job.Dockerfile'
+            - 'package.json'
+    
+    - name: Skip if no changes
+      if: steps.changes.outputs.job == 'false' && github.event_name != 'workflow_dispatch'
+      run: |
+        echo "No changes detected for job build, skipping..."
+        exit 0
       
     - name: Set deployment tag
       id: set-tag
