@@ -1,0 +1,56 @@
+services:
+  portfolio_mysql:
+    platform: linux/x86_64
+    image: mysql:8.0.20
+    container_name: portfolio_mysql
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --lower_case_table_names=2
+    volumes:
+      - ./app_db_volume_dev:/var/lib/mysql
+      - ./initdb_dev.d:/docker-entrypoint-initdb.d
+    restart: always
+    networks:
+      - portfolio_network
+    environment:
+      MYSQL_ROOT_PASSWORD: portfolio_server!23
+      MYSQL_DATABASE: admin
+    ports:
+      - "13306:3306"
+
+  portfolio_redis:
+    image: redis:alpine
+    environment:
+      - REDIS_REPLICATION_MODE=master
+    restart: always
+    container_name: portfolio_redis
+    ports:
+      - "16379:6379"
+    networks:
+      - portfolio_network
+
+  portfolio_mongodb:
+    image: mongo:6.0
+    container_name: portfolio_mongodb
+    restart: always
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=portfolio_server!23
+      - MONGO_INITDB_DATABASE=survive
+    ports:
+      - "13017:27017"
+    volumes:
+      - ./mongo_data_dev:/data/db
+      - ./initmongo_dev.d:/docker-entrypoint-initdb.d
+    networks:
+      - portfolio_network
+
+volumes:
+  app_db_volume:
+  mongo_data_dev:
+
+networks:
+  portfolio_network:
+    driver: bridge
