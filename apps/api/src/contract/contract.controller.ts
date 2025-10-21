@@ -18,7 +18,6 @@ import { GetContractInDto } from './dto/get-contract-in.dto';
 @UseGuards(JwtWeb3Guard)
 export class ContractController {
   constructor(private readonly contractService: ContractService) {}
-
   @Get()
   @ApiResponseEntity({
     type: GetContractOutDto,
