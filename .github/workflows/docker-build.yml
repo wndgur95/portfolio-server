@@ -14,8 +14,22 @@ on:
         type: boolean
   push:
     branches: [ master ]
+    paths:
+      - 'apps/**'
+      - 'libs/**'
+      - 'app.Dockerfile'
+      - 'job.Dockerfile'
+      - 'package.json'
+      - 'tsconfig.json'
   pull_request:
     branches: [ master ]
+    paths:
+      - 'apps/**'
+      - 'libs/**'
+      - 'app.Dockerfile'
+      - 'job.Dockerfile'
+      - 'package.json'
+      - 'tsconfig.json'
 
 env:
   REGISTRY: harbor.ljh-project.mooo.com
@@ -28,18 +42,6 @@ jobs:
   build-app:
     name: Build and Push App Image
     runs-on: [self-hosted, kubernetes, portfolio-backend]
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      contains(github.event.head_commit.modified, 'apps/admin/') ||
-      contains(github.event.head_commit.modified, 'apps/api/') ||
-      contains(github.event.head_commit.modified, 'apps/batch/') ||
-      contains(github.event.head_commit.modified, 'apps/game/') ||
-      contains(github.event.head_commit.modified, 'apps/log/') ||
-      contains(github.event.head_commit.modified, 'apps/socket/') ||
-      contains(github.event.head_commit.modified, 'apps/src/') ||
-      contains(github.event.head_commit.modified, 'libs/') ||
-      contains(github.event.head_commit.modified, 'app.Dockerfile') ||
-      contains(github.event.head_commit.modified, 'package.json')
     outputs:
       deployment_tag: ${{ steps.set-tag.outputs.deployment_tag }}
     
@@ -129,12 +131,6 @@ jobs:
   build-job:
     name: Build and Push Job Image
     runs-on: [self-hosted, kubernetes, portfolio-backend]
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      contains(github.event.head_commit.modified, 'apps/job/') ||
-      contains(github.event.head_commit.modified, 'libs/') ||
-      contains(github.event.head_commit.modified, 'job.Dockerfile') ||
-      contains(github.event.head_commit.modified, 'package.json')
     outputs:
       deployment_tag: ${{ steps.set-tag.outputs.deployment_tag }}
     
