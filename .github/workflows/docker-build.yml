@@ -25,20 +25,28 @@ env:
   K8S_BRANCH: main
 
 jobs:
-  check-changes:
-    name: Check File Changes
+  build-app:
+    name: Build and Push App Image
     runs-on: [self-hosted, kubernetes, portfolio-backend]
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.head_commit.modified, 'apps/admin/') ||
+      contains(github.event.head_commit.modified, 'apps/api/') ||
+      contains(github.event.head_commit.modified, 'apps/batch/') ||
+      contains(github.event.head_commit.modified, 'apps/game/') ||
+      contains(github.event.head_commit.modified, 'apps/log/') ||
+      contains(github.event.head_commit.modified, 'apps/socket/') ||
+      contains(github.event.head_commit.modified, 'apps/src/') ||
+      contains(github.event.head_commit.modified, 'libs/') ||
+      contains(github.event.head_commit.modified, 'app.Dockerfile') ||
+      contains(github.event.head_commit.modified, 'package.json')
     outputs:
-      should_build_app: ${{ steps.check.outputs.should_build_app }}
-      should_build_job: ${{ steps.check.outputs.should_build_job }}
       deployment_tag: ${{ steps.set-tag.outputs.deployment_tag }}
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-    
+      
     - name: Set deployment tag
       id: set-tag
       run: |
@@ -48,85 +56,6 @@ jobs:
         DEPLOYMENT_TAG="${BRANCH_NAME}-${SHORT_SHA}"
         echo "deployment_tag=${DEPLOYMENT_TAG}" >> $GITHUB_OUTPUT
         echo "DEPLOYMENT_TAG=${DEPLOYMENT_TAG}" >> $GITHUB_ENV
-    
-    - name: Check changed files
-      id: check
-      run: |
-        # 수동 실행이나 pull_request가 아닌 경우 이전 커밋과 비교
-        if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-          echo "Manual trigger - building both"
-          echo "should_build_app=true" >> $GITHUB_OUTPUT
-          echo "should_build_job=true" >> $GITHUB_OUTPUT
-          exit 0
-        fi
-        
-        # 변경된 파일 목록 가져오기
-        if [ "${{ github.event_name }}" == "pull_request" ]; then
-          CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})
-        else
-          CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
-        fi
-        
-        echo "Changed files:"
-        echo "$CHANGED_FILES"
-        
-        # libs 경로 변경 체크
-        LIBS_CHANGED=$(echo "$CHANGED_FILES" | grep -E '^libs/' || true)
-        
-        # apps 경로 변경 체크
-        APPS_CHANGED=$(echo "$CHANGED_FILES" | grep -E '^apps/' || true)
-        
-        # apps/job 경로 변경 체크
-        JOB_CHANGED=$(echo "$CHANGED_FILES" | grep -E '^apps/job/' || true)
-        
-        # apps/job 외의 경로 변경 체크
-        OTHER_CHANGED=$(echo "$CHANGED_FILES" | grep -vE '^apps/job/' || true)
-        
-        # 빌드 여부 결정
-        SHOULD_BUILD_APP="false"
-        SHOULD_BUILD_JOB="false"
-        
-        if [ -n "$LIBS_CHANGED" ]; then
-          echo "📦 libs/ changed - building both app and job"
-          SHOULD_BUILD_APP="true"
-          SHOULD_BUILD_JOB="true"
-        elif [ -n "$APPS_CHANGED" ]; then
-          if [ -n "$JOB_CHANGED" ]; then
-            echo "📦 apps/job/ changed - building job only"
-            SHOULD_BUILD_JOB="true"
-          fi
-          
-          # apps/ 내의 다른 경로 변경 체크 (job 제외)
-          APPS_NON_JOB_CHANGED=$(echo "$CHANGED_FILES" | grep -E '^apps/' | grep -vE '^apps/job/' || true)
-          if [ -n "$APPS_NON_JOB_CHANGED" ]; then
-            echo "📦 apps/ (non-job) changed - building app only"
-            SHOULD_BUILD_APP="true"
-          fi
-        else
-          if [ -n "$OTHER_CHANGED" ]; then
-            echo "📦 Other files changed - building app only"
-            SHOULD_BUILD_APP="true"
-          fi
-        fi
-        
-        echo "should_build_app=$SHOULD_BUILD_APP" >> $GITHUB_OUTPUT
-        echo "should_build_job=$SHOULD_BUILD_JOB" >> $GITHUB_OUTPUT
-        
-        echo "Build decisions:"
-        echo "  - App: $SHOULD_BUILD_APP"
-        echo "  - Job: $SHOULD_BUILD_JOB"
-
-  build-app:
-    name: Build and Push App Image
-    runs-on: [self-hosted, kubernetes, portfolio-backend]
-    needs: check-changes
-    if: needs.check-changes.outputs.should_build_app == 'true'
-    outputs:
-      deployment_tag: ${{ needs.check-changes.outputs.deployment_tag }}
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
       
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
@@ -194,20 +123,34 @@ jobs:
         echo "🏷️  Custom tag: ${{ github.event.inputs.tag || 'Not specified' }}"
         echo "🧹 Cache cleaned: ${{ github.event.inputs.clean_cache }}"
         echo "📦 App Images built: ${{ steps.meta-app.outputs.tags }}"
-        echo "🚀 Deployment tag: ${{ needs.check-changes.outputs.deployment_tag }}"
+        echo "🚀 Deployment tag: ${{ steps.set-tag.outputs.deployment_tag }}"
         echo "=========================================="
 
   build-job:
     name: Build and Push Job Image
     runs-on: [self-hosted, kubernetes, portfolio-backend]
-    needs: check-changes
-    if: needs.check-changes.outputs.should_build_job == 'true'
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.head_commit.modified, 'apps/job/') ||
+      contains(github.event.head_commit.modified, 'libs/') ||
+      contains(github.event.head_commit.modified, 'job.Dockerfile') ||
+      contains(github.event.head_commit.modified, 'package.json')
     outputs:
-      deployment_tag: ${{ needs.check-changes.outputs.deployment_tag }}
+      deployment_tag: ${{ steps.set-tag.outputs.deployment_tag }}
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      
+    - name: Set deployment tag
+      id: set-tag
+      run: |
+        # GitHub SHA의 짧은 버전 사용 (7자리)
+        SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+        BRANCH_NAME="${{ github.ref_name }}"
+        DEPLOYMENT_TAG="${BRANCH_NAME}-${SHORT_SHA}"
+        echo "deployment_tag=${DEPLOYMENT_TAG}" >> $GITHUB_OUTPUT
+        echo "DEPLOYMENT_TAG=${DEPLOYMENT_TAG}" >> $GITHUB_ENV
       
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
@@ -267,14 +210,14 @@ jobs:
         echo "👤 Triggered by: ${{ github.actor }}"
         echo "🏷️  Custom tag: ${{ github.event.inputs.tag || 'Not specified' }}"
         echo "📦 Job Images built: ${{ steps.meta-job.outputs.tags }}"
-        echo "🚀 Deployment tag: ${{ needs.check-changes.outputs.deployment_tag }}"
+        echo "🚀 Deployment tag: ${{ steps.set-tag.outputs.deployment_tag }}"
         echo "=========================================="
   
   show-disk-usage:
     name: Show Disk Usage
     runs-on: [self-hosted, kubernetes, portfolio-backend]
-    needs: [check-changes, build-app, build-job]
-    if: always() && needs.check-changes.result == 'success'
+    needs: [build-app, build-job]
+    if: always()
     steps:
     - name: Show disk usage
       run: |
@@ -293,10 +236,9 @@ jobs:
   deploy:
     name: Update Helm Chart and Deploy
     runs-on: self-hosted
-    needs: [check-changes, build-app, build-job]
+    needs: [build-app, build-job]
     if: |
       github.event_name != 'pull_request' && 
-      needs.check-changes.result == 'success' &&
       (needs.build-app.result == 'success' || needs.build-job.result == 'success')
     
     steps:
@@ -314,7 +256,7 @@ jobs:
         echo "Service: portfolio-backend"
         echo "Environment: production"
         
-        DEPLOYMENT_TAG="${{ needs.check-changes.outputs.deployment_tag }}"
+        DEPLOYMENT_TAG="${{ needs.build-app.outputs.deployment_tag || needs.build-job.outputs.deployment_tag }}"
         
         # App 이미지가 빌드된 경우에만 업데이트
         if [ "${{ needs.check-changes.outputs.should_build_app }}" == "true" ] && [ "${{ needs.build-app.result }}" == "success" ]; then
@@ -383,7 +325,7 @@ jobs:
         # 변경사항 확인
         git status
         
-        DEPLOYMENT_TAG="${{ needs.check-changes.outputs.deployment_tag }}"
+        DEPLOYMENT_TAG="${{ needs.build-app.outputs.deployment_tag || needs.build-job.outputs.deployment_tag }}"
         COMMIT_MSG="feat: Update portfolio-backend"
         COMMIT_DETAILS=""
         FILES_TO_ADD=""
@@ -427,7 +369,7 @@ jobs:
       run: |
         echo "🚀 ArgoCD will automatically detect the new image tags and deploy them"
         
-        DEPLOYMENT_TAG="${{ needs.check-changes.outputs.deployment_tag }}"
+        DEPLOYMENT_TAG="${{ needs.build-app.outputs.deployment_tag || needs.build-job.outputs.deployment_tag }}"
         
         if [ "${{ needs.check-changes.outputs.should_build_app }}" == "true" ] && [ "${{ needs.build-app.result }}" == "success" ]; then
           echo "📦 App Image: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/app:${DEPLOYMENT_TAG}"
@@ -444,7 +386,7 @@ jobs:
         echo "🎉 Portfolio Backend deployment triggered!"
         echo "=========================================="
         
-        DEPLOYMENT_TAG="${{ needs.check-changes.outputs.deployment_tag }}"
+        DEPLOYMENT_TAG="${{ needs.build-app.outputs.deployment_tag || needs.build-job.outputs.deployment_tag }}"
         
         if [ "${{ needs.check-changes.outputs.should_build_app }}" == "true" ] && [ "${{ needs.build-app.result }}" == "success" ]; then
           echo "📦 App Image: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/app:${DEPLOYMENT_TAG}"
