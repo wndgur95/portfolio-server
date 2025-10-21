@@ -217,7 +217,9 @@ jobs:
     name: Show Disk Usage
     runs-on: [self-hosted, kubernetes, portfolio-backend]
     needs: [build-app, build-job]
-    if: always()
+    if: |
+      always() && 
+      (needs.build-app.result == 'success' || needs.build-job.result == 'success')
     steps:
     - name: Show disk usage
       run: |
