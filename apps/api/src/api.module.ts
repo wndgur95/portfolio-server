@@ -63,6 +63,8 @@ import { ContractController } from './contract/contract.controller';
 import { ContractService } from './contract/contract.service';
 import { NftController } from './nft/nft.controller';
 import { NftService } from './nft/nft.service';
+import SajuDatabaseConfig from '@libs/dao/config/saju/saju-database.config';
+import { SajuModule } from './saju/saju.module';
 
 @Module({
   imports: [
@@ -84,6 +86,7 @@ import { NftService } from './nft/nft.service';
       ArenaDatabaseConfig,
       ContractDatabaseConfig,
       BatchDatabaseConfig,
+      SajuDatabaseConfig,
     ].map((it) => {
       return TypeOrmExModule.forRootAsync({
         name: it().name,
@@ -109,6 +112,7 @@ import { NftService } from './nft/nft.service';
     StaticModule,
     ContractModule,
     BatchCommonModule,
+    SajuModule,
   ],
   controllers: [
     ApiController,

@@ -30,6 +30,11 @@ CREATE DATABASE IF NOT EXISTS `batch`
 CHARACTER SET utf8mb4 
 COLLATE utf8mb4_unicode_ci;
 
+-- saju_db 데이터베이스 생성
+CREATE DATABASE IF NOT EXISTS `saju_db` 
+CHARACTER SET utf8mb4 
+COLLATE utf8mb4_unicode_ci;
+
 -- portfolio_server 사용자 생성
 CREATE USER 'portfolio_server'@'%' IDENTIFIED BY 'portfolio_server!23';
 

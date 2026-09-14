@@ -159,8 +159,8 @@ export class AuthService {
         gameDbId,
       });
 
+      payload.database = getDatabaseByGameDbId(user.gameDbId);
       ContextProvider.setUserInfo(payload);
-      payload.database = ContextProvider.getUserInfo().database;
 
       await this.userService.createUserDetail(user);
     }
