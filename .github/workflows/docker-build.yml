@@ -310,10 +310,11 @@ jobs:
           cp values.yaml values.yaml.backup
           
           # App 이미지 태그 업데이트 (image.tag)
-          sed -i 's/tag: ".*"/tag: "'"$DEPLOYMENT_TAG"'"/' values.yaml
+          sed -i.bak 's/tag: ".*"/tag: "'"$DEPLOYMENT_TAG"'"/' values.yaml
           
           # App 이미지 repository 업데이트 (image.repository)
-          sed -i 's|repository: ".*"|repository: "${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/app"|' values.yaml
+          sed -i.bak 's|repository: ".*"|repository: "${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/app"|' values.yaml
+          rm -f values.yaml.bak
           
           echo "✅ Updated App image tag to: $DEPLOYMENT_TAG"
           echo "✅ Updated App repository to: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/app"
@@ -339,10 +340,11 @@ jobs:
           cp values.yaml values.yaml.backup
           
           # Job 이미지 태그 업데이트 (image.tag)
-          sed -i 's/tag: ".*"/tag: "'"$DEPLOYMENT_TAG"'"/' values.yaml
+          sed -i.bak 's/tag: ".*"/tag: "'"$DEPLOYMENT_TAG"'"/' values.yaml
           
           # Job 이미지 repository 업데이트 (image.repository)
-          sed -i 's|repository: ".*"|repository: "${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/job"|' values.yaml
+          sed -i.bak 's|repository: ".*"|repository: "${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/job"|' values.yaml
+          rm -f values.yaml.bak
           
           echo "✅ Updated Job image tag to: $DEPLOYMENT_TAG"
           echo "✅ Updated Job repository to: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/job"
