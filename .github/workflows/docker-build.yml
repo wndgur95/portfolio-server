@@ -299,7 +299,7 @@ jobs:
         DEPLOYMENT_TAG="${{ needs.build-app.outputs.deployment_tag || needs.build-job.outputs.deployment_tag }}"
         
         # App 이미지가 빌드된 경우에만 업데이트
-        if [ "${{ needs.build-app.result }}" == "success" ]; then
+        if [ "${{ needs.build-app.result }}" == "success" ] && [ -n "$DEPLOYMENT_TAG" ]; then
           echo "📦 Updating App image..."
           echo "Tag: $DEPLOYMENT_TAG"
           echo "Repository: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/app"
@@ -329,7 +329,7 @@ jobs:
         fi
         
         # Job 이미지가 빌드된 경우에만 업데이트
-        if [ "${{ needs.build-job.result }}" == "success" ]; then
+        if [ "${{ needs.build-job.result }}" == "success" ] && [ -n "$DEPLOYMENT_TAG" ]; then
           echo "📦 Updating Job image..."
           echo "Tag: $DEPLOYMENT_TAG"
           echo "Repository: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/job"
