@@ -278,8 +278,8 @@ jobs:
     runs-on: self-hosted
     needs: [build-app, build-job]
     if: |
-      github.event_name == 'push' && 
-      (needs.build-app.result == 'success' || needs.build-job.result == 'success')
+      github.event_name != 'pull_request' && 
+      (needs.build-app.outputs.deployment_tag != '' || needs.build-job.outputs.deployment_tag != '')
     
     steps:
     - name: Checkout k8s-enterprise
@@ -373,7 +373,7 @@ jobs:
         FILES_TO_ADD=""
         
         # App이 빌드된 경우
-        if [ "${{ needs.build-app.result }}" == "success" ]; then
+        if [ "${{ needs.build-app.result }}" == "success" ] && [ -n "${{ needs.build-app.outputs.deployment_tag }}" ]; then
           COMMIT_MSG="$COMMIT_MSG app"
           COMMIT_DETAILS="${COMMIT_DETAILS}
         - App Image: ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ env.IMAGE_BASE }}/app:${DEPLOYMENT_TAG}"
@@ -382,7 +382,7 @@ jobs:
         fi
         
         # Job이 빌드된 경우
-        if [ "${{ needs.build-job.result }}" == "success" ]; then
+        if [ "${{ needs.build-job.result }}" == "success" ] && [ -n "${{ needs.build-job.outputs.deployment_tag }}" ]; then
           if [[ "$COMMIT_MSG" == *"app"* ]]; then
             COMMIT_MSG="$COMMIT_MSG and job"
           else
@@ -396,8 +396,21 @@ jobs:
         
         COMMIT_MSG="$COMMIT_MSG image to ${DEPLOYMENT_TAG}"
         
+        # 추가할 파일이 없는 경우 건너뛰기
+        if [ -z "$FILES_TO_ADD" ]; then
+          echo "⏭️  No files to commit, skipping"
+          exit 0
+        fi
+        
         # 커밋 및 푸시
         git add $FILES_TO_ADD
+        
+        # Staged된 변경사항이 없는 경우 건너뛰기 (working tree clean 방지)
+        if git diff --staged --quiet; then
+          echo "ℹ️  No changes staged to commit (working tree clean, values.yaml is already up-to-date)"
+          exit 0
+        fi
+        
         git commit -m "${COMMIT_MSG}${COMMIT_DETAILS}
         - Commit: ${{ github.sha }}
         - Branch: ${{ github.ref_name }}
