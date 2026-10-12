@@ -109,8 +109,8 @@ jobs:
         platforms: linux/arm64
         tags: ${{ steps.meta-app.outputs.tags }}
         labels: ${{ steps.meta-app.outputs.labels }}
-        cache-from: type=gha,scope=app
-        cache-to: type=gha,mode=max,scope=app
+        # cache-from: type=gha,scope=app
+        # cache-to: type=gha,mode=max,scope=app
 
     - name: Clean up local Docker images
       if: steps.changes.outputs.app == 'true' || github.event_name == 'workflow_dispatch'
@@ -217,8 +217,8 @@ jobs:
         platforms: linux/arm64
         tags: ${{ steps.meta-job.outputs.tags }}
         labels: ${{ steps.meta-job.outputs.labels }}
-        cache-from: type=gha,scope=job
-        cache-to: type=gha,mode=max,scope=job
+        # cache-from: type=gha,scope=job
+        # cache-to: type=gha,mode=max,scope=job
 
     - name: Clean up local Docker images
       if: steps.changes.outputs.job == 'true' || github.event_name == 'workflow_dispatch'
